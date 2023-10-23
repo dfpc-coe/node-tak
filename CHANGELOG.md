@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v0.2.0
+
+- :bug: Fix Lint Errors
+
 ### v0.1.0
 
 - :pencil2: Add a CHANGELOG, Initial Commit
