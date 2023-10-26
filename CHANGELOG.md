@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v0.3.2
+
+- :bug: Close Polygons in Node-CoT
+
 ### v0.3.1
 
 - :bug: Bump Build
