@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v0.3.1
+
+- :bug: Bump Build
+
 ### v0.3.0
 
 - :bug: Properly encode Polygons in Node-COT
