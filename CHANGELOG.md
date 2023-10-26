@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v0.3.0
+
+- :bug: Properly encode Polygons in Node-COT
+
 ### v0.2.0
 
 - :bug: Fix Lint Errors
