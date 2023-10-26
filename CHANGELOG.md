@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v0.3.3
+
+- :bug: Non-Zero Opacity Level
+
 ### v0.3.2
 
 - :bug: Close Polygons in Node-CoT
