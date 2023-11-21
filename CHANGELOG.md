@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v0.4.0
+
+- :rocket: Update node-cot to support encoding Polygons and LineStrings
+
 ### v0.3.3
 
 - :bug: Non-Zero Opacity Level
