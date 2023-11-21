@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v0.4.2
+
+- :arrow_up: Update node-cot
+
 ### v0.4.1
 
 - :arrow_up: Update node-cot
