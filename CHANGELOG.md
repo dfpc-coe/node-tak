@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v0.4.1
+
+- :arrow_up: Update node-cot
+
 ### v0.4.0
 
 - :rocket: Update node-cot to support encoding Polygons and LineStrings
