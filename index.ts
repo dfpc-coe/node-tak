@@ -15,7 +15,7 @@ export interface PartialCoT {
 }
 
 export default class TAK extends EventEmitter {
-    id: number;
+    id: number | string;
     type: string;
     url: URL;
     auth: TAKAuth;
@@ -28,7 +28,7 @@ export default class TAK extends EventEmitter {
     version?: string;
 
     constructor(
-        id: number,
+        id: number | string,
         type: string,
         url: URL,
         auth: TAKAuth
@@ -49,7 +49,7 @@ export default class TAK extends EventEmitter {
         this.queue = [];
     }
 
-    static async connect(id: number, url: URL, auth: TAKAuth) {
+    static async connect(id: number | string, url: URL, auth: TAKAuth) {
         const tak = new TAK(id, 'ssl', url, auth);
 
         if (url.protocol === 'ssl:') {
