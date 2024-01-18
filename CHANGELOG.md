@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.1.0
+
+- :rocket: `id` can now be number or string
+
 ### v1.0.2
 
 - :arrow_up: Update node-cot
