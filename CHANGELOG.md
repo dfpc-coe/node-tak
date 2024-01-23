@@ -10,9 +10,9 @@
 
 ## Version History
 
-### v1.1.0
+### v1.2.0
 
-- :rocket: `id` can now be number or string
+- :arrow_up: Move `node-cot` to `peerDependencies`
 
 ### v1.0.2
 

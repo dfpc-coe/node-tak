@@ -14,8 +14,10 @@
         "pretest": "npm run lint"
     },
     "dependencies": {
-        "@tak-ps/node-cot": "^4.6.0",
         "ajv": "^8.12.0"
+    },
+    "peerDependencies": {
+        "@tak-ps/node-cot": "^5.0.0"
     },
     "devDependencies": {
         "@types/node": "^20.0.0",
