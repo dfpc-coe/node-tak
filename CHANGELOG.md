@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v1.3.0
+
+- :rocket: Perform initial parsing in try/catch
+- :rocket: Remove ts-ignores now that node-cot has strong type defs
+
 ### v1.2.0
 
 - :arrow_up: Move `node-cot` to `peerDependencies`

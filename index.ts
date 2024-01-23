@@ -88,16 +88,18 @@ export default class TAK extends EventEmitter {
 
                 let result = TAK.findCoT(buff);
                 while (result && result.event) {
-                    const cot = new CoT(result.event);
-
                     try {
-                        // @ts-ignore: Remove once we have JSONSchema => TS Defs for CoT Messages
+                        const cot = new CoT(result.event);
+
                         if (cot.raw.event._attributes.type === 't-x-c-t-r') {
                             this.open = true;
                             this.emit('ping');
-                        // @ts-ignore: Remove once we have JSONSchema => TS Defs for CoT Messages
-                        } else if (cot.raw.event._attributes.type === 't-x-takp-v') {
-                            // @ts-ignore: Remove once we have JSONSchema => TS Defs for CoT Messages
+                        } else if (
+                            cot.raw.event._attributes.type === 't-x-takp-v'
+                            && cot.raw.event.detail
+                            && cot.raw.event.detail.TakControl
+                            && cot.raw.event.detail.TakControl.TakServerVersionInfo
+                        ) {
                             this.version = cot.raw.event.detail.TakControl.TakServerVersionInfo._attributes.serverVersion;
                         } else {
                             this.emit('cot', cot);
