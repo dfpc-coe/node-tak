@@ -2,7 +2,7 @@
 
 <p align=center>Javascript TAK Server Library</p>
 
-Lightweight JavaScript library for managing TAK TLS Connectoions for streaming CoT data
+Lightweight JavaScript library for managing TAK TLS connections for streaming CoT data
 
 ## Installation
 
