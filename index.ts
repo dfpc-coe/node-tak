@@ -3,6 +3,9 @@ import tls from 'node:tls';
 import CoT from '@tak-ps/node-cot';
 import type { TLSSocket } from 'node:tls'
 
+/**
+ * Store the TAK Client Certificate for a connection
+ */
 export interface TAKAuth {
     cert: string;
     key: string;
@@ -49,7 +52,7 @@ export default class TAK extends EventEmitter {
         this.queue = [];
     }
 
-    static async connect(id: number | string, url: URL, auth: TAKAuth) {
+    static async connect(id: number | string, url: URL, auth: TAKAuth): Promise<TAK> {
         const tak = new TAK(id, 'ssl', url, auth);
 
         if (url.protocol === 'ssl:') {
@@ -63,6 +66,8 @@ export default class TAK extends EventEmitter {
 
     connect_ssl(): Promise<TAK> {
         return new Promise((resolve) => {
+            this.destroyed = false;
+
             this.client = tls.connect({
                 host: this.url.hostname,
                 port: parseInt(this.url.port),
@@ -130,7 +135,12 @@ export default class TAK extends EventEmitter {
     }
 
     async reconnect() {
-        return await this.connect_ssl();
+        if (this.destroyed) {
+            await this.connect_ssl();
+        } else {
+            this.destroy();
+            await this.connect_ssl();
+        }
     }
 
     destroy() {
