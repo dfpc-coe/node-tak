@@ -10,7 +10,7 @@
 
 ## Version History
 
-### v1.3.0
+### v1.4.0
 
 - :bug: Destory client when a new client is created after `reconnect` is called
 
