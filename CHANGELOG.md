@@ -12,6 +12,10 @@
 
 ### v1.3.0
 
+- :bug: Destory client when a new client is created after `reconnect` is called
+
+### v1.3.0
+
 - :rocket: Perform initial parsing in try/catch
 - :rocket: Remove ts-ignores now that node-cot has strong type defs
 
