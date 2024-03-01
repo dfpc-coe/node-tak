@@ -84,6 +84,7 @@ export default class TAK extends EventEmitter {
 
             this.client.on('secureConnect', () => {
                 console.error(`ok - ${this.id} @ secure:${this.client ? this.client.authorized : 'NO CLIENT'} - ${this.client ? this.client.authorizationError : 'NO CLIENT'}`);
+                this.emit('secureConnect')
             });
 
             let buff = '';

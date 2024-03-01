@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v1.6.0
+
+- :arrow_up: Update to latest deps
+- :rocket: Add `secureConnect` event
+
 ### v1.4.0
 
 - :bug: Destory client when a new client is created after `reconnect` is called
