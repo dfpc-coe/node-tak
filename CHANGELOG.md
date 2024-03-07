@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.6.1
+
+- :bug: Fix capture group to not be numbered
+
 ### v1.6.0
 
 - :bug: Update regex in findCoT to find `<event>` but not `<events>`
