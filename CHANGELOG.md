@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v1.6.0
+
+- :bug: Update regex in findCoT to find `<event>` but not `<events>`
+- :arrow_up: Update to latest deps
+
 ### v1.5.0
 
 - :arrow_up: Update to latest deps

@@ -208,7 +208,8 @@ export default class TAK extends EventEmitter {
         /* eslint-disable no-control-regex */
         str = str.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
 
-        let match = str.match(/(<event.*?<\/event>)(.*)/); // find first CoT
+        // Match <event .../> or <event> but not <events>
+        let match = str.match(/(<event(\s|>).*?<\/event>)(.*)/); // find first CoT
         if (!match) {
             match = str.match(/(<event[^>]*\/>)(.*)/); // find first CoT
             if (!match) return null;
