@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.7.0
+
+- :bug: Fix leak where retries would spin up new Ping Intervals
+
 ### v1.6.1
 
 - :bug: Fix capture group to not be numbered

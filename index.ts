@@ -27,6 +27,7 @@ export default class TAK extends EventEmitter {
     queue: string[];
     writing: boolean;
 
+    pingInterval?: ReturnType<typeof setTimeout>;
     client?: TLSSocket;
     version?: string;
 
@@ -127,7 +128,7 @@ export default class TAK extends EventEmitter {
                 if (!this.destroyed) this.emit('end');
             });
 
-            setInterval(() => {
+            this.pingInterval = setInterval(() => {
                 this.ping();
             }, 5000);
 
@@ -148,6 +149,11 @@ export default class TAK extends EventEmitter {
         this.destroyed = true;
         if (this.client) {
             this.client.destroy();
+        }
+
+        if (this.pingInterval) {
+            clearInterval(this.pingInterval)
+            this.pingInterval = undefined;
         }
     }
 
