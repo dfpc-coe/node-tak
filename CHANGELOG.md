@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.8.0
+
+- :arrow_up: Update to latest TS Libraries and Node-COT@5.5
+
 ### v1.7.0
 
 - :bug: Fix leak where retries would spin up new Ping Intervals
