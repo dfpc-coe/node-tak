@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v1.9.0
+
+- :arrow_up: Increase Ping Aggressiveness
+
 ### v1.8.0
 
 - :arrow_up: Update to latest TS Libraries and Node-COT@5.5
