@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v2.1.0
+
+- :arrow_up: Update to ESLint Flat Config System
+
 ### v2.0.1
 
 - :white_check_mark: Fix tests
