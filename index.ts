@@ -107,6 +107,7 @@ export default class TAK extends EventEmitter {
                             && cot.raw.event.detail
                             && cot.raw.event.detail.TakControl
                             && cot.raw.event.detail.TakControl.TakServerVersionInfo
+                            && cot.raw.event.detail.TakControl.TakServerVersionInfo._attributes
                         ) {
                             this.version = cot.raw.event.detail.TakControl.TakServerVersionInfo._attributes.serverVersion;
                         } else {
