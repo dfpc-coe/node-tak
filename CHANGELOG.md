@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v2.0.1
+
+- :white_check_mark: Fix tests
+
 ### v2.0.0
 
 - :arrow_up: Update `node-cot@6.1` Which uses the new `.properties.metadata` for user defined properties
