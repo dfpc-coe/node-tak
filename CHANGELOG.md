@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v2.1.2
+
+- :rocket: Add automatic GH Release
+
 ### v2.1.1
 
 - :arrow_up: Move ts-eslint to dev deps
