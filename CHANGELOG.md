@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v3.0.0
+
+- :arrow_up: Update required `node-tak` version to 3
+
 ### v2.1.2
 
 - :rocket: Add automatic GH Release
