@@ -10,9 +10,13 @@
 
 ## Version History
 
+### v4.0.0
+
+- :arrow_up: Update required `node-tak` version to 8
+
 ### v3.0.0
 
-- :arrow_up: Update required `node-tak` version to 3
+- :arrow_up: Update required `node-tak` version to 7
 
 ### v2.1.2
 
