@@ -20,6 +20,7 @@
         "@tak-ps/node-cot": "^8.0.1"
     },
     "devDependencies": {
+        "@types/express": "^4.17.21",
         "@types/node": "^20.0.0",
         "@types/tape": "^5.6.0",
         "eslint": "^8.35.0",
