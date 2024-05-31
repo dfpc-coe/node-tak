@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.0.2
+
+- :arrow_up: Add necessary library types
+
 ### v4.0.1
 
 - :arrow_up: Update required `node-tak` version to 8.0.1
