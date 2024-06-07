@@ -1,4 +1,4 @@
-import TAK, { CoT } from '../index.js';
+import TAK from '../index.js';
 import test from 'tape';
 
 test('findCoT - Unfinished', (t) => {

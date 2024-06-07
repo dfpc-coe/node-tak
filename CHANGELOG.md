@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.1.1
+
+- :bug: Fix lints
+
 ### v4.1.0
 
 - :rocket: Support parsing XML CoTs with multiline fields
