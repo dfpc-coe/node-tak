@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.1.0
+
+- :rocket: Support parsing XML CoTs with multiline fields
+
 ### v4.0.2
 
 - :arrow_up: Add necessary library types
