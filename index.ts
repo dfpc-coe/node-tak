@@ -7,7 +7,7 @@ import type { TLSSocket } from 'node:tls'
 export const REGEX_CONTROL = /[\u000B-\u001F\u007F-\u009F]/g;
 
 // Match <event .../> or <event> but not <events>
-export const REGEX_EVENT = /(<event[ >](?:[\s\S]|.)*?<\/event>)((?:[\s\S]|.)*)/
+export const REGEX_EVENT = /(<event[ >](?:[\s\S])*?<\/event>)((?:[\s\S])*)/
 
 /**
  * Store the TAK Client Certificate for a connection

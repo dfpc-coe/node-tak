@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.3.1
+
+- :bug: Optimize Regex Compilation
+
 ### v4.3.0
 
 - :bug: Optimize Regex Compilation
