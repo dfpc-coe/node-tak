@@ -3,6 +3,12 @@ import tls from 'node:tls';
 import CoT from '@tak-ps/node-cot';
 import type { TLSSocket } from 'node:tls'
 
+/* eslint-disable no-control-regex */
+export const REGEX_CONTROL = /[\u000B-\u001F\u007F-\u009F]/g;
+
+// Match <event .../> or <event> but not <events>
+export const REGEX_EVENT = /(<event[ >](?:[\s\S]|.)*?<\/event>)((?:[\s\S]|.)*)/
+
 /**
  * Store the TAK Client Certificate for a connection
  */
@@ -213,16 +219,10 @@ export default class TAK extends EventEmitter {
 
     // https://github.com/vidterra/multitak/blob/main/app/lib/helper.js#L4
     static findCoT(str: string): null | PartialCoT {
-        /* eslint-disable no-control-regex */
-        str = str.replace(/[\u000B-\u001F\u007F-\u009F]/g, "");
+        str = str.replace(REGEX_CONTROL, "");
 
-        // Match <event .../> or <event> but not <events>
-        let match = str.match(/(<event[ >](?:[\s\S]|.)*?<\/event>)((?:[\s\S]|.)*)/); // find first CoT
-
-        if (!match) {
-            match = str.match(/(<event[^>]*\/>)()/); // find first CoT
-            if (!match) return null;
-        }
+        const match = str.match(REGEX_EVENT); // find first CoT
+        if (!match) return null;
 
         return {
             event: match[1],

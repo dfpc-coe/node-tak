@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.3.0
+
+- :bug: Optimize Regex Compilation
+
 ### v4.2.0
 
 - :bug: Fix remainder values for multi-line regex
