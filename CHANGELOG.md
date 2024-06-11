@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v4.4.0
+
+- :rocket: Remove Remainder
+
 ### v4.3.1
 
 - :bug: Optimize Regex Compilation
