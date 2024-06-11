@@ -7,7 +7,7 @@ import type { TLSSocket } from 'node:tls'
 export const REGEX_CONTROL = /[\u000B-\u001F\u007F-\u009F]/g;
 
 // Match <event .../> or <event> but not <events>
-export const REGEX_EVENT = /(<event[ >](?:[\s\S])*?<\/event>)((?:[\s\S])*)/
+export const REGEX_EVENT = /(<event[ >][\s\S]*?<\/event>)([\s\S]*)/
 
 /**
  * Store the TAK Client Certificate for a connection
@@ -20,7 +20,6 @@ export interface TAKAuth {
 export interface PartialCoT {
     event: string;
     remainder: string;
-    discard: string;
 }
 
 export default class TAK extends EventEmitter {
@@ -227,7 +226,6 @@ export default class TAK extends EventEmitter {
         return {
             event: match[1],
             remainder: match[2],
-            discard: match[0]
         };
     }
 }
