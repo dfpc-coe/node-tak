@@ -33,3 +33,24 @@ remarks field
     t.end();
 });
 
+test('findCoT - New Lines - Non-Greedy', (t) => {
+    const res = TAK.findCoT(`
+<event>
+    <detail remarks="
+I am a multiline
+remarks field
+    "/>
+</event><event>
+    <detail remarks="
+I am a multiline
+remarks field
+    "/>
+</event>`);
+    t.deepEquals(res, {
+        event: '<event>\n    <detail remarks="\nI am a multiline\nremarks field\n    "/>\n</event>',
+        remainder: '<event>\n    <detail remarks="\nI am a multiline\nremarks field\n    "/>\n</event>',
+        discard: '<event>\n    <detail remarks="\nI am a multiline\nremarks field\n    "/>\n</event><event>\n    <detail remarks="\nI am a multiline\nremarks field\n    "/>\n</event>'
+    });
+    t.end();
+});
+
