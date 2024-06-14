@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v5.0.0
+
+- :arrow_up: Update required `node-cot` version to 9
+
 ### v4.4.0
 
 - :rocket: Remove Remainder
