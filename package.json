@@ -1,7 +1,7 @@
 {
     "name": "@tak-ps/node-tak",
     "type": "module",
-    "version": "6.0.0",
+    "version": "7.0.0",
     "description": "Lightweight JavaScript library for communicating with TAK Server",
     "author": "Nick Ingalls <nick@ingalls.ca>",
     "main": "dist/index.js",
