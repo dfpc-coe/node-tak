@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v8.0.0
+
+- :arrow_up: Update required `node-cot` version to 12
+
 ### v7.0.0
 
 - :arrow_up: Update required `node-cot` version to 11
