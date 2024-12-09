@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v8.1.0
+
+- :arrow_up: Update all core deps
+
 ### v8.0.0
 
 - :arrow_up: Update required `node-cot` version to 12
