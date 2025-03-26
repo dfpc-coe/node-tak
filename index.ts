@@ -143,7 +143,7 @@ export default class TAK extends EventEmitter {
         });
     }
 
-    async reconnect() {
+    async reconnect(): Promise<void> {
         if (this.destroyed) {
             await this.connect_ssl();
         } else {
@@ -152,7 +152,7 @@ export default class TAK extends EventEmitter {
         }
     }
 
-    destroy() {
+    destroy(): void {
         this.destroyed = true;
         if (this.client) {
             this.client.destroy();
@@ -164,7 +164,7 @@ export default class TAK extends EventEmitter {
         }
     }
 
-    async ping() {
+    async ping(): Promise<void> {
         this.write([CoT.ping()]);
     }
 
@@ -178,7 +178,7 @@ export default class TAK extends EventEmitter {
         });
     }
 
-    async process() {
+    async process(): Promise<void> {
         this.writing = true;
         while (this.queue.length) {
             const body = this.queue.shift()
@@ -202,18 +202,22 @@ export default class TAK extends EventEmitter {
      *
      * @param {CoT} cot CoT Object
      */
-    write(cots: CoT[]) {
+    write(cots: CoT[]): void {
         for (const cot of cots) {
             this.queue.push(cot.to_xml());
         }
 
-        if (this.queue.length && !this.writing) this.process();
+        if (this.queue.length && !this.writing) {
+            this.process();
+        }
     }
 
-    write_xml(body: string) {
+    write_xml(body: string): void {
         this.queue.push(body);
 
-        if (this.queue.length && !this.writing) this.process();
+        if (this.queue.length && !this.writing) {
+            this.process();
+        }
     }
 
     // https://github.com/vidterra/multitak/blob/main/app/lib/helper.js#L4
@@ -230,6 +234,4 @@ export default class TAK extends EventEmitter {
     }
 }
 
-export {
-    CoT
-}
+export { CoT }

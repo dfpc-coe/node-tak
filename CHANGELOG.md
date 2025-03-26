@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v8.2.1
+
+- :rocket: Explicit TS return defs
+
 ### v8.2.0
 
 - :arrow_up: Update all core deps
