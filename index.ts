@@ -127,12 +127,12 @@ export default class TAK extends EventEmitter {
                     result = TAK.findCoT(buff);
                 }
             }).on('timeout', () => {
-                if (!this.destroyed) this.emit('timeout');
+                this.emit('timeout');
             }).on('error', (err: Error) => {
                 this.emit('error', err);
             }).on('end', () => {
                 this.open = false;
-                if (!this.destroyed) this.emit('end');
+                this.emit('end');
             });
 
             this.pingInterval = setInterval(() => {
