@@ -10,6 +10,19 @@
 
 ## Version History
 
+### v8.3.0
+
+- :rocket: Events are always forwarded regardless of destroyed status
+- :arrow_up: Update all core deps
+
+### v8.2.1
+
+- :rocket: Explicit TS return defs
+
+### v8.2.0
+
+- :arrow_up: Update all core deps
+
 ### v8.1.0
 
 - :arrow_up: Update all core deps
