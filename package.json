@@ -6,22 +6,35 @@
     "author": "Nick Ingalls <nick@ingalls.ca>",
     "main": "dist/index.js",
     "types": "index.ts",
+    "engines": {
+        "node": ">= 22"
+    },
     "scripts": {
-        "test": "ts-node-test test/",
-        "lint": "eslint *.ts test/*.ts",
+        "test": "c8 --reporter=lcov ts-node-test test/",
+        "lint": "eslint *.ts test/ lib/",
         "doc": "typedoc index.ts",
         "build": "tsc --build",
         "pretest": "npm run lint"
     },
     "dependencies": {
-        "ajv": "^8.12.0"
+        "ajv": "^8.12.0",
+        "form-data": "^4.0.2",
+        "http-cookie-agent": "^7.0.1",
+        "mime": "^4.0.7",
+        "pem": "^1.14.8",
+        "tough-cookie": "^5.1.2",
+        "undici": "^7.8.0",
+        "xml2js": "^0.6.2"
     },
     "peerDependencies": {
         "@tak-ps/node-cot": "^12.0.0"
     },
     "devDependencies": {
         "@types/node": "^22.0.0",
+        "@types/pem": "^1.14.4",
         "@types/tape": "^5.6.0",
+        "@types/xml2js": "^0.4.14",
+        "c8": "^10.1.3",
         "eslint": "^9.0.0",
         "tape": "^5.6.1",
         "ts-node": "^10.9.1",
