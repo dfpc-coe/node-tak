@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v8.7.0
+
+- :tada: Add ability to delete Repeater
+
 ### v8.6.0
 
 - :tada: Add initial support for the Repeaters API
