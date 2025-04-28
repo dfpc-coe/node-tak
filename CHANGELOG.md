@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v8.6.0
+
+- :tada: Add initial support for the Repeaters API
+
 ### v8.5.0
 
 - :tada: Add initial support for the Injectors API
