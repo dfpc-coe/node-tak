@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v8.5.0
+
+- :tada: Add initial support for the Injectors API
+
 ### v8.4.1
 
 - :bug: Fix named export
