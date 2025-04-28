@@ -9,6 +9,7 @@ import Credentials from './api/credentials.js';
 import Contacts from './api/contacts.js';
 import Files from './api/files.js';
 import Injectors from './api/injectors.js';
+import Repeater from './api/repeater.js';
 import Group from './api/groups.js';
 import Subscription from './api/subscriptions.js';
 import Video from './api/video.js';
@@ -32,6 +33,7 @@ export default class TAKAPI {
     Contacts: Contacts;
     Subscription: Subscription;
     Injectors: Injectors;
+    Repeater: Repeater;
     Group: Group;
     Video: Video;
     Export: Export;
@@ -55,6 +57,7 @@ export default class TAKAPI {
         this.Group = new Group(this);
         this.Video = new Video(this);
         this.Injectors = new Injectors(this);
+        this.Repeater = new Repeater(this);
         this.Files = new Files(this);
     }
 
