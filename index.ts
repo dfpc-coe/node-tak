@@ -3,6 +3,9 @@ import tls from 'node:tls';
 import CoT from '@tak-ps/node-cot';
 import type { TLSSocket } from 'node:tls'
 
+export * from './lib/api.js';
+export * from './lib/auth.js';
+
 /* eslint-disable no-control-regex */
 export const REGEX_CONTROL = /[\u000B-\u001F\u007F-\u009F]/g;
 
@@ -234,4 +237,6 @@ export default class TAK extends EventEmitter {
     }
 }
 
-export { CoT }
+export {
+    CoT,
+}
