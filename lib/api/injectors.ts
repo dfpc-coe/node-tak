@@ -1,5 +1,5 @@
 import TAKAPI from '../api.js';
-import { TAKItem, TAKList } from './types.js';
+import { TAKList } from './types.js';
 import { Type, Static } from '@sinclair/typebox';
 
 export const Injector = Type.Object({
