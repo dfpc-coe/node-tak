@@ -1,8 +1,8 @@
 <h1 align=center>Node-TAK</h1>
-
 <p align=center>Javascript TAK Server Library</p>
 
 Lightweight JavaScript library for managing TAK TLS connections for streaming CoT data
+as well as a typed SDK for performing TAK Server REST API operations
 
 ## Installation
 
@@ -16,7 +16,7 @@ npm install @tak-ps/node-tak
 
 ## Usage Examples
 
-### Basic Usage
+### Basic Streaming COT Usage
 
 ```js
 import TAK from '@tak-ps/node-tak';
@@ -38,4 +38,16 @@ tak.on('cot', async (cot: CoT) => {
     console.error(`Connection Error`);
 });
 
+```
+
+### Basic API Usage
+
+```js
+import { TAKAPI, APIAuthCertificate } from '@tak-ps/node-tak'
+
+const api = await TAKAPI.init(new URL('TAK SERVER Marti API & Port'), new APIAuthCertificate(auth.cert, auth.key));
+
+const missions = await api.Mission.list(req.query);
+
+console.error(missions);
 ```
