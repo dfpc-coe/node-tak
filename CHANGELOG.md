@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v8.4.0
+
+- :tada: Include TAK API Operations SDK
+
 ### v8.3.0
 
 - :rocket: Events are always forwarded regardless of destroyed status
