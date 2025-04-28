@@ -32,4 +32,17 @@ export default class {
             method: 'GET'
         });
     }
+
+    /**
+     * Delete a repeater by UID
+     *
+     * {@link https://docs.tak.gov/api/takserver/redoc#tag/repeater-api/operation/remove TAK Server Docs}.
+     */
+    async delete(uid: string): Promise<void> {
+        const url = new URL(`/Marti/api/repeater/remove/${uid}`, this.api.url);
+
+        await this.api.fetch(url, {
+            method: 'GET'
+        });
+    }
 }
