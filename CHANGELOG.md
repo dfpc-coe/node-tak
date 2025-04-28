@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v8.4.1
+
+- :bug: Fix named export
+
 ### v8.4.0
 
 - :tada: Include TAK API Operations SDK
