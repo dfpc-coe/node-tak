@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v8.9.0
+
+- :rocket: Allow getting & setting repeater period
+
 ### v8.8.1
 
 - :bug: Fix relative path

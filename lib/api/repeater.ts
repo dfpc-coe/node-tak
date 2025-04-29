@@ -28,15 +28,17 @@ export default class {
      */
     async period(period?: number): Promise<number> {
         const url = new URL('/Marti/api/repeater/period', this.api.url);
-        if (period !== undefined) {
+        if (period === undefined) {
             return await this.api.fetch(url, {
                 method: 'GET'
             });
         } else {
-            return await this.api.fetch(url, {
+            await this.api.fetch(url, {
                 method: 'POST',
                 body: period
             });
+
+            return period;
         }
     }
 
