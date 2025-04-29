@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v8.8.1
+
+- :bug: Fix relative path
+
 ### v8.8.0
 
 - :rocket: Add exports field to package.json

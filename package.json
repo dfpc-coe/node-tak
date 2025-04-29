@@ -7,9 +7,9 @@
     "main": "dist/index.js",
     "types": "index.ts",
     "exports": {
-        ".": "dist/index.js",
-        "./lib/*": "dist/lib/*.js",
-        "./lib/api/*": "dist/lib/api/*.js"
+        ".": "./dist/index.js",
+        "./lib/*": "./dist/lib/*.js",
+        "./lib/api/*": "./dist/lib/api/*.js"
     },
     "engines": {
         "node": ">= 22"
