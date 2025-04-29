@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v8.8.0
+
+- :rocket: Add exports field to package.json
+
 ### v8.7.0
 
 - :tada: Add ability to delete Repeater
