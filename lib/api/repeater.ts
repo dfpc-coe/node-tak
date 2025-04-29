@@ -21,6 +21,26 @@ export default class {
     }
 
     /**
+     * Return or set the current rebroadcast period
+     *
+     * {@link https://docs.tak.gov/api/takserver/redoc#tag/repeater-api/operation/getPeriod TAK Server Docs}.
+     * {@link https://docs.tak.gov/api/takserver/redoc#tag/repeater-api/operation/setPeriod TAK Server Docs}.
+     */
+    async period(period?: number): Promise<number> {
+        const url = new URL('/Marti/api/repeater/period', this.api.url);
+        if (period !== undefined) {
+            return await this.api.fetch(url, {
+                method: 'GET'
+            });
+        } else {
+            return await this.api.fetch(url, {
+                method: 'POST',
+                body: period
+            });
+        }
+    }
+
+    /**
      * Return a list of all configured COT Repeaters
      *
      * {@link https://docs.tak.gov/api/takserver/redoc#tag/repeater-api/operation/getList TAK Server Docs}.
