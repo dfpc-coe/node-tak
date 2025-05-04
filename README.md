@@ -4,6 +4,17 @@
 Lightweight JavaScript library for managing TAK TLS connections for streaming CoT data
 as well as a typed SDK for performing TAK Server REST API operations
 
+## API Documentation
+
+API Documentation for the latest version can be found on our [Github Pages Site](https://dfpc-coe.github.io/node-tak/)
+
+Or generated locally with
+
+```sh
+npm run doc
+
+```
+
 ## Installation
 
 ### NPM
