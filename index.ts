@@ -18,6 +18,9 @@ export const REGEX_EVENT = /(<event[ >][\s\S]*?<\/event>)([\s\S]*)/
 export interface TAKAuth {
     cert: string;
     key: string;
+    passphrase?: string;
+    ca?: string;
+    rejectUnauthorized?: boolean;
 }
 
 export interface PartialCoT {
@@ -80,9 +83,11 @@ export default class TAK extends EventEmitter {
             this.client = tls.connect({
                 host: this.url.hostname,
                 port: parseInt(this.url.port),
-                rejectUnauthorized: false,
+                rejectUnauthorized: this.auth.rejectUnauthorized ?? false,
                 cert: this.auth.cert,
-                key: this.auth.key
+                key: this.auth.key,
+                passphrase: this.auth.passphrase,
+                ca: this.auth.ca,
             });
 
             this.client.setNoDelay();
