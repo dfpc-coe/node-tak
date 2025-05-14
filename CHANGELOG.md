@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v8.10.0
+
+- :rocket: Support additional TLS options
+
 ### v8.9.0
 
 - :rocket: Allow getting & setting repeater period
