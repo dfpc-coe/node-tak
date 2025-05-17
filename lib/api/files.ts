@@ -2,7 +2,7 @@ import FormData from 'form-data';
 import type { ParsedArgs } from 'minimist'
 import { Readable } from 'node:stream';
 import mime from 'mime';
-import Commands from '../commands.js';
+import Commands, { CommandOutputFormat } from '../commands.js';
 import { TAKList } from './types.js';
 import { Type, Static } from '@sinclair/typebox';
 
@@ -38,7 +38,8 @@ export default class FileCommands extends Commands {
         list: {
             description: 'List Files',
             params: Type.Object({}),
-            query: Type.Object({})
+            query: Type.Object({}),
+            formats: [ CommandOutputFormat.JSON ]
         }
     }
 

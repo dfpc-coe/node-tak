@@ -1,7 +1,7 @@
 import { TAKList } from './types.js';
 import type { ParsedArgs } from 'minimist'
 import { Type, Static } from '@sinclair/typebox';
-import Commands from '../commands.js';
+import Commands, { CommandOutputFormat } from '../commands.js';
 
 export const Injector = Type.Object({
     uid: Type.String(),
@@ -15,7 +15,8 @@ export default class InjectorCommands extends Commands {
         list: {
             description: 'List Injectors',
             params: Type.Object({}),
-            query: Type.Object({})
+            query: Type.Object({}),
+            formats: [ CommandOutputFormat.JSON ]
         }
     }
 

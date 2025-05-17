@@ -6,13 +6,14 @@ import path from 'node:path';
 import minimist from 'minimist';
 import { Static } from '@sinclair/typebox';
 import TAK from './index.js';
+import { getPemFromP12 } from 'p12-pem'
 import TAKAPI, { CommandList } from './lib/api.js';
 import { APIAuthPassword, APIAuthCertificate } from './lib/auth.js';
 import Commands, { CommandConfig } from './lib/commands.js';
 import { select, confirm, number, input, password, Separator } from '@inquirer/prompts';
 
 const args = minimist(process.argv, {
-    string: ['profile', 'format'],
+    string: ['profile', 'format', 'auth'],
 });
 
 const configPath = path.resolve(os.homedir(), './.tak.json');
@@ -92,7 +93,7 @@ if (!args.profile) {
 
 if (args.profile && !config.profiles[args.profile]) {
     throw new Error(`Profile "${args.profile}" is not defined in config file`);
-} else if (!config.profiles[args.profile].auth) {
+} else if (!args.auth && !config.profiles[args.profile].auth) {
     const user = await input({ message: 'TAK Username' });
     const pass = await password({ message: 'TAK Password' });
 
@@ -127,7 +128,28 @@ await fs.writeFile(
 )
 
 
-const auth = config.profiles[args.profile].auth;
+let auth = config.profiles[args.profile].auth;
+
+if (args.auth) {
+    const password = process.env.TAK_P12_PASSWORD || await input({ message: 'P12 Container Password' });
+
+    const certs = getPemFromP12(args.auth, password)
+
+    const cert = certs.pemCertificate
+        .split('-----BEGIN CERTIFICATE-----')
+        .join('-----BEGIN CERTIFICATE-----\n')
+        .split('-----END CERTIFICATE-----')
+        .join('\n-----END CERTIFICATE-----');
+
+    const key = certs.pemKey
+        .split('-----BEGIN RSA PRIVATE KEY-----')
+        .join('-----BEGIN RSA PRIVATE KEY-----\n')
+        .split('-----END RSA PRIVATE KEY-----')
+        .join('\n-----END RSA PRIVATE KEY-----');
+
+    auth = { cert, key }
+}
+
 if (!auth) throw new Error(`No Auth in ${args.profile} profile`);
 
 if (command === 'stream') {
@@ -147,8 +169,9 @@ if (command === 'stream') {
         new APIAuthCertificate(auth.cert, auth.key)
     );
 
-    const invoke = tak[CommandList[command]];
-    if (!invoke || !(invoke instanceof Commands)) throw new Error(`${command} not found`);
+    const invokeTest = tak[CommandList[command]];
+    if (!invokeTest || !(invokeTest instanceof Commands)) throw new Error(`${command} not found`);
+    const invoke = invokeTest as Commands;
 
     if (!args._[3] || args._[3] === 'help') {
         const subcommands = <T extends object>(obj: T) => Object.keys(obj) as Array<keyof T>;
@@ -159,11 +182,16 @@ if (command === 'stream') {
                 `    tak ${args._[2]} <subcommand>`,
                 'SubCommands:',
             ].concat(subcommands(invoke.schema).map((subcommand) => {
-                // @ts-expect-error TODO need to figure out the never here when using keyof
                 return `    ${String(subcommand)} - ${invoke.schema[subcommand].description}`
             }))).join('\n')
         )
     } else {
+        if (args.format && !invoke.schema[args._[3]]) {
+            throw new Error(`Unsupported Subcommand: ${args._[3]}`);
+        } else if (args.format && !invoke.schema[args._[3]].formats.includes(args.format)) {
+            throw new Error(`tak ${args._[2]} ${args._[3]} does not support --format ${args.format}. Supported formats are: ${invoke.schema[args._[3]].formats.join(",")}`);
+        }
+
         const res = await invoke.cli(args);
 
         if (typeof res === 'string') {
