@@ -1,6 +1,7 @@
-import TAKAPI from '../api.js';
 import { APIAuthPassword } from '../auth.js';
+import type { ParsedArgs } from 'minimist'
 import { Static, Type } from '@sinclair/typebox';
+import Commands from '../commands.js';
 import pem from 'pem';
 import xml2js from 'xml2js';
 
@@ -9,14 +10,24 @@ export const CertificateResponse = Type.Object({
     key: Type.String()
 });
 
-export default class {
-    api: TAKAPI;
-
-    constructor(api: TAKAPI) {
-        this.api = api;
+export default class CredentialCommands extends Commands {
+    schema = {
+        config: {
+            description: 'Return TLS Config Info',
+            params: Type.Object({}),
+            query: Type.Object({})
+        }
     }
 
-    async config() {
+    async cli(args: ParsedArgs): Promise<object | string> {
+        if (args._[3] === 'config') {
+            return this.config();
+        } else {
+            throw new Error('Unsupported Subcommand');
+        }
+    }
+
+    async config(): Promise<string> {
         const url = new URL(`/Marti/api/tls/config`, this.api.url);
         return await this.api.fetch(url, {
             method: 'GET'

@@ -1,6 +1,7 @@
 import { Static, Type } from '@sinclair/typebox';
-import TAKAPI from '../api.js';
+import type { ParsedArgs } from 'minimist'
 import { TAKList } from './types.js';
+import Commands from '../commands.js';
 
 export const Group = Type.Object({
     name: Type.String(),
@@ -18,11 +19,29 @@ export const GroupListInput = Type.Object({
 
 export const TAKList_Group = TAKList(Group);
 
-export default class {
-    api: TAKAPI;
+export default class GroupCommands extends Commands {
+    schema = {
+        list: {
+            description: 'List Missions',
+            params: Type.Object({}),
+            query: Type.Object({})
+        }
+    }
 
-    constructor(api: TAKAPI) {
-        this.api = api;
+    async cli(args: ParsedArgs): Promise<object | string> {
+        if (args._[3] === 'list') {
+            const list = await this.list();
+
+            if (args.format === 'json') {
+                return list;
+            } else {
+                return list.data.map((channel) => {
+                    return `${channel.name} - ${channel.description}`;
+                }).join('\n');
+            }
+        } else {
+            throw new Error('Unsupported Subcommand');
+        }
     }
 
     async list(

@@ -1,6 +1,6 @@
 import Err from '@openaddresses/batch-error';
-import TAKAPI from '../api.js';
 import { Type, Static } from '@sinclair/typebox';
+import Commands from '../commands.js';
 
 export const LoginInput = Type.Object({
     username: Type.String(),
@@ -15,11 +15,11 @@ export const TokenContents = Type.Object({
     iat: Type.Number()
 })
 
-export default class {
-    api: TAKAPI;
+export default class OAuthCommands extends Commands {
+    schema = {}
 
-    constructor(api: TAKAPI) {
-        this.api = api;
+    async cli(): Promise<object | string> {
+        throw new Error('Unsupported Subcommand');
     }
 
     parse(jwt: string): Static<typeof TokenContents>{

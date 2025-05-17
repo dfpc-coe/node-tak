@@ -1,5 +1,5 @@
 import xmljs from 'xml-js';
-import TAKAPI from '../api.js';
+import type { ParsedArgs } from 'minimist'
 import CoT from '@tak-ps/node-cot';
 import { Type, Static } from '@sinclair/typebox';
 import Err from '@openaddresses/batch-error';
@@ -7,6 +7,7 @@ import { Readable } from 'node:stream'
 import { TAKItem, TAKList } from './types.js';
 import { MissionLog } from './mission-log.js';
 import type { Feature } from '@tak-ps/node-cot';
+import Commands from '../commands.js';
 
 export enum MissionSubscriberRole {
     MISSION_OWNER = 'MISSION_OWNER',
@@ -192,11 +193,29 @@ export const TAKItem_MissionSubscriber = TAKItem(MissionSubscriber);
 /**
  * @class
  */
-export default class {
-    api: TAKAPI;
+export default class MissionCommands extends Commands {
+    schema = {
+        list: {
+            description: 'List Missions',
+            params: Type.Object({}),
+            query: Type.Object({})
+        }
+    }
 
-    constructor(api: TAKAPI) {
-        this.api = api;
+    async cli(args: ParsedArgs): Promise<object | string> {
+        if (args._[3] === 'list') {
+            const list = await this.list({});
+
+            if (args.format === 'json') {
+                return list;
+            } else {
+                return list.data.map((mission) => {
+                    return `${mission.name} - ${mission.description}`;
+                }).join('\n');
+            }
+        } else {
+            throw new Error('Unsupported Subcommand');
+        }
     }
 
     #isGUID(id: string): boolean {

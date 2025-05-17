@@ -1,9 +1,11 @@
 import EventEmitter from 'node:events';
+import type { Static } from '@sinclair/typebox';
 import tls from 'node:tls';
 import CoT from '@tak-ps/node-cot';
 import type { TLSSocket } from 'node:tls'
 
 import TAKAPI from './lib/api.js';
+import { TAKAuth } from './lib/auth.js';
 export * from './lib/auth.js';
 
 /* eslint-disable no-control-regex */
@@ -12,27 +14,21 @@ export const REGEX_CONTROL = /[\u000B-\u001F\u007F-\u009F]/g;
 // Match <event .../> or <event> but not <events>
 export const REGEX_EVENT = /(<event[ >][\s\S]*?<\/event>)([\s\S]*)/
 
-/**
- * Store the TAK Client Certificate for a connection
- */
-export interface TAKAuth {
-    cert: string;
-    key: string;
-    passphrase?: string;
-    ca?: string;
-    rejectUnauthorized?: boolean;
-}
-
 export interface PartialCoT {
     event: string;
     remainder: string;
+}
+
+export type TAKOptions = {
+    id?: number | string,
+    type?: string,
 }
 
 export default class TAK extends EventEmitter {
     id: number | string;
     type: string;
     url: URL;
-    auth: TAKAuth;
+    auth: Static<typeof TAKAuth>;
     open: boolean;
     destroyed: boolean;
     queue: string[];
@@ -42,17 +38,27 @@ export default class TAK extends EventEmitter {
     client?: TLSSocket;
     version?: string;
 
+    /**
+     * @constructor
+     *
+     * @param url   - Full URL of Streaming COT Endpoint IE: "https://ops.cotak.gov:8089"
+     * @param auth  - TAK Certificate Pair
+     * @param opts  - Options Object
+     * @param opts.id   - When using multiple connections in a script, allows a unique ID per connection
+     * @param opts.type - When using multiple connections in a script, allows specifying a script provided connection type
+     */
     constructor(
-        id: number | string,
-        type: string,
         url: URL,
-        auth: TAKAuth
+        auth: Static<typeof TAKAuth>,
+        opts: TAKOptions = {}
     ) {
         super();
 
-        this.id = id;
+        if (!opts) opts = {};
 
-        this.type = type;
+        this.id = opts.id || crypto.randomUUID();
+        this.type = opts.type || 'unknown';
+
         this.url = url;
         this.auth = auth;
 
@@ -64,8 +70,12 @@ export default class TAK extends EventEmitter {
         this.queue = [];
     }
 
-    static async connect(id: number | string, url: URL, auth: TAKAuth): Promise<TAK> {
-        const tak = new TAK(id, 'ssl', url, auth);
+    static async connect(
+        url: URL,
+        auth: Static<typeof TAKAuth>,
+        opts: TAKOptions = {}
+    ): Promise<TAK> {
+        const tak = new TAK(url, auth, opts);
 
         if (url.protocol === 'ssl:') {
             if (!tak.auth.cert) throw new Error('auth.cert required');

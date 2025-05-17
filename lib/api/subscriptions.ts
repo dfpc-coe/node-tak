@@ -1,7 +1,7 @@
-import TAKAPI from '../api.js';
 import { Type, Static } from '@sinclair/typebox';
 import { Group } from './groups.js';
 import { TAKList } from './types.js';
+import Commands from '../commands.js';
 
 export const Subscription = Type.Object({
     dn: Type.Union([Type.String(), Type.Null()]),
@@ -58,11 +58,11 @@ export const ListSubscriptionInput = Type.Object({
 export const TAKList_Subscription = TAKList(Subscription);
 
 
-export default class {
-    api: TAKAPI;
+export default class SubscriptionCommands extends Commands {
+    schema = {}
 
-    constructor(api: TAKAPI) {
-        this.api = api;
+    async cli(): Promise<object | string> {
+        throw new Error('Unsupported Subcommand');
     }
 
     async list(

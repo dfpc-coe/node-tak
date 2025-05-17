@@ -1,6 +1,6 @@
-import TAKAPI from '../api.js';
 import { Type, Static } from '@sinclair/typebox';
 import { Readable } from 'node:stream';
+import Commands from '../commands.js';
 
 export const ExportInput = Type.Object({
     startTime: Type.String(),
@@ -16,11 +16,11 @@ export const ExportInput = Type.Object({
 /**
  * @class
  */
-export default class {
-    api: TAKAPI;
+export default class ExportCommands extends Commands {
+    schema = {};
 
-    constructor(api: TAKAPI) {
-        this.api = api;
+    async cli(): Promise<object | string> {
+        throw new Error('Unsupported Subcommand');
     }
 
     async export(query: Static<typeof ExportInput>): Promise<Readable> {

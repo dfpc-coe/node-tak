@@ -1,9 +1,9 @@
-import TAKAPI from '../api.js';
 import Err from '@openaddresses/batch-error';
 import xmljs from 'xml-js';
 import { Type, Static } from '@sinclair/typebox';
 import CoT from '@tak-ps/node-cot';
 import type { Feature } from '@tak-ps/node-cot';
+import Commands from '../commands.js';
 
 export const HistoryOptions = Type.Object({
     start: Type.Optional(Type.String()),
@@ -11,11 +11,11 @@ export const HistoryOptions = Type.Object({
     secago: Type.Optional(Type.String()),
 })
 
-export default class COTQuery {
-    api: TAKAPI;
+export default class QueryCommands extends Commands {
+    schema = {}
 
-    constructor(api: TAKAPI) {
-        this.api = api;
+    async cli(): Promise<object | string> {
+        throw new Error('Unsupported Subcommand');
     }
 
     async singleFeat(uid: string): Promise<Static<typeof Feature.Feature>> {

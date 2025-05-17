@@ -1,5 +1,6 @@
-import TAKAPI from '../api.js';
 import { Type, Static } from '@sinclair/typebox';
+import type { ParsedArgs } from 'minimist'
+import Commands from '../commands.js';
 
 export const Package = Type.Object({
     EXPIRATION: Type.String(),
@@ -24,11 +25,29 @@ export const ListInput = Type.Object({
 /**
  * @class
  */
-export default class {
-    api: TAKAPI;
+export default class PackageCommands extends Commands {
+    schema = {
+        list: {
+            description: 'List Data Packages',
+            params: Type.Object({}),
+            query: Type.Object({})
+        }
+    }
 
-    constructor(api: TAKAPI) {
-        this.api = api;
+    async cli(args: ParsedArgs): Promise<object | string> {
+        if (args._[3] === 'list') {
+            const list = await this.list({});
+
+            if (args.format === 'json') {
+                return list;
+            } else {
+                return list.results.map((data) => {
+                    return data.Name;
+                }).join('\n');
+            }
+        } else {
+            throw new Error('Unsupported Subcommand');
+        }
     }
 
     async list(query: Static<typeof ListInput>): Promise<{

@@ -1,9 +1,9 @@
-import TAKAPI from '../api.js';
 import { TAKList, TAKItem } from './types.js';
 import { Type, Static } from '@sinclair/typebox';
 import type { MissionOptions } from './mission.js';
 import { GUIDMatch } from './mission.js';
 import Err from '@openaddresses/batch-error';
+import Commands from '../commands.js';
 import type { Feature } from '@tak-ps/node-cot';
 
 export enum MissionLayerType {
@@ -63,11 +63,17 @@ export const CreateInput = Type.Object({
 export const TAKList_MissionLayer = TAKList(MissionLayer);
 export const TAKItem_MissionLayer = TAKItem(MissionLayer);
 
-export default class {
-    api: TAKAPI;
+export default class MissionLayerCommands extends Commands {
+    schema = {
+        list: {
+            description: 'List Injectors',
+            params: Type.Object({}),
+            query: Type.Object({})
+        }
+    }
 
-    constructor(api: TAKAPI) {
-        this.api = api;
+    async cli(): Promise<object | string> {
+        throw new Error('Unsupported Subcommand');
     }
 
     #encodeName(name: string): string {

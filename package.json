@@ -6,6 +6,9 @@
     "author": "Nick Ingalls <nick@ingalls.ca>",
     "main": "dist/index.js",
     "types": "index.ts",
+    "bin": {
+        "tak": "tsx ./cli.ts"
+    },
     "exports": {
         ".": "./dist/index.js",
         "./lib/*": "./dist/lib/*.js",
@@ -35,12 +38,15 @@
         "@tak-ps/node-cot": "^12.0.0"
     },
     "devDependencies": {
+        "@inquirer/prompts": "^7.5.1",
+        "@types/minimist": "^1.2.5",
         "@types/node": "^22.0.0",
         "@types/pem": "^1.14.4",
         "@types/tape": "^5.6.0",
         "@types/xml2js": "^0.4.14",
         "c8": "^10.1.3",
         "eslint": "^9.0.0",
+        "minimist": "^1.2.8",
         "tape": "^5.6.1",
         "ts-node": "^10.9.1",
         "ts-node-test": "^0.4.0",

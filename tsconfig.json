@@ -22,6 +22,7 @@
         }
     },
     "include": [
+        "cli.ts",
         "index.ts", 
         "test/**/*",
         "lib/**/*",

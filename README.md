@@ -25,7 +25,42 @@ To install `node-tak` with npm run
 npm install @tak-ps/node-tak
 ```
 
-## Usage Examples
+or for use with the global CLI:
+
+```bash
+npm install --global @tak-ps/node-tak
+```
+
+## CLI Usage Examples
+
+### Initial Setup
+
+The initial run of the CLI will generate a new Connection Profile & Credentials
+
+```
+tak
+```
+
+Once the profile is generated you can specify it with `--profile <profile>` in any command
+or if it is not provided it will be interactively requested
+
+### Streaming COTs
+
+```
+tak stream
+```
+
+### API Operations
+
+```
+tak <command> <subcommand>
+tak mission list
+tak package list
+```
+
+etc.
+
+## SDK Usage Examples
 
 ### Basic Streaming COT Usage
 

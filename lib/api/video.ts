@@ -1,7 +1,8 @@
 import Err from '@openaddresses/batch-error';
+import type { ParsedArgs } from 'minimist'
 import { Static, Type } from '@sinclair/typebox';
 import { randomUUID } from 'node:crypto';
-import TAKAPI from '../api.js';
+import Commands from '../commands.js';
 
 export const FeedInput = Type.Object({
     uuid: Type.Optional(Type.String()),
@@ -62,11 +63,21 @@ export const VideoConnectionListInput = Type.Object({
     protocol: Type.Optional(Type.String())
 })
 
-export default class {
-    api: TAKAPI;
+export default class VideoCommands extends Commands {
+    schema = {
+        list: {
+            description: 'List V2 Video Configs',
+            params: Type.Object({}),
+            query: Type.Object({})
+        }
+    }
 
-    constructor(api: TAKAPI) {
-        this.api = api;
+    async cli(args: ParsedArgs): Promise<object | string> {
+        if (args._[3] === 'list') {
+            return await this.list()
+        } else {
+            throw new Error('Unsupported Subcommand');
+        }
     }
 
     async list(

@@ -1,6 +1,7 @@
-import TAKAPI from '../api.js';
 import { TAKList } from './types.js';
+import type { ParsedArgs } from 'minimist'
 import { Type, Static } from '@sinclair/typebox';
+import Commands from '../commands.js';
 
 export const Injector = Type.Object({
     uid: Type.String(),
@@ -9,11 +10,29 @@ export const Injector = Type.Object({
 
 export const TAKList_Injector = TAKList(Injector);
 
-export default class {
-    api: TAKAPI;
+export default class InjectorCommands extends Commands {
+    schema = {
+        list: {
+            description: 'List Injectors',
+            params: Type.Object({}),
+            query: Type.Object({})
+        }
+    }
 
-    constructor(api: TAKAPI) {
-        this.api = api;
+    async cli(args: ParsedArgs): Promise<object | string> {
+        if (args._[3] === 'list') {
+            const list = await this.list();
+
+            if (args.format === 'json') {
+                return list;
+            } else {
+                return list.data.map((injector) => {
+                    return `${injector.uid} - ${injector.toInject}`;
+                }).join('\n');
+            }
+        } else {
+            throw new Error('Unsupported Subcommand');
+        }
     }
 
     /**

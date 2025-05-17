@@ -1,6 +1,6 @@
-import TAKAPI from '../api.js';
 import { TAKList } from './types.js';
 import { Type, Static } from '@sinclair/typebox';
+import Commands from '../commands.js';
 
 export const Repeater = Type.Object({
     uid: Type.String(),
@@ -13,11 +13,11 @@ export const Repeater = Type.Object({
 
 export const TAKList_Repeater = TAKList(Repeater);
 
-export default class {
-    api: TAKAPI;
+export default class RepeaterCommands extends Commands {
+    schema = {}
 
-    constructor(api: TAKAPI) {
-        this.api = api;
+    async cli(): Promise<object | string> {
+        throw new Error('Unsupported Subcommand');
     }
 
     /**
