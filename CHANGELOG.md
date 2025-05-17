@@ -10,6 +10,12 @@
 
 ## Version History
 
+### v9.0.0
+
+- :rocket: *Breaking* Change TAK constructor & connect sig. to make CloudTAK used props optional
+- :tada: Introduce new CLI
+- :tada: Introduce `Files.list` API Integration
+
 ### v8.10.0
 
 - :rocket: Support additional TLS options
