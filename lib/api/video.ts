@@ -2,7 +2,7 @@ import Err from '@openaddresses/batch-error';
 import type { ParsedArgs } from 'minimist'
 import { Static, Type } from '@sinclair/typebox';
 import { randomUUID } from 'node:crypto';
-import Commands from '../commands.js';
+import Commands, { CommandOutputFormat } from '../commands.js';
 
 export const FeedInput = Type.Object({
     uuid: Type.Optional(Type.String()),
@@ -68,7 +68,8 @@ export default class VideoCommands extends Commands {
         list: {
             description: 'List V2 Video Configs',
             params: Type.Object({}),
-            query: Type.Object({})
+            query: Type.Object({}),
+            formats: [ CommandOutputFormat.JSON ]
         }
     }
 

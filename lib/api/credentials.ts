@@ -1,7 +1,7 @@
 import { APIAuthPassword } from '../auth.js';
 import type { ParsedArgs } from 'minimist'
 import { Static, Type } from '@sinclair/typebox';
-import Commands from '../commands.js';
+import Commands, { CommandOutputFormat } from '../commands.js';
 import pem from 'pem';
 import xml2js from 'xml2js';
 
@@ -15,7 +15,8 @@ export default class CredentialCommands extends Commands {
         config: {
             description: 'Return TLS Config Info',
             params: Type.Object({}),
-            query: Type.Object({})
+            query: Type.Object({}),
+            formats: [ CommandOutputFormat.JSON ]
         }
     }
 

@@ -3,7 +3,7 @@ import { Type, Static } from '@sinclair/typebox';
 import type { MissionOptions } from './mission.js';
 import { GUIDMatch } from './mission.js';
 import Err from '@openaddresses/batch-error';
-import Commands from '../commands.js';
+import Commands, { CommandOutputFormat } from '../commands.js';
 import type { Feature } from '@tak-ps/node-cot';
 
 export enum MissionLayerType {
@@ -68,7 +68,8 @@ export default class MissionLayerCommands extends Commands {
         list: {
             description: 'List Injectors',
             params: Type.Object({}),
-            query: Type.Object({})
+            query: Type.Object({}),
+            formats: [ CommandOutputFormat.JSON ]
         }
     }
 

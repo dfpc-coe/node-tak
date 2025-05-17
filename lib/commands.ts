@@ -20,6 +20,12 @@ export const CommandConfig = Type.Object({
     )
 })
 
+export enum CommandOutputFormat {
+    JSON = 'json',
+    GEOJSON = 'geojson',
+    XML = 'xml',
+    BINARY = 'binary'
+}
 
 export default class Commands {
     api: TAKAPI;
@@ -28,6 +34,7 @@ export default class Commands {
         description: string,
         params: TObject<any>,
         query: TObject<any>,
+        formats: Array<CommandOutputFormat>
     }> = {};
 
     constructor(api: TAKAPI) {

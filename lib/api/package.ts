@@ -1,6 +1,6 @@
 import { Type, Static } from '@sinclair/typebox';
 import type { ParsedArgs } from 'minimist'
-import Commands from '../commands.js';
+import Commands, { CommandOutputFormat } from '../commands.js';
 
 export const Package = Type.Object({
     EXPIRATION: Type.String(),
@@ -30,7 +30,8 @@ export default class PackageCommands extends Commands {
         list: {
             description: 'List Data Packages',
             params: Type.Object({}),
-            query: Type.Object({})
+            query: Type.Object({}),
+            formats: [ CommandOutputFormat.JSON ]
         }
     }
 

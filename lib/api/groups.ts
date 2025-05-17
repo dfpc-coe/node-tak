@@ -1,7 +1,7 @@
 import { Static, Type } from '@sinclair/typebox';
 import type { ParsedArgs } from 'minimist'
 import { TAKList } from './types.js';
-import Commands from '../commands.js';
+import Commands, { CommandOutputFormat } from '../commands.js';
 
 export const Group = Type.Object({
     name: Type.String(),
@@ -24,7 +24,8 @@ export default class GroupCommands extends Commands {
         list: {
             description: 'List Missions',
             params: Type.Object({}),
-            query: Type.Object({})
+            query: Type.Object({}),
+            formats: [ CommandOutputFormat.JSON ]
         }
     }
 

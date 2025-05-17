@@ -1,6 +1,6 @@
 import { Type, Static } from '@sinclair/typebox';
 import type { ParsedArgs } from 'minimist'
-import Commands from '../commands.js';
+import Commands, { CommandOutputFormat } from '../commands.js';
 
 export const Contact = Type.Object({
     filterGroups: Type.Any(), // I'm not familiar with this one
@@ -17,7 +17,8 @@ export default class ContactCommands extends Commands {
         list: {
             description: 'List Contacts',
             params: Type.Object({}),
-            query: Type.Object({})
+            query: Type.Object({}),
+            formats: [ CommandOutputFormat.JSON ]
         }
     }
 

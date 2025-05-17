@@ -52,13 +52,36 @@ tak stream
 
 ### API Operations
 
+Example of a couple different operations:
+
 ```
 tak <command> <subcommand>
 tak mission list
 tak package list
 ```
 
-etc.
+### Command Line Args
+
+The following command line args are supported by all or many
+of the different command modes
+
+_Use custom P12 cert file_
+
+```
+--auth <p12 file to use>
+```
+
+_Output Raw JSON where possible_
+
+```
+--format json
+```
+
+#### Environment Variables
+
+| Variable | Notes |
+| -------- | ----- |
+| `TAK_P12_PASSWORD` | Avoid the P12 Password prompt when using in a script |
 
 ## SDK Usage Examples
 

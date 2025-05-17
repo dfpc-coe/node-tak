@@ -7,7 +7,7 @@ import { Readable } from 'node:stream'
 import { TAKItem, TAKList } from './types.js';
 import { MissionLog } from './mission-log.js';
 import type { Feature } from '@tak-ps/node-cot';
-import Commands from '../commands.js';
+import Commands, { CommandOutputFormat } from '../commands.js';
 
 export enum MissionSubscriberRole {
     MISSION_OWNER = 'MISSION_OWNER',
@@ -198,7 +198,8 @@ export default class MissionCommands extends Commands {
         list: {
             description: 'List Missions',
             params: Type.Object({}),
-            query: Type.Object({})
+            query: Type.Object({}),
+            formats: [ CommandOutputFormat.JSON ]
         }
     }
 
