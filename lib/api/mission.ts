@@ -194,16 +194,16 @@ export const TAKItem_MissionSubscriber = TAKItem(MissionSubscriber);
  * @class
  */
 export default class MissionCommands extends Commands {
+    schema = {
+        list: {
+            description: 'List Missions',
+            params: Type.Object({}),
+            query: Type.Object({})
+        }
+    }
+
     async cli(args: ParsedArgs): Promise<object | string> {
-        if (!args._[3] || args._[3] === 'help') {
-            return [
-                `Command: tak ${args._[2]} <subcommand>`,
-                'SubCommands:',
-                '    list - List Missions',
-                'Args:',
-                '    --format json'
-            ].join('\n') + '\n';
-        } else if (args._[3] === 'list') {
+        if (args._[3] === 'list') {
             const list = await this.list({});
 
             if (args.format === 'json') {

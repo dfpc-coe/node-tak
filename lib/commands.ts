@@ -1,6 +1,7 @@
 import { TAKAuth } from './auth.js';
-import type { ParsedArgs  } from 'minimist';
+import type { ParsedArgs } from 'minimist';
 import TAKAPI from './api.js';
+import type { TObject } from '@sinclair/typebox';
 import { Type } from '@sinclair/typebox';
 
 export const CommandConfig = Type.Object({
@@ -22,6 +23,12 @@ export const CommandConfig = Type.Object({
 
 export default class Commands {
     api: TAKAPI;
+
+    schema: Record<string, {
+        description: string,
+        params: TObject<any>,
+        query: TObject<any>,
+    }> = {};
 
     constructor(api: TAKAPI) {
         this.api = api;

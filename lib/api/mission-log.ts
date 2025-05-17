@@ -1,5 +1,4 @@
 import { Type, Static } from '@sinclair/typebox';
-import type { ParsedArgs } from 'minimist'
 import { TAKItem } from './types.js';
 import type { MissionOptions } from './mission.js';
 import Commands from '../commands.js';
@@ -31,14 +30,10 @@ export const UpdateMissionLog = Type.Composite([ CreateMissionLog, Type.Object({
 export const TAKItem_MissionLog = TAKItem(MissionLog);
 
 export default class MissionLogCommands extends Commands {
-    async cli(args: ParsedArgs): Promise<object | string> {
-        if (!args._[3] || args._[3] === 'help') {
-            return [
-                `Command: tak ${args._[2]} <subcommand>`,
-            ].join('\n') + '\n';
-        } else {
-            throw new Error('Unsupported Subcommand');
-        }
+    schema = {}
+
+    async cli(): Promise<object | string> {
+        throw new Error('Unsupported Subcommand');
     }
 
     #headers(opts?: Static<typeof MissionOptions>): object {

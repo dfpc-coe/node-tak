@@ -148,12 +148,27 @@ if (command === 'stream') {
     const invoke = tak[CommandList[command]];
     if (!invoke || !(invoke instanceof Commands)) throw new Error(`${command} not found`);
 
-    const res = await invoke.cli(args);
+    if (!args._[3] || args._[3] === 'help') {
+        const subcommands = <T extends object>(obj: T) => Object.keys(obj) as Array<keyof T>;
 
-    if (typeof res === 'string') {
-        console.log(res);
+        console.log((
+            [
+                'Command:',
+                `    tak ${args._[2]} <subcommand>`,
+                'SubCommands:',
+            ].concat(subcommands(invoke.schema).map((subcommand) => {
+                // @ts-expect-error TODO need to figure out the never here when using keyof
+                return `    ${String(subcommand)} - ${invoke.schema[subcommand].description}`
+            }))).join('\n')
+        )
     } else {
-        console.log(JSON.stringify(res, null, 4));
+        const res = await invoke.cli(args);
+
+        if (typeof res === 'string') {
+            console.log(res);
+        } else {
+            console.log(JSON.stringify(res, null, 4));
+        }
     }
 }
 

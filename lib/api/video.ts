@@ -64,13 +64,16 @@ export const VideoConnectionListInput = Type.Object({
 })
 
 export default class VideoCommands extends Commands {
+    schema = {
+        list: {
+            description: 'List V2 Video Configs',
+            params: Type.Object({}),
+            query: Type.Object({})
+        }
+    }
+
     async cli(args: ParsedArgs): Promise<object | string> {
-        if (!args._[3] || args._[3] === 'help') {
-            return [
-                `Command: tak ${args._[2]} <subcommand>`,
-                '    list - List all Video Configs'
-            ].join('\n') + '\n';
-        } else if (args._[3] === 'list') {
+        if (args._[3] === 'list') {
             return await this.list()
         } else {
             throw new Error('Unsupported Subcommand');

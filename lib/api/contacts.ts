@@ -13,6 +13,14 @@ export const Contact = Type.Object({
 });
 
 export default class ContactCommands extends Commands {
+    schema = {
+        list: {
+            description: 'List Contacts',
+            params: Type.Object({}),
+            query: Type.Object({})
+        }
+    }
+
     async cli(args: ParsedArgs): Promise<object | string> {
         if (args._[3] === 'list') {
             const list = await this.list();
@@ -23,14 +31,6 @@ export default class ContactCommands extends Commands {
                     return `${contact.callsign || '<No Callsign Set>'} (${contact.notes.trim()})`;
                 }).join('\n');
             }
-        } else if (!args._[3] || args._[3] === 'help') {
-            return [
-                `Command: tak ${args._[1]} <subcommand>`,
-                'SubCommands:',
-                '    list - List Contacts',
-                'Args:',
-                '    --format json'
-            ].join('\n') + '\n';
         } else {
             throw new Error('Unsupported Subcommand');
         }

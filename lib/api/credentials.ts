@@ -11,13 +11,16 @@ export const CertificateResponse = Type.Object({
 });
 
 export default class CredentialCommands extends Commands {
+    schema = {
+        config: {
+            description: 'Return TLS Config Info',
+            params: Type.Object({}),
+            query: Type.Object({})
+        }
+    }
+
     async cli(args: ParsedArgs): Promise<object | string> {
-        if (!args._[3] || args._[3] === 'help') {
-            return [
-                `Command: tak ${args._[2]} <subcommand>`,
-                '    config - Return TLS Config Info',
-            ].join('\n') + '\n';
-        } else if (args._[3] === 'config') {
+        if (args._[3] === 'config') {
             return this.config();
         } else {
             throw new Error('Unsupported Subcommand');

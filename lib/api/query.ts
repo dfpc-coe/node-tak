@@ -1,5 +1,4 @@
 import Err from '@openaddresses/batch-error';
-import type { ParsedArgs } from 'minimist'
 import xmljs from 'xml-js';
 import { Type, Static } from '@sinclair/typebox';
 import CoT from '@tak-ps/node-cot';
@@ -13,14 +12,10 @@ export const HistoryOptions = Type.Object({
 })
 
 export default class QueryCommands extends Commands {
-    async cli(args: ParsedArgs): Promise<object | string> {
-        if (!args._[3] || args._[3] === 'help') {
-            return [
-                `Command: tak ${args._[2]} <subcommand>`,
-            ].join('\n') + '\n';
-        } else {
-            throw new Error('Unsupported Subcommand');
-        }
+    schema = {}
+
+    async cli(): Promise<object | string> {
+        throw new Error('Unsupported Subcommand');
     }
 
     async singleFeat(uid: string): Promise<Static<typeof Feature.Feature>> {
