@@ -20,7 +20,7 @@ export const Config = Type.Object({
     uploadSizeLimit: Type.Integer()
 })
 
-export default class File extends Commands {
+export default class FileCommands extends Commands {
     // TODO Investigate this endpoint
     list() {
         new URL(`/Marti/api/sync/search`, this.api.url);

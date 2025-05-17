@@ -11,7 +11,7 @@ export const HistoryOptions = Type.Object({
     secago: Type.Optional(Type.String()),
 })
 
-export default class Query extends Commands {
+export default class QueryCommands extends Commands {
     async singleFeat(uid: string): Promise<Static<typeof Feature.Feature>> {
         const cotstr = await this.single(uid);
         return new CoT(cotstr).to_geojson();

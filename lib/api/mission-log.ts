@@ -29,7 +29,7 @@ export const UpdateMissionLog = Type.Composite([ CreateMissionLog, Type.Object({
 
 export const TAKItem_MissionLog = TAKItem(MissionLog);
 
-export default class MissionLog extends Commands {
+export default class MissionLogCommands extends Commands {
     #headers(opts?: Static<typeof MissionOptions>): object {
         if (opts && opts.token) {
             return {

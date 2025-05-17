@@ -18,7 +18,7 @@ export const GroupListInput = Type.Object({
 
 export const TAKList_Group = TAKList(Group);
 
-export default class Groups extends Commands {
+export default class GroupCommands extends Commands {
     async list(
         query: Static<typeof GroupListInput> = {}
     ): Promise<Static<typeof TAKList_Group>> {

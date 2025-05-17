@@ -11,7 +11,7 @@ export const Contact = Type.Object({
     uid: Type.String()
 });
 
-export default class Contacts extends Commands {
+export default class ContactCommands extends Commands {
     async list(): Promise<Array<Static<typeof Contact>>> {
         const url = new URL(`/Marti/api/contacts/all`, this.api.url);
         return await this.api.fetch(url, {

@@ -9,7 +9,7 @@ export const Injector = Type.Object({
 
 export const TAKList_Injector = TAKList(Injector);
 
-export default class Injectors extends Commands {
+export default class InjectorCommands extends Commands {
     /**
      * Return a list of all configured COT Injectors
      *

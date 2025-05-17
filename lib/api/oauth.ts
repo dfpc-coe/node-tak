@@ -15,7 +15,7 @@ export const TokenContents = Type.Object({
     iat: Type.Number()
 })
 
-export default class OAuth extends Commands {
+export default class OAuthCommands extends Commands {
     parse(jwt: string): Static<typeof TokenContents>{
         const split = Buffer.from(jwt, 'base64').toString().split('}').map((ext) => { return ext + '}'});
         if (split.length < 2) throw new Err(500, null, 'Unexpected TAK JWT Format');

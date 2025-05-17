@@ -24,7 +24,7 @@ export const ListInput = Type.Object({
 /**
  * @class
  */
-export default class DataPackage extends Commands {
+export default class PackageCommands extends Commands {
     async list(query: Static<typeof ListInput>): Promise<{
         resultCount: number;
         results: Array<Static<typeof Package>>

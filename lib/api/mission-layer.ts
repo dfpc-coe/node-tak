@@ -63,7 +63,7 @@ export const CreateInput = Type.Object({
 export const TAKList_MissionLayer = TAKList(MissionLayer);
 export const TAKItem_MissionLayer = TAKItem(MissionLayer);
 
-export default class MissionLayer extends Commands {
+export default class MissionLayerCommands extends Commands {
     #encodeName(name: string): string {
         return encodeURIComponent(name.trim())
     }

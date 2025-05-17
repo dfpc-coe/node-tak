@@ -17,22 +17,22 @@ import Export from './api/export.js';
 import Err from '@openaddresses/batch-error';
 import * as auth from './auth.js';
 
-export const Commands = {
-    Package,
-    OAuth,
-    Mission,
-    MissionLog,
-    MissionLayer,
-    Credentials,
-    Contacts,
-    Subscription,
-    Injectors,
-    Repeater,
-    Group,
-    Video,
-    Export,
-    Query,
-    Files
+export const Commands: Record<string, keyof TAKAPI> = {
+    package: 'Package',
+    oauth: 'OAuth',
+    mission: Mission,
+    'mission-log': MissionLog,
+    'Mission-layer': MissionLayer,
+    credential: Credentials,
+    contact: Contacts,
+    subscription: Subscription,
+    injector: Injectors,
+    repeater: Repeater,
+    group: Group,
+    video: Video,
+    export: Export,
+    query: Query,
+    file: Files
 }
 
 /**

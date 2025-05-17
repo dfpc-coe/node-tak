@@ -62,7 +62,7 @@ export const VideoConnectionListInput = Type.Object({
     protocol: Type.Optional(Type.String())
 })
 
-export default class Video extends Commands {
+export default class VideoCommands extends Commands {
     async list(
         query: Static<typeof VideoConnectionListInput> = {}
     ): Promise<Static<typeof VideoConnectionList>> {

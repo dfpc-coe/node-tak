@@ -9,7 +9,7 @@ export const CertificateResponse = Type.Object({
     key: Type.String()
 });
 
-export default class Credentials extends Commands {
+export default class CredentialCommands extends Commands {
     async config(): Promise<string> {
         const url = new URL(`/Marti/api/tls/config`, this.api.url);
         return await this.api.fetch(url, {

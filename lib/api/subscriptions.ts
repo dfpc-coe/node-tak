@@ -58,7 +58,7 @@ export const ListSubscriptionInput = Type.Object({
 export const TAKList_Subscription = TAKList(Subscription);
 
 
-export default class UserSubscription extends Commands {
+export default class SubscriptionCommands extends Commands {
     async list(
         query: Static<typeof ListSubscriptionInput>
     ): Promise<Static<typeof TAKList_Subscription>> {

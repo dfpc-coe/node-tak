@@ -13,7 +13,7 @@ export const Repeater = Type.Object({
 
 export const TAKList_Repeater = TAKList(Repeater);
 
-export default class Repeater extends Commands {
+export default class RepeaterCommands extends Commands {
     /**
      * Return or set the current rebroadcast period
      *

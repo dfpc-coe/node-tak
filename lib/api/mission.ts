@@ -192,7 +192,7 @@ export const TAKItem_MissionSubscriber = TAKItem(MissionSubscriber);
 /**
  * @class
  */
-export default class Mission extends Commands {
+export default class MissionCommands extends Commands {
     #isGUID(id: string): boolean {
         return GUIDMatch.test(id)
     }

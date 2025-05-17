@@ -16,7 +16,7 @@ export const ExportInput = Type.Object({
 /**
  * @class
  */
-export default class Export extends Commands {
+export default class ExportCommands extends Commands {
     async export(query: Static<typeof ExportInput>): Promise<Readable> {
         const url = new URL(`/Marti/ExportMissionKML`, this.api.url);
 
