@@ -1,3 +1,4 @@
+import { TAKAuth } from '../index.js';
 import TAKAPI from './api.js';
 import { Type } from '@sinclair/typebox';
 
@@ -10,10 +11,7 @@ export const CommandConfig = Type.Object({
             webtak: Type.Integer(),
             stream: Type.Integer()
         }),
-        auth: Type.Optional(Type.Object({
-            cert: Type.String(),
-            key: Type.String()
-        }))
+        auth: Type.Optional(TAKAuth)
     }))
 })
 
@@ -25,7 +23,7 @@ export default class Commands {
         this.api = api;
     }
 
-    cli(args = {}): Promise<object> {
+    async cli(args = {}): Promise<object> {
         if (!args) throw new Error('Args object must be provided');
         throw new Error('Command not yet supported');
     }

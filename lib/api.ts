@@ -17,7 +17,7 @@ import Export from './api/export.js';
 import Err from '@openaddresses/batch-error';
 import * as auth from './auth.js';
 
-export const Commands: Record<string, keyof TAKAPI> = {
+export const CommandList: Record<string, keyof TAKAPI> = {
     package: 'Package',
     oauth: 'OAuth',
     mission: 'Mission',

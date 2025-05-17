@@ -1,4 +1,6 @@
 import EventEmitter from 'node:events';
+import { Type } from '@sinclair/typebox';
+import type { Static } from '@sinclair/typebox';
 import tls from 'node:tls';
 import CoT from '@tak-ps/node-cot';
 import type { TLSSocket } from 'node:tls'
@@ -15,13 +17,13 @@ export const REGEX_EVENT = /(<event[ >][\s\S]*?<\/event>)([\s\S]*)/
 /**
  * Store the TAK Client Certificate for a connection
  */
-export interface TAKAuth {
-    cert: string;
-    key: string;
-    passphrase?: string;
-    ca?: string;
-    rejectUnauthorized?: boolean;
-}
+export const TAKAuth = Type.Object({
+    cert: Type.String(),
+    key: Type.String(),
+    passphrase: Type.Optional(Type.String()),
+    ca: Type.Optional(Type.String()),
+    rejectUnauthorized: Type.Optional(Type.Boolean())
+})
 
 export interface PartialCoT {
     event: string;
@@ -37,7 +39,7 @@ export default class TAK extends EventEmitter {
     id: number | string;
     type: string;
     url: URL;
-    auth: TAKAuth;
+    auth: Static<typeof TAKAuth>;
     open: boolean;
     destroyed: boolean;
     queue: string[];
@@ -58,7 +60,7 @@ export default class TAK extends EventEmitter {
      */
     constructor(
         url: URL,
-        auth: TAKAuth,
+        auth: Static<typeof TAKAuth>,
         opts: TAKOptions = {}
     ) {
         super();
@@ -81,7 +83,7 @@ export default class TAK extends EventEmitter {
 
     static async connect(
         url: URL,
-        auth: TAKAuth,
+        auth: Static<typeof TAKAuth>,
         opts: TAKOptions = {}
     ): Promise<TAK> {
         const tak = new TAK(url, auth, opts);
