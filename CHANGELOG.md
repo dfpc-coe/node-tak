@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v9.1.0
+
+- :rocket: Register and validate `--format` flag in CLI
+- :tada: Allow specifying custom p12 file for auth
+
 ### v9.0.1
 
 - :bug: Fix Global bin registration
