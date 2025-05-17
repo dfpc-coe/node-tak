@@ -1,7 +1,7 @@
-import TAKAPI from '../api.js';
 import FormData from 'form-data';
 import { Readable } from 'node:stream';
 import mime from 'mime';
+import Commands from '../commands.js';
 import { Type, Static } from '@sinclair/typebox';
 
 export const Content = Type.Object({
@@ -20,13 +20,7 @@ export const Config = Type.Object({
     uploadSizeLimit: Type.Integer()
 })
 
-export default class File {
-    api: TAKAPI;
-
-    constructor(api: TAKAPI) {
-        this.api = api;
-    }
-
+export default class File extends Commands {
     // TODO Investigate this endpoint
     list() {
         new URL(`/Marti/api/sync/search`, this.api.url);

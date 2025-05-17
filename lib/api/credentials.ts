@@ -1,6 +1,6 @@
-import TAKAPI from '../api.js';
 import { APIAuthPassword } from '../auth.js';
 import { Static, Type } from '@sinclair/typebox';
+import Commands from '../commands.js';
 import pem from 'pem';
 import xml2js from 'xml2js';
 
@@ -9,14 +9,8 @@ export const CertificateResponse = Type.Object({
     key: Type.String()
 });
 
-export default class {
-    api: TAKAPI;
-
-    constructor(api: TAKAPI) {
-        this.api = api;
-    }
-
-    async config() {
+export default class Credentials extends Commands {
+    async config(): Promise<string> {
         const url = new URL(`/Marti/api/tls/config`, this.api.url);
         return await this.api.fetch(url, {
             method: 'GET'

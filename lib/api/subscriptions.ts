@@ -1,7 +1,7 @@
-import TAKAPI from '../api.js';
 import { Type, Static } from '@sinclair/typebox';
 import { Group } from './groups.js';
 import { TAKList } from './types.js';
+import Commands from '../commands.js';
 
 export const Subscription = Type.Object({
     dn: Type.Union([Type.String(), Type.Null()]),
@@ -58,13 +58,7 @@ export const ListSubscriptionInput = Type.Object({
 export const TAKList_Subscription = TAKList(Subscription);
 
 
-export default class {
-    api: TAKAPI;
-
-    constructor(api: TAKAPI) {
-        this.api = api;
-    }
-
+export default class UserSubscription extends Commands {
     async list(
         query: Static<typeof ListSubscriptionInput>
     ): Promise<Static<typeof TAKList_Subscription>> {

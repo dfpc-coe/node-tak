@@ -1,6 +1,6 @@
 import Err from '@openaddresses/batch-error';
-import TAKAPI from '../api.js';
 import { Type, Static } from '@sinclair/typebox';
+import Commands from '../commands.js';
 
 export const LoginInput = Type.Object({
     username: Type.String(),
@@ -15,13 +15,7 @@ export const TokenContents = Type.Object({
     iat: Type.Number()
 })
 
-export default class {
-    api: TAKAPI;
-
-    constructor(api: TAKAPI) {
-        this.api = api;
-    }
-
+export default class OAuth extends Commands {
     parse(jwt: string): Static<typeof TokenContents>{
         const split = Buffer.from(jwt, 'base64').toString().split('}').map((ext) => { return ext + '}'});
         if (split.length < 2) throw new Err(500, null, 'Unexpected TAK JWT Format');

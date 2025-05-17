@@ -1,5 +1,4 @@
 import xmljs from 'xml-js';
-import TAKAPI from '../api.js';
 import CoT from '@tak-ps/node-cot';
 import { Type, Static } from '@sinclair/typebox';
 import Err from '@openaddresses/batch-error';
@@ -7,6 +6,7 @@ import { Readable } from 'node:stream'
 import { TAKItem, TAKList } from './types.js';
 import { MissionLog } from './mission-log.js';
 import type { Feature } from '@tak-ps/node-cot';
+import Commands from '../commands.js';
 
 export enum MissionSubscriberRole {
     MISSION_OWNER = 'MISSION_OWNER',
@@ -192,13 +192,7 @@ export const TAKItem_MissionSubscriber = TAKItem(MissionSubscriber);
 /**
  * @class
  */
-export default class {
-    api: TAKAPI;
-
-    constructor(api: TAKAPI) {
-        this.api = api;
-    }
-
+export default class Mission extends Commands {
     #isGUID(id: string): boolean {
         return GUIDMatch.test(id)
     }

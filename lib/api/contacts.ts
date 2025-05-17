@@ -1,5 +1,5 @@
-import TAKAPI from '../api.js';
 import { Type, Static } from '@sinclair/typebox';
+import Commands from '../commands.js';
 
 export const Contact = Type.Object({
     filterGroups: Type.Any(), // I'm not familiar with this one
@@ -11,13 +11,7 @@ export const Contact = Type.Object({
     uid: Type.String()
 });
 
-export default class {
-    api: TAKAPI;
-
-    constructor(api: TAKAPI) {
-        this.api = api;
-    }
-
+export default class Contacts extends Commands {
     async list(): Promise<Array<Static<typeof Contact>>> {
         const url = new URL(`/Marti/api/contacts/all`, this.api.url);
         return await this.api.fetch(url, {

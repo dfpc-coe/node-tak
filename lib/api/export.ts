@@ -1,6 +1,6 @@
-import TAKAPI from '../api.js';
 import { Type, Static } from '@sinclair/typebox';
 import { Readable } from 'node:stream';
+import Commands from '../commands.js';
 
 export const ExportInput = Type.Object({
     startTime: Type.String(),
@@ -16,13 +16,7 @@ export const ExportInput = Type.Object({
 /**
  * @class
  */
-export default class {
-    api: TAKAPI;
-
-    constructor(api: TAKAPI) {
-        this.api = api;
-    }
-
+export default class Export extends Commands {
     async export(query: Static<typeof ExportInput>): Promise<Readable> {
         const url = new URL(`/Marti/ExportMissionKML`, this.api.url);
 

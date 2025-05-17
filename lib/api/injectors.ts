@@ -1,6 +1,6 @@
-import TAKAPI from '../api.js';
 import { TAKList } from './types.js';
 import { Type, Static } from '@sinclair/typebox';
+import Commands from '../commands.js';
 
 export const Injector = Type.Object({
     uid: Type.String(),
@@ -9,13 +9,7 @@ export const Injector = Type.Object({
 
 export const TAKList_Injector = TAKList(Injector);
 
-export default class {
-    api: TAKAPI;
-
-    constructor(api: TAKAPI) {
-        this.api = api;
-    }
-
+export default class Injectors extends Commands {
     /**
      * Return a list of all configured COT Injectors
      *

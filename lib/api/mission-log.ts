@@ -1,7 +1,7 @@
-import TAKAPI from '../api.js';
 import { Type, Static } from '@sinclair/typebox';
 import { TAKItem } from './types.js';
 import type { MissionOptions } from './mission.js';
+import Commands from '../commands.js';
 import { GUIDMatch } from './mission.js';
 
 export const MissionLog = Type.Object({
@@ -29,13 +29,7 @@ export const UpdateMissionLog = Type.Composite([ CreateMissionLog, Type.Object({
 
 export const TAKItem_MissionLog = TAKItem(MissionLog);
 
-export default class {
-    api: TAKAPI;
-
-    constructor(api: TAKAPI) {
-        this.api = api;
-    }
-
+export default class MissionLog extends Commands {
     #headers(opts?: Static<typeof MissionOptions>): object {
         if (opts && opts.token) {
             return {

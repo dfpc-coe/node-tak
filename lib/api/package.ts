@@ -1,5 +1,5 @@
-import TAKAPI from '../api.js';
 import { Type, Static } from '@sinclair/typebox';
+import Commands from '../commands.js';
 
 export const Package = Type.Object({
     EXPIRATION: Type.String(),
@@ -24,13 +24,7 @@ export const ListInput = Type.Object({
 /**
  * @class
  */
-export default class {
-    api: TAKAPI;
-
-    constructor(api: TAKAPI) {
-        this.api = api;
-    }
-
+export default class DataPackage extends Commands {
     async list(query: Static<typeof ListInput>): Promise<{
         resultCount: number;
         results: Array<Static<typeof Package>>

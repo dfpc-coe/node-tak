@@ -1,6 +1,6 @@
 import { Static, Type } from '@sinclair/typebox';
-import TAKAPI from '../api.js';
 import { TAKList } from './types.js';
+import Commands from '../commands.js';
 
 export const Group = Type.Object({
     name: Type.String(),
@@ -18,13 +18,7 @@ export const GroupListInput = Type.Object({
 
 export const TAKList_Group = TAKList(Group);
 
-export default class {
-    api: TAKAPI;
-
-    constructor(api: TAKAPI) {
-        this.api = api;
-    }
-
+export default class Groups extends Commands {
     async list(
         query: Static<typeof GroupListInput> = {}
     ): Promise<Static<typeof TAKList_Group>> {

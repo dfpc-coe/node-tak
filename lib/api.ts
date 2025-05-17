@@ -17,6 +17,24 @@ import Export from './api/export.js';
 import Err from '@openaddresses/batch-error';
 import * as auth from './auth.js';
 
+export const Commands = {
+    Package,
+    OAuth,
+    Mission,
+    MissionLog,
+    MissionLayer,
+    Credentials,
+    Contacts,
+    Subscription,
+    Injectors,
+    Repeater,
+    Group,
+    Video,
+    Export,
+    Query,
+    Files
+}
+
 /**
  * Handle TAK HTTP API Operations
  * @class

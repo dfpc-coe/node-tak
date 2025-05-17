@@ -1,7 +1,7 @@
 import Err from '@openaddresses/batch-error';
 import { Static, Type } from '@sinclair/typebox';
 import { randomUUID } from 'node:crypto';
-import TAKAPI from '../api.js';
+import Commands from '../commands.js';
 
 export const FeedInput = Type.Object({
     uuid: Type.Optional(Type.String()),
@@ -62,13 +62,7 @@ export const VideoConnectionListInput = Type.Object({
     protocol: Type.Optional(Type.String())
 })
 
-export default class {
-    api: TAKAPI;
-
-    constructor(api: TAKAPI) {
-        this.api = api;
-    }
-
+export default class Video extends Commands {
     async list(
         query: Static<typeof VideoConnectionListInput> = {}
     ): Promise<Static<typeof VideoConnectionList>> {
