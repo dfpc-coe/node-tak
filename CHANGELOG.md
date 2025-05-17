@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.0.1
+
+- :bug: Fix Global bin registration
+
 ### v9.0.0
 
 - :rocket: *Breaking* Change TAK constructor & connect sig. to make CloudTAK used props optional
