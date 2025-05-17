@@ -3,7 +3,7 @@ import { Type } from '@sinclair/typebox';
 
 export const CommandConfig = Type.Object({
     version: Type.Integer(),
-    profiles: Type.Record(Type.String, Type.Object({
+    profiles: Type.Record(Type.String(), Type.Object({
         host: Type.String(),
         ports: Type.Object({
             marti: Type.Integer(),
@@ -25,7 +25,7 @@ export default class Commands {
         this.api = api;
     }
 
-    commands(args = {}): Promise<object> {
+    cli(args = {}): Promise<object> {
         if (!args) throw new Error('Args object must be provided');
         throw new Error('Command not yet supported');
     }
