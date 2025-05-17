@@ -1,11 +1,11 @@
 import EventEmitter from 'node:events';
-import { Type } from '@sinclair/typebox';
 import type { Static } from '@sinclair/typebox';
 import tls from 'node:tls';
 import CoT from '@tak-ps/node-cot';
 import type { TLSSocket } from 'node:tls'
 
 import TAKAPI from './lib/api.js';
+import { TAKAuth } from './lib/auth.js';
 export * from './lib/auth.js';
 
 /* eslint-disable no-control-regex */
@@ -13,17 +13,6 @@ export const REGEX_CONTROL = /[\u000B-\u001F\u007F-\u009F]/g;
 
 // Match <event .../> or <event> but not <events>
 export const REGEX_EVENT = /(<event[ >][\s\S]*?<\/event>)([\s\S]*)/
-
-/**
- * Store the TAK Client Certificate for a connection
- */
-export const TAKAuth = Type.Object({
-    cert: Type.String(),
-    key: Type.String(),
-    passphrase: Type.Optional(Type.String()),
-    ca: Type.Optional(Type.String()),
-    rejectUnauthorized: Type.Optional(Type.Boolean())
-})
 
 export interface PartialCoT {
     event: string;

@@ -1,4 +1,5 @@
 import { TAKList } from './types.js';
+import type { ParsedArgs } from 'minimist'
 import { Type, Static } from '@sinclair/typebox';
 import Commands from '../commands.js';
 
@@ -14,6 +15,16 @@ export const Repeater = Type.Object({
 export const TAKList_Repeater = TAKList(Repeater);
 
 export default class RepeaterCommands extends Commands {
+    async cli(args: ParsedArgs): Promise<object | string> {
+        if (!args._[3] || args._[3] === 'help') {
+            return [
+                `Command: tak ${args._[2]} <subcommand>`,
+            ].join('\n') + '\n';
+        } else {
+            throw new Error('Unsupported Subcommand');
+        }
+    }
+
     /**
      * Return or set the current rebroadcast period
      *

@@ -1,4 +1,5 @@
 import Err from '@openaddresses/batch-error';
+import type { ParsedArgs } from 'minimist'
 import { Static, Type } from '@sinclair/typebox';
 import { randomUUID } from 'node:crypto';
 import Commands from '../commands.js';
@@ -63,6 +64,19 @@ export const VideoConnectionListInput = Type.Object({
 })
 
 export default class VideoCommands extends Commands {
+    async cli(args: ParsedArgs): Promise<object | string> {
+        if (!args._[3] || args._[3] === 'help') {
+            return [
+                `Command: tak ${args._[2]} <subcommand>`,
+                '    list - List all Video Configs'
+            ].join('\n') + '\n';
+        } else if (args._[3] === 'list') {
+            return await this.list()
+        } else {
+            throw new Error('Unsupported Subcommand');
+        }
+    }
+
     async list(
         query: Static<typeof VideoConnectionListInput> = {}
     ): Promise<Static<typeof VideoConnectionList>> {

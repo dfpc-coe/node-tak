@@ -22,7 +22,7 @@ export const CommandList: Record<string, keyof TAKAPI> = {
     oauth: 'OAuth',
     mission: 'Mission',
     'mission-log': 'MissionLog',
-    'Mission-layer': 'MissionLayer',
+    'mission-layer': 'MissionLayer',
     credential: 'Credentials',
     contact: 'Contacts',
     subscription: 'Subscription',

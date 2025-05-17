@@ -1,4 +1,5 @@
 import { APIAuthPassword } from '../auth.js';
+import type { ParsedArgs } from 'minimist'
 import { Static, Type } from '@sinclair/typebox';
 import Commands from '../commands.js';
 import pem from 'pem';
@@ -10,6 +11,19 @@ export const CertificateResponse = Type.Object({
 });
 
 export default class CredentialCommands extends Commands {
+    async cli(args: ParsedArgs): Promise<object | string> {
+        if (!args._[3] || args._[3] === 'help') {
+            return [
+                `Command: tak ${args._[2]} <subcommand>`,
+                '    config - Return TLS Config Info',
+            ].join('\n') + '\n';
+        } else if (args._[3] === 'config') {
+            return this.config();
+        } else {
+            throw new Error('Unsupported Subcommand');
+        }
+    }
+
     async config(): Promise<string> {
         const url = new URL(`/Marti/api/tls/config`, this.api.url);
         return await this.api.fetch(url, {

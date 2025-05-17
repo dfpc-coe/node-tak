@@ -1,4 +1,5 @@
 import xmljs from 'xml-js';
+import type { ParsedArgs } from 'minimist'
 import CoT from '@tak-ps/node-cot';
 import { Type, Static } from '@sinclair/typebox';
 import Err from '@openaddresses/batch-error';
@@ -193,6 +194,30 @@ export const TAKItem_MissionSubscriber = TAKItem(MissionSubscriber);
  * @class
  */
 export default class MissionCommands extends Commands {
+    async cli(args: ParsedArgs): Promise<object | string> {
+        if (!args._[3] || args._[3] === 'help') {
+            return [
+                `Command: tak ${args._[2]} <subcommand>`,
+                'SubCommands:',
+                '    list - List Missions',
+                'Args:',
+                '    --format json'
+            ].join('\n') + '\n';
+        } else if (args._[3] === 'list') {
+            const list = await this.list({});
+
+            if (args.format === 'json') {
+                return list;
+            } else {
+                return list.data.map((mission) => {
+                    return `${mission.name} - ${mission.description}`;
+                }).join('\n');
+            }
+        } else {
+            throw new Error('Unsupported Subcommand');
+        }
+    }
+
     #isGUID(id: string): boolean {
         return GUIDMatch.test(id)
     }

@@ -1,4 +1,5 @@
 import { TAKList, TAKItem } from './types.js';
+import type { ParsedArgs } from 'minimist'
 import { Type, Static } from '@sinclair/typebox';
 import type { MissionOptions } from './mission.js';
 import { GUIDMatch } from './mission.js';
@@ -64,6 +65,16 @@ export const TAKList_MissionLayer = TAKList(MissionLayer);
 export const TAKItem_MissionLayer = TAKItem(MissionLayer);
 
 export default class MissionLayerCommands extends Commands {
+    async cli(args: ParsedArgs): Promise<object | string> {
+        if (!args._[3] || args._[3] === 'help') {
+            return [
+                `Command: tak ${args._[2]} <subcommand>`,
+            ].join('\n') + '\n';
+        } else {
+            throw new Error('Unsupported Subcommand');
+        }
+    }
+
     #encodeName(name: string): string {
         return encodeURIComponent(name.trim())
     }

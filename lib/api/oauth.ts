@@ -1,4 +1,5 @@
 import Err from '@openaddresses/batch-error';
+import type { ParsedArgs } from 'minimist'
 import { Type, Static } from '@sinclair/typebox';
 import Commands from '../commands.js';
 
@@ -16,6 +17,16 @@ export const TokenContents = Type.Object({
 })
 
 export default class OAuthCommands extends Commands {
+    async cli(args: ParsedArgs): Promise<object | string> {
+        if (!args._[3] || args._[3] === 'help') {
+            return [
+                `Command: tak ${args._[2]} <subcommand>`,
+            ].join('\n') + '\n';
+        } else {
+            throw new Error('Unsupported Subcommand');
+        }
+    }
+
     parse(jwt: string): Static<typeof TokenContents>{
         const split = Buffer.from(jwt, 'base64').toString().split('}').map((ext) => { return ext + '}'});
         if (split.length < 2) throw new Err(500, null, 'Unexpected TAK JWT Format');

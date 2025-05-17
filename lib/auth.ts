@@ -1,9 +1,21 @@
 import fetch from './fetch.js';
+import { Type } from '@sinclair/typebox';
 import { CookieJar, Cookie } from 'tough-cookie';
 import { CookieAgent } from 'http-cookie-agent/undici';
 import { Client } from 'undici';
 import TAKAPI from './api.js';
 import stream2buffer  from './stream.js';
+
+/**
+ * Store the TAK Client Certificate for a connection
+ */
+export const TAKAuth = Type.Object({
+    cert: Type.String(),
+    key: Type.String(),
+    passphrase: Type.Optional(Type.String()),
+    ca: Type.Optional(Type.String()),
+    rejectUnauthorized: Type.Optional(Type.Boolean())
+})
 
 export class APIAuth {
     async init(api: TAKAPI) { // eslint-disable-line @typescript-eslint/no-unused-vars

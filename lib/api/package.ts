@@ -1,4 +1,5 @@
 import { Type, Static } from '@sinclair/typebox';
+import type { ParsedArgs } from 'minimist'
 import Commands from '../commands.js';
 
 export const Package = Type.Object({
@@ -25,6 +26,30 @@ export const ListInput = Type.Object({
  * @class
  */
 export default class PackageCommands extends Commands {
+    async cli(args: ParsedArgs): Promise<object | string> {
+        if (!args._[3] || args._[3] === 'help') {
+            return [
+                `Command: tak ${args._[2]} <subcommand>`,
+                'SubCommands:',
+                '    list - List Data Packages',
+                'Args:',
+                '    --format json'
+            ].join('\n') + '\n';
+        } else if (args._[3] === 'list') {
+            const list = await this.list({});
+
+            if (args.format === 'json') {
+                return list;
+            } else {
+                return list.results.map((data) => {
+                    return data.Name;
+                }).join('\n');
+            }
+        } else {
+            throw new Error('Unsupported Subcommand');
+        }
+    }
+
     async list(query: Static<typeof ListInput>): Promise<{
         resultCount: number;
         results: Array<Static<typeof Package>>

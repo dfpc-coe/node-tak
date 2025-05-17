@@ -1,4 +1,5 @@
 import { Static, Type } from '@sinclair/typebox';
+import type { ParsedArgs } from 'minimist'
 import { TAKList } from './types.js';
 import Commands from '../commands.js';
 
@@ -19,6 +20,30 @@ export const GroupListInput = Type.Object({
 export const TAKList_Group = TAKList(Group);
 
 export default class GroupCommands extends Commands {
+    async cli(args: ParsedArgs): Promise<object | string> {
+        if (!args._[3] || args._[3] === 'help') {
+            return [
+                `Command: tak ${args._[2]} <subcommand>`,
+                'SubCommands:',
+                '    list - List Missions',
+                'Args:',
+                '    --format json'
+            ].join('\n') + '\n';
+        } else if (args._[3] === 'list') {
+            const list = await this.list();
+
+            if (args.format === 'json') {
+                return list;
+            } else {
+                return list.data.map((channel) => {
+                    return `${channel.name} - ${channel.description}`;
+                }).join('\n');
+            }
+        } else {
+            throw new Error('Unsupported Subcommand');
+        }
+    }
+
     async list(
         query: Static<typeof GroupListInput> = {}
     ): Promise<Static<typeof TAKList_Group>> {

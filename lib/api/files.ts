@@ -1,7 +1,9 @@
 import FormData from 'form-data';
+import type { ParsedArgs } from 'minimist'
 import { Readable } from 'node:stream';
 import mime from 'mime';
 import Commands from '../commands.js';
+import { TAKList } from './types.js';
 import { Type, Static } from '@sinclair/typebox';
 
 export const Content = Type.Object({
@@ -16,16 +18,53 @@ export const Content = Type.Object({
   Name: Type.String()
 });
 
+export const TAKList_Content = TAKList(Type.Object({
+    filename: Type.String(),
+    keywords: Type.Array(Type.String()),
+    mimeType: Type.String(),
+    name: Type.String(),
+    submissionTime: Type.String(),
+    submitter: Type.String(),
+    uid: Type.String(),
+    size: Type.Integer(),
+}));
+
 export const Config = Type.Object({
     uploadSizeLimit: Type.Integer()
 })
 
 export default class FileCommands extends Commands {
-    // TODO Investigate this endpoint
-    list() {
-        new URL(`/Marti/api/sync/search`, this.api.url);
-        // param hash=<hash>
-    } 
+    async cli(args: ParsedArgs): Promise<object | string> {
+        if (!args._[3] || args._[3] === 'help') {
+            return [
+                `Command: tak ${args._[2]} <subcommand>`,
+                'SubCommands:',
+                '    list - List Files',
+                'Args:',
+                '    --format json'
+            ].join('\n') + '\n';
+        } else if (args._[3] === 'list') {
+            const list = await this.list();
+
+            if (args.format === 'json') {
+                return list;
+            } else {
+                return list.data.map((data) => {
+                    return data.filename;
+                }).join('\n');
+            }
+        } else {
+            throw new Error('Unsupported Subcommand');
+        }
+    }
+
+    async list(): Promise<Static<typeof TAKList_Content>> {
+        const url = new URL(`/Marti/api/sync/search`, this.api.url);
+
+        return await this.api.fetch(url, {
+            method: 'GET'
+        });
+    }
 
     async meta(hash: string): Promise<string> {
         const url = new URL(`/Marti/sync/${encodeURIComponent(hash)}/metadata`, this.api.url);

@@ -1,4 +1,5 @@
 import { TAKList } from './types.js';
+import type { ParsedArgs } from 'minimist'
 import { Type, Static } from '@sinclair/typebox';
 import Commands from '../commands.js';
 
@@ -10,6 +11,30 @@ export const Injector = Type.Object({
 export const TAKList_Injector = TAKList(Injector);
 
 export default class InjectorCommands extends Commands {
+    async cli(args: ParsedArgs): Promise<object | string> {
+        if (!args._[3] || args._[3] === 'help') {
+            return [
+                `Command: tak ${args._[2]} <subcommand>`,
+                'SubCommands:',
+                '    list - List Injectors',
+                'Args:',
+                '    --format json'
+            ].join('\n') + '\n';
+        } else if (args._[3] === 'list') {
+            const list = await this.list();
+
+            if (args.format === 'json') {
+                return list;
+            } else {
+                return list.data.map((injector) => {
+                    return `${injector.uid} - ${injector.toInject}`;
+                }).join('\n');
+            }
+        } else {
+            throw new Error('Unsupported Subcommand');
+        }
+    }
+
     /**
      * Return a list of all configured COT Injectors
      *
