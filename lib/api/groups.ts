@@ -17,14 +17,26 @@ export const GroupListInput = Type.Object({
     useCache: Type.Optional(Type.Boolean())
 })
 
+export const MemberListInput = Type.Object({
+    groupNameFilter: Type.String()
+})
+
 export const TAKList_Group = TAKList(Group);
+export const TAKList_Member = TAKList(Group);
 
 export default class GroupCommands extends Commands {
     schema = {
         list: {
-            description: 'List Missions',
+            description: 'List Groups',
             params: Type.Object({}),
             query: Type.Object({}),
+            formats: [ CommandOutputFormat.JSON ]
+        },
+
+        'list-members': {
+            description: 'List Members',
+            params: Type.Object({}),
+            query: Type.Object(MemberListInput),
             formats: [ CommandOutputFormat.JSON ]
         }
     }
@@ -37,6 +49,19 @@ export default class GroupCommands extends Commands {
                 return list;
             } else {
                 return list.data.map((channel) => {
+                    return `${channel.name} - ${channel.description}`;
+                }).join('\n');
+            }
+        } else if (args._[3] === 'list-members') {
+            const list = await this.members({
+                groupNameFilter: args.groupNameFilter || ''
+            });
+
+            if (args.format === 'json') {
+                return list;
+            } else {
+                return list.data.map((member) => {
+                    console.error(member);
                     return `${channel.name} - ${channel.description}`;
                 }).join('\n');
             }
@@ -78,6 +103,25 @@ export default class GroupCommands extends Commands {
         await this.api.fetch(url, {
             method: 'PUT',
             body
+        });
+    }
+
+    async members(
+        query: Static<typeof MemberListInput> = {}
+    ): Promise<Static<typeof TAKList_Member>> {
+        const url = new URL(`/Marti/api/groups/members`, this.api.url);
+
+        let q: keyof Static<typeof MemberListInput>;
+        for (q in query) {
+            if (query[q] !== undefined) {
+                url.searchParams.append(q, String(query[q]));
+            }
+        }
+
+        console.error(url);
+
+        return await this.api.fetch(url, {
+            method: 'GET'
         });
     }
 }
