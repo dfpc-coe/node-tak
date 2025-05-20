@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.2.1
+
+- :bug: Ensure MissionTokens are used internally if present in a top level call
+
 ### v9.2.0
 
 - :rocket: Ensure Mission Name meets regex/length requirements of TAK Server on creation
