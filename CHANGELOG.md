@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v9.2.0
+
+- :rocket: Ensure Mission Name meets regex/length requirements of TAK Server on creation
+- :tada: Add Locate API SDK
+
 ### v9.1.0
 
 - :rocket: Register and validate `--format` flag in CLI

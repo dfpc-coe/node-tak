@@ -2,6 +2,7 @@ import FormData from 'form-data';
 import OAuth from './api/oauth.js';
 import Package from './api/package.js';
 import Query from './api/query.js';
+import Locate from './api/locate.js';
 import Mission from './api/mission.js';
 import MissionLog from './api/mission-log.js';
 import MissionLayer from './api/mission-layer.js';
@@ -21,6 +22,7 @@ export const CommandList: Record<string, keyof TAKAPI> = {
     package: 'Package',
     oauth: 'OAuth',
     mission: 'Mission',
+    locate: 'Locate',
     'mission-log': 'MissionLog',
     'mission-layer': 'MissionLayer',
     credential: 'Credentials',
@@ -45,6 +47,7 @@ export default class TAKAPI {
     Package: Package;
     OAuth: OAuth;
     Mission: Mission;
+    Locate: Locate;
     MissionLog: MissionLog;
     MissionLayer: MissionLayer;
     Credentials: Credentials;
@@ -63,6 +66,7 @@ export default class TAKAPI {
         this.auth = auth;
 
         this.Query = new Query(this);
+        this.Locate = new Locate(this);
         this.Package = new Package(this);
         this.OAuth = new OAuth(this);
         this.Export = new Export(this);
