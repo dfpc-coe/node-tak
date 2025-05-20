@@ -266,7 +266,7 @@ export default class MissionCommands extends Commands {
         query: Static<typeof MissionChangesInput>,
         opts?: Static<typeof MissionOptions>
     ): Promise<Static<typeof TAKList_MissionChange>> {
-        if (this.#isGUID(name)) name = (await this.getGuid(name, {})).name;
+        if (this.#isGUID(name)) name = (await this.getGuid(name, {}, opts)).name;
 
         const url = new URL(`/Marti/api/missions/${this.#encodeName(name)}/changes`, this.api.url);
 
@@ -399,7 +399,7 @@ export default class MissionCommands extends Commands {
         body: Readable,
         opts?: Static<typeof MissionOptions>
     ) {
-        if (this.#isGUID(name)) name = (await this.getGuid(name, {})).name;
+        if (this.#isGUID(name)) name = (await this.getGuid(name, {}, opts)).name;
 
         const url = new URL(`/Marti/api/missions/${this.#encodeName(name)}/contents/missionpackage`, this.api.url);
         url.searchParams.append('creatorUid', creatorUid);
