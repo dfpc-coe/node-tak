@@ -697,6 +697,16 @@ export default class MissionCommands extends Commands {
     ): Promise<Static<typeof Mission>> {
         const url = new URL(`/Marti/api/missions/${this.#encodeName(name)}`, this.api.url);
 
+        // I want to keep this 1:1 with the TAK Server Source Code
+        // eslint-disable-next-line no-useless-escape
+        if (!name.match(/^[\p{L}\p{N}\w\d\s\.\(\)!=@#$&^*_\-\+\[\]\{\}:,\.\/\|\\]*$/u)) {
+            throw new Err(400, null, 'Mission Name contains an invalid Character');
+        } else if (name.length === 0) {
+            throw new Err(400, null, 'Mission Name must have a length > 0');
+        } else if (name.length > 1024) {
+            throw new Err(400, null, 'Mission Name cannot exceed 1024 characters');
+        }
+
         if (query.group && Array.isArray(query.group)) query.group = query.group.join(',');
 
         let q: keyof Static<typeof MissionCreateInput>;
