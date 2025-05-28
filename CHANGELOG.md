@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.2.2
+
+- :arrow_up: Update Core Deps
+
 ### v9.2.1
 
 - :bug: Ensure MissionTokens are used internally if present in a top level call
