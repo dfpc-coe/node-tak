@@ -162,7 +162,9 @@ if (command === 'stream') {
         console.log(JSON.stringify(cot.to_geojson()));
     });
 } else {
-    if (!config.profiles[args.profile].auth) throw new Error(`No Auth in ${args.profile} profile`);
+    if (!config.profiles[args.profile].auth) {
+        throw new Error(`No Auth in ${args.profile} profile`);
+    }
 
     const tak = new TAKAPI(
         new URL('https://' + config.profiles[args.profile].host + ':' + config.profiles[args.profile].ports.marti),
@@ -170,7 +172,10 @@ if (command === 'stream') {
     );
 
     const invokeTest = tak[CommandList[command]];
-    if (!invokeTest || !(invokeTest instanceof Commands)) throw new Error(`${command} not found`);
+    if (!invokeTest || !(invokeTest instanceof Commands)) {
+        throw new Error(`${command} not found`);
+    }
+
     const invoke = invokeTest as Commands;
 
     if (!args._[3] || args._[3] === 'help') {
@@ -191,13 +196,17 @@ if (command === 'stream') {
         } else if (args.format && !invoke.schema[args._[3]].formats.includes(args.format)) {
             throw new Error(`tak ${args._[2]} ${args._[3]} does not support --format ${args.format}. Supported formats are: ${invoke.schema[args._[3]].formats.join(",")}`);
         }
+    
+        try {
+            const res = await invoke.cli(args);
 
-        const res = await invoke.cli(args);
-
-        if (typeof res === 'string') {
-            console.log(res);
-        } else {
-            console.log(JSON.stringify(res, null, 4));
+            if (typeof res === 'string') {
+                console.log(res);
+            } else {
+                console.log(JSON.stringify(res, null, 4));
+            }
+        } catch (err) {
+            console.error(err);
         }
     }
 }
