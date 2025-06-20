@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v9.3.1
+
+- :arrow_up: Update Core Deps
+
 ### v9.3.0
 
 - :tada: Add Profile Connection API Call
