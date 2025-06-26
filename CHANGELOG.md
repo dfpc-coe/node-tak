@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v10.0.0
+
+- :arrow_up: Migrate to `node-cot@13`
+
 ### v9.3.2
 
 - :arrow_up: Update Core Deps
