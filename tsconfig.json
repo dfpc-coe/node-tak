@@ -24,8 +24,8 @@
     "include": [
         "cli.ts",
         "index.ts", 
-        "test/**/*",
-        "lib/**/*",
+        "test/**/*.ts",
+        "lib/**/*.ts",
         "lib/schema.json"
     ]
 }

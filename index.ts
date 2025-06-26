@@ -1,7 +1,7 @@
 import EventEmitter from 'node:events';
 import type { Static } from '@sinclair/typebox';
 import tls from 'node:tls';
-import CoT from '@tak-ps/node-cot';
+import CoT, { CoTParser } from '@tak-ps/node-cot';
 import type { TLSSocket } from 'node:tls'
 
 import TAKAPI from './lib/api.js';
@@ -120,7 +120,7 @@ export default class TAK extends EventEmitter {
                 let result = TAK.findCoT(buff);
                 while (result && result.event) {
                     try {
-                        const cot = new CoT(result.event);
+                        const cot = CoTParser.from_xml(result.event);
 
                         if (cot.raw.event._attributes.type === 't-x-c-t-r') {
                             this.open = true;
@@ -222,7 +222,7 @@ export default class TAK extends EventEmitter {
      */
     write(cots: CoT[]): void {
         for (const cot of cots) {
-            this.queue.push(cot.to_xml());
+            this.queue.push(CoTParser.to_xml(cot));
         }
 
         if (this.queue.length && !this.writing) {
