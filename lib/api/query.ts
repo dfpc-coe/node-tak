@@ -1,7 +1,7 @@
 import Err from '@openaddresses/batch-error';
 import xmljs from 'xml-js';
 import { Type, Static } from '@sinclair/typebox';
-import CoT from '@tak-ps/node-cot';
+import CoT, { CoTParser } from '@tak-ps/node-cot';
 import type { Feature } from '@tak-ps/node-cot';
 import Commands from '../commands.js';
 
@@ -20,7 +20,7 @@ export default class QueryCommands extends Commands {
 
     async singleFeat(uid: string): Promise<Static<typeof Feature.Feature>> {
         const cotstr = await this.single(uid);
-        return new CoT(cotstr).to_geojson();
+        return CoTParser.to_geojson(CoTParser.from_xml(cotstr))
     }
 
     async single(uid: string): Promise<string> {
@@ -48,7 +48,7 @@ export default class QueryCommands extends Commands {
         if (!res.events.event || (Array.isArray(res.events.event) && !res.events.event.length)) return feats;
 
         for (const event of Array.isArray(res.events.event) ? res.events.event : [res.events.event] ) {
-            feats.push((new CoT({ event })).to_geojson());
+            feats.push(CoTParser.to_geojson(new CoT({ event })));
         }
 
         return feats;

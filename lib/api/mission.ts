@@ -1,6 +1,6 @@
 import xmljs from 'xml-js';
 import type { ParsedArgs } from 'minimist'
-import CoT from '@tak-ps/node-cot';
+import CoT, { CoTParser } from '@tak-ps/node-cot';
 import { Type, Static } from '@sinclair/typebox';
 import Err from '@openaddresses/batch-error';
 import { Readable } from 'node:stream'
@@ -300,7 +300,7 @@ export default class MissionCommands extends Commands {
         if (!res.events.event || (Array.isArray(res.events.event) && !res.events.event.length)) return feats;
 
         for (const event of Array.isArray(res.events.event) ? res.events.event : [res.events.event] ) {
-            feats.push((new CoT({ event })).to_geojson());
+            feats.push(CoTParser.to_geojson(new CoT({ event })));
         }
 
         return feats;
