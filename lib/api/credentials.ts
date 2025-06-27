@@ -6,6 +6,7 @@ import pem from 'pem';
 import xml2js from 'xml2js';
 
 export const CertificateResponse = Type.Object({
+    ca: Type.Array(Type.String()),
     cert: Type.String(),
     key: Type.String()
 });
@@ -79,6 +80,7 @@ export default class CredentialCommands extends Commands {
         cert = cert + '-----END CERTIFICATE-----';
 
         return {
+            ca: [ res.ca0 ],
             cert,
             key: keys.clientKey
         }
