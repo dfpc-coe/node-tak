@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v10.1.0
+
+- :arrow_up: Include CA list in SignClient list
+
 ### v10.0.0
 
 - :arrow_up: Migrate to `node-cot@13`
