@@ -30,8 +30,8 @@ export const MissionContent = Type.Object({
 
 export const Mission = Type.Object({
     name: Type.String(),
-    description: Type.String(),
-    chatRoom: Type.String(),
+    description: Type.Optional(Type.String()),
+    chatRoom: Type.Optional(Type.String()),
     baseLayer: Type.Optional(Type.String()),
     bbox: Type.Optional(Type.String()),
     path: Type.Optional(Type.String()),

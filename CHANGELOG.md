@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v10.2.0
+
+- :arrow_up: Update Mission Response expectations
+
 ### v10.1.0
 
 - :arrow_up: Include CA list in SignClient list

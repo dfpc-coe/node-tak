@@ -5,6 +5,7 @@ import os from  'node:os';
 import path from 'node:path';
 import minimist from 'minimist';
 import { Static } from '@sinclair/typebox';
+import { CoTParser } from '@tak-ps/node-cot'
 import TAK from './index.js';
 import { getPemFromP12 } from 'p12-pem'
 import TAKAPI, { CommandList } from './lib/api.js';
@@ -102,7 +103,12 @@ if (args.profile && !config.profiles[args.profile]) {
         new APIAuthPassword(user, pass)
     );
 
-    config.profiles[args.profile].auth = await api.Credentials.generate();
+    const auth = await api.Credentials.generate();
+    config.profiles[args.profile].auth = {
+        cert: auth.cert,
+        key: auth.key,
+        ca: auth.ca[0]
+    }
 }
 
 let command = args._[2];
@@ -159,7 +165,7 @@ if (command === 'stream') {
     );
 
     tak.on('cot', (cot) => {
-        console.log(JSON.stringify(cot.to_geojson()));
+        console.log(JSON.stringify(CoTParser.to_geojson(cot)));
     });
 } else {
     if (!config.profiles[args.profile].auth) {
@@ -196,7 +202,7 @@ if (command === 'stream') {
         } else if (args.format && !invoke.schema[args._[3]].formats.includes(args.format)) {
             throw new Error(`tak ${args._[2]} ${args._[3]} does not support --format ${args.format}. Supported formats are: ${invoke.schema[args._[3]].formats.join(",")}`);
         }
-    
+
         try {
             const res = await invoke.cli(args);
 
