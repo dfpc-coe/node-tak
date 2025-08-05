@@ -300,7 +300,7 @@ export default class MissionCommands extends Commands {
         if (!res.events.event || (Array.isArray(res.events.event) && !res.events.event.length)) return feats;
 
         for (const event of Array.isArray(res.events.event) ? res.events.event : [res.events.event] ) {
-            feats.push(CoTParser.to_geojson(new CoT({ event })));
+            feats.push(await CoTParser.to_geojson(new CoT({ event })));
         }
 
         return feats;

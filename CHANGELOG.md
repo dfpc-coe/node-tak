@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v11.0.0
+
+- :rocket: Update `TAK.write` function to use promises
+- :rocket: Update all instances of CoTParser to await new Promise
+
 ### v10.2.0
 
 - :arrow_up: Update Mission Response expectations

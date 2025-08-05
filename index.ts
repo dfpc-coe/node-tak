@@ -113,14 +113,14 @@ export default class TAK extends EventEmitter {
             });
 
             let buff = '';
-            this.client.on('data', (data: Buffer) => {
+            this.client.on('data', async (data: Buffer) => {
                 // Eventually Parse ProtoBuf
                 buff = buff + data.toString();
 
                 let result = TAK.findCoT(buff);
                 while (result && result.event) {
                     try {
-                        const cot = CoTParser.from_xml(result.event);
+                        const cot = await CoTParser.from_xml(result.event);
 
                         if (cot.raw.event._attributes.type === 't-x-c-t-r') {
                             this.open = true;
@@ -220,9 +220,9 @@ export default class TAK extends EventEmitter {
      *
      * @param {CoT} cot CoT Object
      */
-    write(cots: CoT[]): void {
+    async write(cots: CoT[]): Promise<void> {
         for (const cot of cots) {
-            this.queue.push(CoTParser.to_xml(cot));
+            this.queue.push(await CoTParser.to_xml(cot));
         }
 
         if (this.queue.length && !this.writing) {
