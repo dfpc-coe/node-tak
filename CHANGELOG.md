@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.0.1
+
+- :arrow_up: Update Core Deps
+
 ### v11.0.0
 
 - :rocket: Update `TAK.write` function to use promises
