@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.1.0
+
+- :rocket: TAK Server 5.5 changed the Cookie format so this PR switches to Bearer tokens
+
 ### v11.0.1
 
 - :arrow_up: Update Core Deps
