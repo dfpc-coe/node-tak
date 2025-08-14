@@ -50,9 +50,12 @@ export class APIAuthPassword extends APIAuth {
         opts.headers = opts.headers || {}
         opts.credentials = 'include';
 
-        if (!opts.headers.Authorization) {
+        if (!opts.headers.Authorization && this.jwt) {
             opts.headers.Authorization = `Bearer ${this.jwt}`;
         }
+
+        console.error('OPTIONS', opts);
+
 
         return await fetch(url, opts);
     }
@@ -70,9 +73,11 @@ export class APIAuthToken extends APIAuth {
         opts.headers = opts.headers || {}
         opts.credentials = 'include';
 
-        if (!opts.headers.Authorization) {
+        if (!opts.headers.Authorization && this.jwt) {
             opts.headers.Authorization = `Bearer ${this.jwt}`;
         }
+
+        console.error('OPTIONS', opts);
 
         return await fetch(url, opts);
     }
