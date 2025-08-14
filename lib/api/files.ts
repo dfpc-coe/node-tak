@@ -1,10 +1,10 @@
-import FormData from 'form-data';
 import type { ParsedArgs } from 'minimist'
 import { Readable } from 'node:stream';
 import mime from 'mime';
 import Commands, { CommandOutputFormat } from '../commands.js';
 import { TAKList } from './types.js';
 import { Type, Static } from '@sinclair/typebox';
+import stream2buffer from '../stream.js';
 
 export const Content = Type.Object({
   UID: Type.String(),
@@ -118,12 +118,15 @@ export default class FileCommands extends Commands {
         url.searchParams.append('creatorUid', opts.creatorUid)
         url.searchParams.append('hash', opts.hash)
 
+        let fileData: Buffer;
         if (body instanceof Buffer) {
-            body = Readable.from(body as Buffer);
+            fileData = body;
+        } else {
+            fileData = await stream2buffer(body as import('node:stream').Stream);
         }
 
         const form = new FormData()
-        form.append('assetfile', body as Readable);
+        form.append('assetfile', new Blob([new Uint8Array(fileData)]), opts.name);
 
         const res = await this.api.fetch(url, {
             method: 'POST',

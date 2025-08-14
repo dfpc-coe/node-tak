@@ -1,4 +1,3 @@
-import FormData from 'form-data';
 import OAuth from './api/oauth.js';
 import Package from './api/package.js';
 import Query from './api/query.js';
@@ -128,7 +127,7 @@ export default class TAKAPI {
                 opts.body = JSON.stringify(opts.body);
                 opts.headers['Content-Type'] = 'application/json';
             } else if (opts.body instanceof FormData) {
-                opts.headers = opts.body.getHeaders();
+                // Native FormData headers are handled automatically by fetch
             } else if (opts.body instanceof URLSearchParams) {
                 opts.headers['Content-Type'] = 'application/x-www-form-urlencoded'
                 opts.body = String(opts.body);
