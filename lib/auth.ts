@@ -1,7 +1,5 @@
 import fetch from './fetch.js';
 import { Type } from '@sinclair/typebox';
-import { CookieJar, Cookie } from 'tough-cookie';
-import { CookieAgent } from 'http-cookie-agent/undici';
 import { Client } from 'undici';
 import TAKAPI from './api.js';
 import stream2buffer  from './stream.js';
@@ -49,15 +47,11 @@ export class APIAuthPassword extends APIAuth {
     }
 
     async fetch(api: TAKAPI, url: URL, opts: any): Promise<any> {
-        const jar = new CookieJar();
-
-        await jar.setCookie(new Cookie({ key: 'access_token', value: this.jwt }), String(api.url));
-
+        opts.headers = opts.headers || {}
         opts.credentials = 'include';
 
-        if (!opts.nocookies) {
-            const agent = new CookieAgent({ cookies: { jar } });
-            opts.dispatcher = agent;
+        if (!opts.headers.Authorization) {
+            opts.headers.Authorization = `Bearer ${this.jwt}`;
         }
 
         return await fetch(url, opts);
@@ -73,15 +67,11 @@ export class APIAuthToken extends APIAuth {
     }
 
     async fetch(api: TAKAPI, url: URL, opts: any): Promise<any> {
-        const jar = new CookieJar();
-
-        await jar.setCookie(new Cookie({ key: 'access_token', value: this.jwt }), String(api.url));
-
-
+        opts.headers = opts.headers || {}
         opts.credentials = 'include';
-        if (!opts.nocookies) {
-            const agent = new CookieAgent({ cookies: { jar } });
-            opts.dispatcher = agent;
+
+        if (!opts.headers.Authorization) {
+            opts.headers.Authorization = `Bearer ${this.jwt}`;
         }
 
         return await fetch(url, opts);
