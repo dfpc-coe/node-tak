@@ -1,10 +1,11 @@
-import FormData from 'form-data';
 import type { ParsedArgs } from 'minimist'
 import { Readable } from 'node:stream';
+import { openAsBlob } from 'node:fs';
 import mime from 'mime';
 import Commands, { CommandOutputFormat } from '../commands.js';
 import { TAKList } from './types.js';
 import { Type, Static } from '@sinclair/typebox';
+import stream2buffer from '../stream.js';
 
 export const Content = Type.Object({
   UID: Type.String(),
@@ -118,12 +119,20 @@ export default class FileCommands extends Commands {
         url.searchParams.append('creatorUid', opts.creatorUid)
         url.searchParams.append('hash', opts.hash)
 
-        if (body instanceof Buffer) {
-            body = Readable.from(body as Buffer);
-        }
+        const form = new FormData();
 
-        const form = new FormData()
-        form.append('assetfile', body as Readable);
+        if (body instanceof Buffer) {
+            // Handle Buffer directly
+            form.append('assetfile', new Blob([new Uint8Array(body)]), opts.name);
+        } else if (body instanceof Readable && 'path' in body && typeof body.path === 'string') {
+            // Use fs.openAsBlob for file streams - memory efficient
+            const fileBlob = await openAsBlob(body.path as string);
+            form.append('assetfile', fileBlob, opts.name);
+        } else {
+            // Fall back to buffer approach for other streams
+            const fileData = await stream2buffer(body as import('node:stream').Stream);
+            form.append('assetfile', new Blob([new Uint8Array(fileData)]), opts.name);
+        }
 
         const res = await this.api.fetch(url, {
             method: 'POST',

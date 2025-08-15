@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v11.2.0
+
+- :rocket: Migrate from external "form-data" library to native FormData class
+- :arrow_down: Remove "form-data" dependency
+
 ### v11.1.0
 
 - :rocket: TAK Server 5.5 changed the Cookie format so this PR switches to Bearer tokens
