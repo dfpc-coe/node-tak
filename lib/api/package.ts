@@ -68,9 +68,18 @@ export default class PackageCommands extends Commands {
             method: 'GET'
         });
 
-        return JSON.parse(res) as {
-            resultCount: number;
-            results: Array<Static<typeof Package>>
-        };
+        if (typeof res === 'text') {
+            // The TAK Server API doesn't return application/json
+            return JSON.parse(res) as {
+                resultCount: number;
+                results: Array<Static<typeof Package>>
+            };
+        } else {
+            return res as {
+                resultCount: number;
+                results: Array<Static<typeof Package>>
+            };
+        }
+
     }
 }
