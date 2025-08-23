@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v11.2.0
+
+- :rocket: Explicitly export Type Definitions in package.json
+- :rocket: Include declaration files in build process
+
 ### v11.1.1
 
 - :rocket: Handle different content-types in Package List API
