@@ -38,7 +38,7 @@ export const Mission = Type.Object({
     classification: Type.Optional(Type.String()),
     tool: Type.String(),
     keywords: Type.Array(Type.Unknown()),
-    creatorUid: Type.String(),
+    creatorUid: Type.Optional(Type.String()),
     createTime: Type.String(),
     externalData: Type.Array(Type.Unknown()),
     feeds: Type.Array(Type.Unknown()),
