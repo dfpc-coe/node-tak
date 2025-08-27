@@ -23,7 +23,7 @@ export const MissionContent = Type.Object({
     submissionTime: Type.String(),
     submitter: Type.String(),
     uid: Type.String(),
-    creatorUid: Type.String(),
+    creatorUid: Type.Optional(Type.String()),
     size: Type.Integer(),
     expiration: Type.Integer()
 });
@@ -54,7 +54,7 @@ export const Mission = Type.Object({
     logs: Type.Optional(Type.Array(MissionLog)),                // Only present if ?logs=true
     contents: Type.Array(Type.Object({
         timestamp: Type.String(),
-        creatorUid: Type.String(),
+        creatorUid: Type.Optional(Type.String()),
         data: MissionContent
     })),
     passwordProtected: Type.Boolean(),
@@ -69,7 +69,7 @@ export const MissionChange = Type.Object({
     missionName: Type.String(),
     timestamp: Type.String(),
     serverTime: Type.String(),
-    creatorUid: Type.String(),
+    creatorUid: Type.Optional(Type.String()),
     contentUid: Type.Optional(Type.String()),
     details: Type.Optional(Type.Object({
         type: Type.String(),

@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.2.2
+
+- :bug: Make CreatorUID Optional
+
 ### v11.2.1
 
 - :bug: Make CreatorUID Optional
