@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.2.1
+
+- :bug: Make CreatorUID Optional
+
 ### v11.2.0
 
 - :rocket: Explicitly export Type Definitions in package.json
