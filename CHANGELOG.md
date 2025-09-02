@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.3.0
+
+- :tada: Add support for Group Selection in Video Creation API (v2)
+
 ### v11.2.2
 
 - :bug: Make CreatorUID Optional
