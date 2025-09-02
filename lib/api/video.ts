@@ -11,7 +11,17 @@ export const FeedInput = Type.Object({
     url: Type.String(),
 });
 
-export const VideoConnectionInput = Type.Object({
+export const VideoConnectionCreateInput = Type.Object({
+    groups: Type.Optional(Type.Array(Type.String())),
+    uuid: Type.Optional(Type.String()),
+    active: Type.Boolean({
+        default: true
+    }),
+    alias: Type.String(),
+    feeds: Type.Array(FeedInput)
+});
+
+export const VideoConnectionUpdateInput = Type.Object({
     uuid: Type.Optional(Type.String()),
     active: Type.Boolean({
         default: true
@@ -99,7 +109,7 @@ export default class VideoCommands extends Commands {
     }
 
     async update(
-        connection: Static<typeof VideoConnectionInput>
+        connection: Static<typeof VideoConnectionUpdateInput>
     ): Promise<Static<typeof VideoConnection>> {
         const url = new URL(`/Marti/api/video/${connection.uuid}`, this.api.url);
 
@@ -120,11 +130,19 @@ export default class VideoCommands extends Commands {
     }
 
     async create(
-        connection: Static<typeof VideoConnectionInput>
+        connection: Static<typeof VideoConnectionCreateInput>
     ): Promise<Static<typeof VideoConnection>> {
         const url = new URL(`/Marti/api/video`, this.api.url);
 
         const uuid = connection.uuid || randomUUID();
+
+        if (connection.groups) {
+            for (const group of connection.groups) {
+                url.searchParams.append('group', group);
+            }
+
+            delete connection.groups;
+        }
 
         await this.api.fetch(url, {
             method: 'POST',
