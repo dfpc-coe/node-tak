@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v11.3.1
+
+- :bug: Remove Debug Calls
+- :arrow_up: Update Core Deps
+
 ### v11.3.0
 
 - :tada: Add support for Group Selection in Video Creation API (v2)

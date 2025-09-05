@@ -72,8 +72,6 @@ export default class QueryCommands extends Commands {
 
         const body = await res.text();
 
-        console.error(body);
-
         return body;
     }
 }
