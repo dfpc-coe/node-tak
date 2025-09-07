@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.4.0 - 2025-09-07
+
+- :tada: Allow constructor opts to pass through CoT Parser options
+
 ### v11.3.1
 
 - :bug: Remove Debug Calls
