@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.5.0 - 2025-09-07
+
+- :rocket: Migrate to `xml-js` and remove `xml2js` to reduce dependency count
+
 ### v11.4.0 - 2025-09-07
 
 - :tada: Allow constructor opts to pass through CoT Parser options
