@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v11.6.0 - 2025-09-07
+
+- :tada: Allow setting Groups when creating a Mission Package
+- :rocket: Add the ability to set keywords on a Mission Package
+
 ### v11.5.0 - 2025-09-07
 
 - :rocket: Migrate to `xml-js` and remove `xml2js` to reduce dependency count
