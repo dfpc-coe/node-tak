@@ -108,15 +108,43 @@ export default class FileCommands extends Commands {
     }
 
     // TODO Return a Content Object
+
+    /**
+     * Update a Package that should appear in the Public Data Packages List
+     */
     async uploadPackage(opts: {
         name: string;
         creatorUid: string;
         hash: string;
+        keywords?: string[];
+        mimetype?: string;
+        groups?: string[];
     }, body: Readable | Buffer): Promise<string> {
         const url = new URL(`/Marti/sync/missionupload`, this.api.url);
         url.searchParams.append('filename', opts.name)
         url.searchParams.append('creatorUid', opts.creatorUid)
         url.searchParams.append('hash', opts.hash)
+
+        if (opts.mimetype) {
+            url.searchParams.append('mimetype', opts.mimetype)
+        }
+
+        // Needs this keywordt to appear in public list
+        url.searchParams.append('keyword', 'missionpackage');
+
+        if (opts.keywords) {
+            for (const keyword of opts.keywords) {
+                if (keyword.toLowerCase() === 'missionpackage') continue;
+                url.searchParams.append('keyword', keyword);
+            }
+        }
+
+        if (opts.groups) {
+            for (const group of opts.groups) {
+                // This is intentionally case sensitive due to an apparent bug in TAK server
+                url.searchParams.append('Groups', group);
+            }
+        }
 
         if (body instanceof Buffer) {
             body = Readable.from(body as Buffer);
@@ -133,6 +161,10 @@ export default class FileCommands extends Commands {
         return res;
     }
 
+    /**
+     * Update a Package that will not appear in the Public Data Packages List
+     * used primarily for sharing files between TAK clients
+     */
     async upload(opts: {
         name: string;
         contentLength: number;
