@@ -116,7 +116,7 @@ export default class FileCommands extends Commands {
         name: string;
         creatorUid: string;
         hash: string;
-        keyword?: string;
+        keywords?: string[];
         mimetype?: string;
         groups?: string[];
     }, body: Readable | Buffer): Promise<string> {
@@ -129,13 +129,20 @@ export default class FileCommands extends Commands {
             url.searchParams.append('mimetype', opts.mimetype)
         }
 
-        if (opts.keyword) {
-            url.searchParams.append('keyword', opts.keyword)
+        // Needs this keywordt to appear in public list
+        url.searchParams.append('keyword', 'missionpackage');
+
+        if (opts.keywords) {
+            for (const keyword of opts.keywords) {
+                if (keyword.toLowerCase() === 'missionpackage') continue;
+                url.searchParams.append('keyword', keyword);
+            }
         }
 
         if (opts.groups) {
             for (const group of opts.groups) {
-                url.searchParams.append('groups', group);
+                // This is intentionally case sensitive due to an apparent bug in TAK server
+                url.searchParams.append('Groups', group);
             }
         }
 
