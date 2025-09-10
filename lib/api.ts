@@ -1,5 +1,6 @@
 import FormData from 'form-data';
 import OAuth from './api/oauth.js';
+import Locate from './api/locate.js';
 import Package from './api/package.js';
 import Query from './api/query.js';
 import Locate from './api/locate.js';
@@ -59,6 +60,7 @@ export default class TAKAPI {
     Injectors: Injectors;
     Repeater: Repeater;
     Group: Group;
+    Locate: Locate;
     Video: Video;
     Export: Export;
     Query: Query;
@@ -80,6 +82,7 @@ export default class TAKAPI {
         this.Credentials = new Credentials(this);
         this.Contacts = new Contacts(this);
         this.Subscription = new Subscription(this);
+        this.Locate = new Locate(this);
         this.Group = new Group(this);
         this.Video = new Video(this);
         this.Injectors = new Injectors(this);
