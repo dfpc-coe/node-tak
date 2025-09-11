@@ -96,7 +96,7 @@ export default class SecurityAuthenticationCommands extends Commands {
      *
      * {@link https://docs.tak.gov/api/takserver#tag/security-authentication-api/operation/isSecure TAK Server Docs}.
      */
-    async verifyConfig(): Promise<Static<typeof TAKList_Injector>> {
+    async isSecure(): Promise<Static<typeof TAKList_Injector>> {
         const url = new URL('/Marti/api/security/isSecure', this.api.url);
 
         return await this.api.fetch(url, {
