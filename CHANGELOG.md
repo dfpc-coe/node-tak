@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.7.0 - 2025-10-11
+
+- :tada: Add `Security` Module
+
 ### v11.6.0 - 2025-09-07
 
 - :tada: Allow setting Groups when creating a Mission Package
