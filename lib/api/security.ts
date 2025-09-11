@@ -1,14 +1,40 @@
-import { TAKList } from './types.js';
+import { TAKItem } from './types.js';
 import type { ParsedArgs } from 'minimist'
 import { Type, Static } from '@sinclair/typebox';
 import Commands, { CommandOutputFormat } from '../commands.js';
 
-export const Injector = Type.Object({
-    uid: Type.String(),
-    toInject: Type.String()
-})
+export const IsSecure = TAKItem(Type.String())
+export const IsValid = TAKItem(Type.String())
 
-export const TAKList_Injector = TAKList(Injector);
+export const AuthConfig = TAKItem(Type.Object({
+    url: Type.String(),
+    userString: Type.String(),
+    updateInterval: Type.Number(),
+    groupPrefix: Type.String(),
+    serviceAccountDN: Type.String(),
+    serviceAccountCredential: Type.String(),
+    groupBaseRDN: Type.String()
+}));
+
+export const SecurityConfig = TAKItem(Type.Object({
+    keystoreFile: Type.String(),
+    truststoreFile: Type.String(),
+    keystorePass: Type.String(),
+    truststorePass: Type.String(),
+    tlsVersion: Type.String(),
+    x509Groups: Type.Boolean(),
+    x509addAnon: Type.Boolean(),
+    enableEnrollment: Type.Boolean(),
+    caType: Type.String(),
+    signingKeystoreFile: Type.String(),
+    signingKeystorePass: Type.String(),
+    validityDays: Type.Number(),
+    mscaUserName: Type.Union([Type.String(), Type.Null()]),
+    mscaPassword: Type.Union([Type.String(), Type.Null()]),
+    mscaTruststore: Type.Union([Type.String(), Type.Null()]),
+    mscaTruststorePass: Type.Union([Type.String(), Type.Null()]),
+    mscaTemplateName: Type.Union([Type.String(), Type.Null()]),
+}));
 
 export default class SecurityAuthenticationCommands extends Commands {
     schema = {
@@ -57,7 +83,7 @@ export default class SecurityAuthenticationCommands extends Commands {
      *
      * {@link https://docs.tak.gov/api/takserver#tag/security-authentication-api/operation/getSecConfig TAK Server Docs}.
      */
-    async securityConfig(): Promise<Static<typeof TAKList_Injector>> {
+    async securityConfig(): Promise<Static<typeof SecurityConfig>> {
         const url = new URL('/Marti/api/security/config', this.api.url);
 
         return await this.api.fetch(url, {
@@ -70,7 +96,7 @@ export default class SecurityAuthenticationCommands extends Commands {
      *
      * {@link https://docs.tak.gov/api/takserver#tag/security-authentication-api/operation/getAuthConfig TAK Server Docs}.
      */
-    async securityConfig(): Promise<Static<typeof TAKList_Injector>> {
+    async authConfig(): Promise<Static<typeof AuthConfig>> {
         const url = new URL('/Marti/api/authentication/config', this.api.url);
 
         return await this.api.fetch(url, {
@@ -83,7 +109,7 @@ export default class SecurityAuthenticationCommands extends Commands {
      *
      * {@link https://docs.tak.gov/api/takserver#tag/security-authentication-api/operation/verifyConfig TAK Server Docs}.
      */
-    async verifyConfig(): Promise<Static<typeof TAKList_Injector>> {
+    async verifyConfig(): Promise<Static<typeof IsValid>> {
         const url = new URL('/Marti/api/security/verifyConfig', this.api.url);
 
         return await this.api.fetch(url, {
@@ -96,7 +122,7 @@ export default class SecurityAuthenticationCommands extends Commands {
      *
      * {@link https://docs.tak.gov/api/takserver#tag/security-authentication-api/operation/isSecure TAK Server Docs}.
      */
-    async isSecure(): Promise<Static<typeof TAKList_Injector>> {
+    async isSecure(): Promise<Static<typeof IsSecure>> {
         const url = new URL('/Marti/api/security/isSecure', this.api.url);
 
         return await this.api.fetch(url, {
