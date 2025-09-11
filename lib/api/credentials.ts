@@ -80,8 +80,13 @@ export default class CredentialCommands extends Commands {
         if (!res.signedCert.endsWith('\n')) cert = cert + '\n';
         cert = cert + '-----END CERTIFICATE-----';
 
+        const chain = [];
+
+        if (res.ca0) chain.push(res.ca0);
+        if (res.ca1) chain.push(res.ca1);
+
         return {
-            ca: [ res.ca0 ],
+            ca: chain,
             cert,
             key: keys.clientKey
         }
