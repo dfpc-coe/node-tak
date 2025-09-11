@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.8.0 - 2025-10-11
+
+- :rocket: Include Int Certs in returned CA chain
+
 ### v11.7.0 - 2025-10-11
 
 - :tada: Add `Security` Module
