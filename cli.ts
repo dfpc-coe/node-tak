@@ -190,7 +190,7 @@ if (command === 'stream') {
         console.log((
             [
                 'Command:',
-                `    tak ${args._[2]} <subcommand>`,
+                `    tak ${command} <subcommand>`,
                 'SubCommands:',
             ].concat(subcommands(invoke.schema).map((subcommand) => {
                 return `    ${String(subcommand)} - ${invoke.schema[subcommand].description}`
@@ -200,7 +200,7 @@ if (command === 'stream') {
         if (args.format && !invoke.schema[args._[3]]) {
             throw new Error(`Unsupported Subcommand: ${args._[3]}`);
         } else if (args.format && !invoke.schema[args._[3]].formats.includes(args.format)) {
-            throw new Error(`tak ${args._[2]} ${args._[3]} does not support --format ${args.format}. Supported formats are: ${invoke.schema[args._[3]].formats.join(",")}`);
+            throw new Error(`tak ${command} ${args._[3]} does not support --format ${args.format}. Supported formats are: ${invoke.schema[args._[3]].formats.join(",")}`);
         }
 
         try {
