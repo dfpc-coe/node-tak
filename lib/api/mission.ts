@@ -705,6 +705,8 @@ export default class MissionCommands extends Commands {
             throw new Err(400, null, 'Mission Name must have a length > 0');
         } else if (body.name.length > 1024) {
             throw new Err(400, null, 'Mission Name cannot exceed 1024 characters');
+        } else if (body.name.includes('/')) {
+            throw new Err(400, null, 'Mission Name cannot contain forward slashes');
         }
 
         if (body.group && Array.isArray(body.group)) body.group = body.group.join(',');

@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.9.1 - 2025-09-29
+
+- :rocket: Don't allow forward slashes in Mission Names
+
 ### v11.9.0 - 2025-09-29
 
 - :rocket: Mission Creation is now done by a single query param
