@@ -1,7 +1,7 @@
 import xmljs from 'xml-js';
 import type { ParsedArgs } from 'minimist'
 import CoT, { CoTParser } from '@tak-ps/node-cot';
-import { Type, Static } from 'typebox';
+import { Type, Static } from '@sinclair/typebox';
 import Err from '@openaddresses/batch-error';
 import { Readable } from 'node:stream'
 import { TAKItem, TAKList } from './types.js';
