@@ -1,7 +1,7 @@
 import xmljs from 'xml-js';
 import type { ParsedArgs } from 'minimist'
 import CoT, { CoTParser } from '@tak-ps/node-cot';
-import { Type, Static } from '@sinclair/typebox';
+import { Type, Static } from 'typebox';
 import Err from '@openaddresses/batch-error';
 import { Readable } from 'node:stream'
 import { TAKItem, TAKList } from './types.js';
@@ -166,6 +166,7 @@ export const MissionListInput = Type.Object({
 });
 
 export const MissionCreateInput = Type.Object({
+    name: Type.String(),
     group: Type.Optional(Type.Union([Type.Array(Type.String()), Type.String()])),
     creatorUid: Type.String(),
     description: Type.Optional(Type.String({ default: '' })),
@@ -692,27 +693,26 @@ export default class MissionCommands extends Commands {
      * {@link https://docs.tak.gov/api/takserver/redoc#tag/mission-api/operation/createMission TAK Server Docs}.
      */
     async create(
-        name: string,
-        query: Static<typeof MissionCreateInput>
+        body: Static<typeof MissionCreateInput>
     ): Promise<Static<typeof Mission>> {
-        const url = new URL(`/Marti/api/missions/${this.#encodeName(name)}`, this.api.url);
+        const url = new URL(`/Marti/api/missions/${this.#encodeName(body.name)}`, this.api.url);
 
         // I want to keep this 1:1 with the TAK Server Source Code
         // eslint-disable-next-line no-useless-escape
-        if (!name.match(/^[\p{L}\p{N}\w\d\s\.\(\)!=@#$&^*_\-\+\[\]\{\}:,\.\/\|\\]*$/u)) {
+        if (!body.name.match(/^[\p{L}\p{N}\w\d\s\.\(\)!=@#$&^*_\-\+\[\]\{\}:,\.\/\|\\]*$/u)) {
             throw new Err(400, null, 'Mission Name contains an invalid Character');
-        } else if (name.length === 0) {
+        } else if (body.name.length === 0) {
             throw new Err(400, null, 'Mission Name must have a length > 0');
-        } else if (name.length > 1024) {
+        } else if (body.name.length > 1024) {
             throw new Err(400, null, 'Mission Name cannot exceed 1024 characters');
         }
 
-        if (query.group && Array.isArray(query.group)) query.group = query.group.join(',');
+        if (body.group && Array.isArray(body.group)) body.group = body.group.join(',');
 
         let q: keyof Static<typeof MissionCreateInput>;
-        for (q in query) {
-            if (query[q] !== undefined) {
-                url.searchParams.append(q, String(query[q]));
+        for (q in body) {
+            if (body[q] !== undefined && q !== 'name') {
+                url.searchParams.append(q, String(body[q]));
             }
         }
 
@@ -721,6 +721,7 @@ export default class MissionCommands extends Commands {
         });
 
         if (!missions.data.length) throw new Error('Create Mission didn\'t return a mission or an error');
+
         const mission = missions.data[0];
 
         return mission;
