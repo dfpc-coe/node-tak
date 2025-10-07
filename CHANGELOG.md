@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.9.2 - 2025-10-07
+
+- :bug: Pass LogID value in Mission Log Update
+
 ### v11.9.1 - 2025-09-29
 
 - :rocket: Don't allow forward slashes in Mission Names

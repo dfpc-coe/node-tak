@@ -130,6 +130,7 @@ export default class MissionLogCommands extends Commands {
             method: 'PUT',
             headers: this.#headers(opts),
             body: {
+                id: body.id,
                 content: body.content,
                 creatorUid: body.creatorUid,
                 keywords: body.keywords,
