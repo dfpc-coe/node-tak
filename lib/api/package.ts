@@ -14,7 +14,7 @@ export const Package = Type.Object({
     Hash: Type.String(),
     CreatorUid: Type.Optional(Type.Union([Type.Null(), Type.String()])),
     Name: Type.String(),
-    Tool: Type.String()
+    Tool: Type.Optional(Type.String())
 });
 
 export const ListInput = Type.Object({

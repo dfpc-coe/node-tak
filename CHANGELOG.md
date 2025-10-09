@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.9.3 - 2025-10-09
+
+- :bug: Make `Package.public` optional
+
 ### v11.9.2 - 2025-10-07
 
 - :bug: Pass LogID value in Mission Log Update
