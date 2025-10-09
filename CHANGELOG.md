@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.9.5 - 2025-10-09
+
+- :bug: Make `Package.SubmissionUser` optional
+
 ### v11.9.4 - 2025-10-09
 
 - :bug: Make `Package.Keywords` optional
