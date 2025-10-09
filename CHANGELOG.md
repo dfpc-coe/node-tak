@@ -10,9 +10,13 @@
 
 ## Version History
 
+### v11.9.4 - 2025-10-09
+
+- :bug: Make `Package.Keywords` optional
+
 ### v11.9.3 - 2025-10-09
 
-- :bug: Make `Package.public` optional
+- :bug: Make `Package.Tool` optional
 
 ### v11.9.2 - 2025-10-07
 

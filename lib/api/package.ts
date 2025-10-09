@@ -6,7 +6,6 @@ export const Package = Type.Object({
     EXPIRATION: Type.String(),
     UID: Type.String(),
     SubmissionDateTime: Type.String(),
-    Keywords: Type.Array(Type.String()),
     MIMEType: Type.String(),
     Size: Type.String(),
     SubmissionUser: Type.String(),
@@ -14,6 +13,7 @@ export const Package = Type.Object({
     Hash: Type.String(),
     CreatorUid: Type.Optional(Type.Union([Type.Null(), Type.String()])),
     Name: Type.String(),
+    Keywords: Type.Optional(Type.Array(Type.String())),
     Tool: Type.Optional(Type.String())
 });
 
