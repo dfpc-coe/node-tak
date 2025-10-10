@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v11.9.6 - 2025-10-09
+
+- :bug: Make `Mission.Content[].SubmissionUser` optional
+- :bug: Make `Mission.Content[].MimeType` optional
+
 ### v11.9.5 - 2025-10-09
 
 - :bug: Make `Package.SubmissionUser` optional

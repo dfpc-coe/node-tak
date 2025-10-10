@@ -17,14 +17,14 @@ export enum MissionSubscriberRole {
 
 export const MissionContent = Type.Object({
     keywords: Type.Array(Type.String()),
-    mimeType: Type.String(),
     name: Type.String(),
     hash: Type.String(),
     submissionTime: Type.String(),
-    submitter: Type.String(),
     uid: Type.String(),
-    creatorUid: Type.Optional(Type.String()),
     size: Type.Integer(),
+    creatorUid: Type.Optional(Type.String()),
+    mimeType: Type.Optional(Type.String()),
+    submitter: Type.Optional(Type.String()),
     expiration: Type.Integer()
 });
 
