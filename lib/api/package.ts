@@ -6,12 +6,12 @@ export const Package = Type.Object({
     EXPIRATION: Type.String(),
     UID: Type.String(),
     SubmissionDateTime: Type.String(),
-    MIMEType: Type.String(),
     Size: Type.String(),
     PrimaryKey: Type.String(),
     Hash: Type.String(),
     CreatorUid: Type.Optional(Type.Union([Type.Null(), Type.String()])),
     Name: Type.String(),
+    MIMEType: Type.Optional(Type.String()),
     SubmissionUser: Type.Optional(Type.String()),
     Keywords: Type.Optional(Type.Array(Type.String())),
     Tool: Type.Optional(Type.String())
