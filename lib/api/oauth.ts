@@ -46,7 +46,7 @@ export default class OAuthCommands extends Commands {
 
         const text = await authres.text();
 
-        if (authres.status === 401) {
+        if ([401, 403].includes(authres.status)) {
             throw new Err(400, new Error(text), 'TAK Server reports incorrect Username or Password');
         } else if (!authres.ok) {
             throw new Err(400, new Error(`Status: ${authres.status}: ${text}`), 'Non-200 Response from Auth Server - Token');

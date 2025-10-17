@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.9.8 - 2025-10-09
+
+- :bug: Throw invalid password for 401 or 403 code on OAuth Generation
+
 ### v11.9.7 - 2025-10-09
 
 - :bug: Make `Package.MIMEType` optional
