@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.10.0 - 2025-10-24
+
+- :rocket: Allow setting Log `dtg` values
+
 ### v11.9.8 - 2025-10-09
 
 - :bug: Throw invalid password for 401 or 403 code on OAuth Generation
