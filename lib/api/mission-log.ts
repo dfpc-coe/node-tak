@@ -107,6 +107,7 @@ export default class MissionLogCommands extends Commands {
             method: 'POST',
             headers: this.#headers(opts),
             body: {
+                dtg: body.dtg,
                 content: body.content,
                 creatorUid: body.creatorUid,
                 keywords: body.keywords,
@@ -136,6 +137,7 @@ export default class MissionLogCommands extends Commands {
             headers: this.#headers(opts),
             body: {
                 id: body.id,
+                dtg: body.dtg,
                 content: body.content,
                 creatorUid: body.creatorUid,
                 keywords: body.keywords,

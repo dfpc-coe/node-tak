@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.10.1 - 2025-10-24
+
+- :rocket: Additional `dtg` Log support
+
 ### v11.10.0 - 2025-10-24
 
 - :rocket: Allow setting Log `dtg` values
