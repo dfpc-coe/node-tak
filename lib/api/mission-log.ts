@@ -17,6 +17,11 @@ export const MissionLog = Type.Object({
 });
 
 export const CreateMissionLog = Type.Object({
+    dtg: Type.String({
+        format: 'date-time',
+        default: new Date().toISOString(),
+        description: 'Date-time group in ISO 8601 format (e.g., "2024-01-01T12:00:00Z")'
+    }),
     content: Type.String(),
     creatorUid: Type.String(),
     contentHashes: Type.Optional(Type.Array(Type.Unknown())),
