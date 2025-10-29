@@ -135,23 +135,16 @@ export default class MissionLayerCommands extends Commands {
         name: string,
         opts?: Static<typeof MissionOptions>
     ): Promise<Static<typeof TAKList_MissionLayer>> {
-        let res;
+        // TODO: This is an issue due to: https://issues.tak.gov/browse/TKS-1023
+        if (this.#isGUID(name)) name = (await this.api.Mission.getGuid(name, {}, opts)).name;
+        //const url = new URL(`/Marti/api/missions/guid/${this.#encodeName(name)}/layers`, this.api.url);
 
-        if (this.#isGUID(name)) {
-            const url = new URL(`/Marti/api/missions/guid/${this.#encodeName(name)}/layers`, this.api.url);
+        const url = new URL(`/Marti/api/missions/${this.#encodeName(name)}/layers`, this.api.url);
 
-            res = await this.api.fetch(url, {
-                method: 'GET',
-                headers: this.#headers(opts),
-            });
-        } else {
-            const url = new URL(`/Marti/api/missions/${this.#encodeName(name)}/layers`, this.api.url);
-
-            res = await this.api.fetch(url, {
-                method: 'GET',
-                headers: this.#headers(opts),
-            });
-        }
+        const res = await this.api.fetch(url, {
+            method: 'GET',
+            headers: this.#headers(opts),
+        });
 
         res.data.map((l: Static<typeof MissionLayer>) => {
             if (l.type === MissionLayerType.UID && !l.uids) {

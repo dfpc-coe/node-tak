@@ -74,8 +74,6 @@ export class APIAuthToken extends APIAuth {
             opts.headers.Authorization = `Bearer ${this.jwt}`;
         }
 
-        console.error('OPTIONS', opts);
-
         return await fetch(url, opts);
     }
 }
