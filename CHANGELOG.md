@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.11.0 - 2025-10-29
+
+- :rocket: Add interactive subcommand selection
+
 ### v11.10.1 - 2025-10-24
 
 - :rocket: Additional `dtg` Log support
