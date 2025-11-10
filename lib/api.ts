@@ -11,6 +11,7 @@ import Security from './api/security.js';
 import Contacts from './api/contacts.js';
 import Profile from './api/profile.js';
 import Files from './api/files.js';
+import Iconsets from './api/iconsets.js';
 import Injectors from './api/injectors.js';
 import Repeater from './api/repeater.js';
 import Group from './api/groups.js';
@@ -30,6 +31,7 @@ export const CommandList: Record<string, keyof TAKAPI> = {
     'mission-log': 'MissionLog',
     'mission-layer': 'MissionLayer',
     credential: 'Credentials',
+    iconsets: 'Iconsets',
     contact: 'Contacts',
     subscription: 'Subscription',
     injector: 'Injectors',
@@ -53,6 +55,7 @@ export default class TAKAPI {
     Mission: Mission;
     Locate: Locate;
     Security: Security;
+    Iconsets: Iconsets;
     MissionLog: MissionLog;
     MissionLayer: MissionLayer;
     Credentials: Credentials;
@@ -78,6 +81,7 @@ export default class TAKAPI {
         this.Profile = new Profile(this);
         this.OAuth = new OAuth(this);
         this.Export = new Export(this);
+        this.Iconsets = new Iconsets(this);
         this.Mission = new Mission(this);
         this.MissionLog = new MissionLog(this);
         this.MissionLayer = new MissionLayer(this);
