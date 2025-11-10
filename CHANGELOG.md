@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.13.0 - 2025-11-10
+
+- :rocket: Add Iconset API Wrapper
+
 ### v11.12.0 - 2025-10-29
 
 - :bug: Due to a bug in TAK Server (https://issues.tak.gov/browse/TKS-1023) patch the Mission List Layers to only use Mission Name
