@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.14.0 - 2025-11-19
+
+- :rocket: Allow filtering Data Packages by name
+
 ### v11.13.0 - 2025-11-10
 
 - :rocket: Add Iconset API Wrapper
