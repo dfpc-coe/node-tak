@@ -18,6 +18,7 @@ export const Package = Type.Object({
 });
 
 export const ListInput = Type.Object({
+    name: Type.Optional(Type.String()),
     tool: Type.Optional(Type.String()),
     uid: Type.Optional(Type.String())
 });
