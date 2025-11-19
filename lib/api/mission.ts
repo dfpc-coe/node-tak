@@ -59,7 +59,7 @@ export const Mission = Type.Object({
     })),
     passwordProtected: Type.Boolean(),
     token: Type.Optional(Type.String()),                        // Only present when mission created
-    groups: Type.Optional(Type.Union([Type.String(), Type.Array(Type.String())])),           // Only present on Mission.get()
+    groups: Type.Union([Type.String(), Type.Array(Type.String())]),
     missionChanges: Type.Optional(Type.Array(Type.Unknown()))   // Only present on Mission.get()
 });
 
