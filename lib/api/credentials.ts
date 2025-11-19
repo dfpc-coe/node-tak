@@ -3,7 +3,7 @@ import type { ParsedArgs } from 'minimist'
 import { Static, Type } from '@sinclair/typebox';
 import Commands, { CommandOutputFormat } from '../commands.js';
 import pem from 'pem';
-import xml2js from 'xml2js';
+import xmljs from 'xml-js';
 
 export const CertificateResponse = Type.Object({
     ca: Type.Array(Type.String()),
@@ -39,14 +39,15 @@ export default class CredentialCommands extends Commands {
     async generate(): Promise<Static<typeof CertificateResponse>> {
         if (!(this.api.auth instanceof APIAuthPassword)) throw new Error('Must use Password Auth');
 
-        const config = await xml2js.parseStringPromise(await this.config());
+        const config: any = xmljs.xml2js(await this.config(), { compact: true });
 
         let organization = null;
         let organizationUnit = null;
-        for (const nameEntry of config['ns2:certificateConfig'].nameEntries) {
-            for (const ne of nameEntry.nameEntry) {
-                if (ne['$'].name === 'O') organization = ne['$'].value;
-                if (ne['$'].name === 'OU') organizationUnit = ne['$'].value;
+        const nameEntries = config['ns2:certificateConfig'].nameEntries;
+        if (nameEntries && nameEntries.nameEntry) {
+            for (const ne of nameEntries.nameEntry) {
+                if (ne._attributes && ne._attributes.name === 'O') organization = ne._attributes.value;
+                if (ne._attributes && ne._attributes.name === 'OU') organizationUnit = ne._attributes.value;
             }
         }
 
@@ -79,8 +80,13 @@ export default class CredentialCommands extends Commands {
         if (!res.signedCert.endsWith('\n')) cert = cert + '\n';
         cert = cert + '-----END CERTIFICATE-----';
 
+        const chain = [];
+
+        if (res.ca0) chain.push(res.ca0);
+        if (res.ca1) chain.push(res.ca1);
+
         return {
-            ca: [ res.ca0 ],
+            ca: chain,
             cert,
             key: keys.clientKey
         }

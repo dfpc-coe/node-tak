@@ -4,6 +4,7 @@
     },
     "compilerOptions": {
         "strict": true,
+        "declaration": true,
         "module": "es2022",
         "skipLibCheck": true,
         "esModuleInterop": true,

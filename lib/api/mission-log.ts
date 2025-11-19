@@ -17,6 +17,11 @@ export const MissionLog = Type.Object({
 });
 
 export const CreateMissionLog = Type.Object({
+    dtg: Type.String({
+        format: 'date-time',
+        default: new Date().toISOString(),
+        description: 'Date-time group in ISO 8601 format (e.g., "2024-01-01T12:00:00Z")'
+    }),
     content: Type.String(),
     creatorUid: Type.String(),
     contentHashes: Type.Optional(Type.Array(Type.Unknown())),
@@ -102,6 +107,7 @@ export default class MissionLogCommands extends Commands {
             method: 'POST',
             headers: this.#headers(opts),
             body: {
+                dtg: body.dtg,
                 content: body.content,
                 creatorUid: body.creatorUid,
                 keywords: body.keywords,
@@ -130,6 +136,8 @@ export default class MissionLogCommands extends Commands {
             method: 'PUT',
             headers: this.#headers(opts),
             body: {
+                id: body.id,
+                dtg: body.dtg,
                 content: body.content,
                 creatorUid: body.creatorUid,
                 keywords: body.keywords,

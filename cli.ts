@@ -184,36 +184,51 @@ if (command === 'stream') {
 
     const invoke = invokeTest as Commands;
 
-    if (!args._[3] || args._[3] === 'help') {
-        const subcommands = <T extends object>(obj: T) => Object.keys(obj) as Array<keyof T>;
+    let subcommand: string | undefined = args._[3];
+    const subcommands = <T extends object>(obj: T) => Object.keys(obj) as Array<keyof T>;
 
+    if (subcommand === 'help') {
         console.log((
             [
                 'Command:',
-                `    tak ${args._[2]} <subcommand>`,
+                `    tak ${command} <subcommand>`,
                 'SubCommands:',
             ].concat(subcommands(invoke.schema).map((subcommand) => {
                 return `    ${String(subcommand)} - ${invoke.schema[subcommand].description}`
             }))).join('\n')
         )
-    } else {
-        if (args.format && !invoke.schema[args._[3]]) {
-            throw new Error(`Unsupported Subcommand: ${args._[3]}`);
-        } else if (args.format && !invoke.schema[args._[3]].formats.includes(args.format)) {
-            throw new Error(`tak ${args._[2]} ${args._[3]} does not support --format ${args.format}. Supported formats are: ${invoke.schema[args._[3]].formats.join(",")}`);
-        }
+        
+        process.exit(0);
+    } else if (!subcommand) {
+        subcommand = await select({
+            message: 'Choose an action',
+            choices: subcommands(invoke.schema).map((subcommand) => {
+                return {
+                    name: subcommand,
+                    value: subcommand
+                }
+            })
+        });
+    }
 
-        try {
-            const res = await invoke.cli(args);
 
-            if (typeof res === 'string') {
-                console.log(res);
-            } else {
-                console.log(JSON.stringify(res, null, 4));
-            }
-        } catch (err) {
-            console.error(err);
+    if (!invoke.schema[subcommand]) {
+        throw new Error(`Unsupported Subcommand: ${subcommand}`);
+    } else if (args.format && !invoke.schema[subcommand].formats.includes(args.format)) {
+        throw new Error(`tak ${command} ${subcommand} does not support --format ${args.format}. Supported formats are: ${invoke.schema[subcommand].formats.join(",")}`);
+    }
+
+    try {
+        args._[3] = subcommand;
+        const res = await invoke.cli(args);
+
+        if (typeof res === 'string') {
+            console.log(res);
+        } else {
+            console.log(JSON.stringify(res, null, 4));
         }
+    } catch (err) {
+        console.error(err);
     }
 }
 

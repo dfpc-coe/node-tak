@@ -54,9 +54,6 @@ export class APIAuthPassword extends APIAuth {
             opts.headers.Authorization = `Bearer ${this.jwt}`;
         }
 
-        console.error('OPTIONS', opts);
-
-
         return await fetch(url, opts);
     }
 }
@@ -76,8 +73,6 @@ export class APIAuthToken extends APIAuth {
         if (!opts.headers.Authorization && this.jwt) {
             opts.headers.Authorization = `Bearer ${this.jwt}`;
         }
-
-        console.error('OPTIONS', opts);
 
         return await fetch(url, opts);
     }

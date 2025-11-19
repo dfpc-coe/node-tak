@@ -6,18 +6,19 @@ export const Package = Type.Object({
     EXPIRATION: Type.String(),
     UID: Type.String(),
     SubmissionDateTime: Type.String(),
-    Keywords: Type.Array(Type.String()),
-    MIMEType: Type.String(),
     Size: Type.String(),
-    SubmissionUser: Type.String(),
     PrimaryKey: Type.String(),
     Hash: Type.String(),
     CreatorUid: Type.Optional(Type.Union([Type.Null(), Type.String()])),
     Name: Type.String(),
-    Tool: Type.String()
+    MIMEType: Type.Optional(Type.String()),
+    SubmissionUser: Type.Optional(Type.String()),
+    Keywords: Type.Optional(Type.Array(Type.String())),
+    Tool: Type.Optional(Type.String())
 });
 
 export const ListInput = Type.Object({
+    name: Type.Optional(Type.String()),
     tool: Type.Optional(Type.String()),
     uid: Type.Optional(Type.String())
 });
@@ -68,9 +69,18 @@ export default class PackageCommands extends Commands {
             method: 'GET'
         });
 
-        return JSON.parse(res) as {
-            resultCount: number;
-            results: Array<Static<typeof Package>>
-        };
+        if (typeof res === 'string') {
+            // The TAK Server API doesn't return application/json
+            return JSON.parse(res) as {
+                resultCount: number;
+                results: Array<Static<typeof Package>>
+            };
+        } else {
+            return res as {
+                resultCount: number;
+                results: Array<Static<typeof Package>>
+            };
+        }
+
     }
 }

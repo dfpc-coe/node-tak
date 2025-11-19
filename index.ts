@@ -2,6 +2,7 @@ import EventEmitter from 'node:events';
 import type { Static } from '@sinclair/typebox';
 import tls from 'node:tls';
 import CoT, { CoTParser } from '@tak-ps/node-cot';
+import type { CoTOptions } from '@tak-ps/node-cot';
 import type { TLSSocket } from 'node:tls'
 
 import TAKAPI from './lib/api.js';
@@ -22,6 +23,7 @@ export interface PartialCoT {
 export type TAKOptions = {
     id?: number | string,
     type?: string,
+    cot?: CoTOptions,
 }
 
 export default class TAK extends EventEmitter {
@@ -33,6 +35,8 @@ export default class TAK extends EventEmitter {
     destroyed: boolean;
     queue: string[];
     writing: boolean;
+
+    cotOptions: CoTOptions;
 
     pingInterval?: ReturnType<typeof setTimeout>;
     client?: TLSSocket;
@@ -63,6 +67,8 @@ export default class TAK extends EventEmitter {
         this.auth = auth;
 
         this.writing = false;
+
+        this.cotOptions = opts.cot || {};
 
         this.open = false;
         this.destroyed = false;
@@ -120,7 +126,7 @@ export default class TAK extends EventEmitter {
                 let result = TAK.findCoT(buff);
                 while (result && result.event) {
                     try {
-                        const cot = await CoTParser.from_xml(result.event);
+                        const cot = await CoTParser.from_xml(result.event, this.cotOptions);
 
                         if (cot.raw.event._attributes.type === 't-x-c-t-r') {
                             this.open = true;

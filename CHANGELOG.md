@@ -10,10 +10,118 @@
 
 ## Version History
 
+### v11.15.0 - 2025-11-19
+
+- :rocket: Migrate from external "form-data" library to native FormData class with memory-efficient file handling
+- :arrow_down: Remove "form-data" dependency
+
+### v11.14.0 - 2025-11-19
+
+- :rocket: Allow filtering Data Packages by name
+
+### v11.13.0 - 2025-11-10
+
+- :rocket: Add Iconset API Wrapper
+
+### v11.12.0 - 2025-10-29
+
+- :bug: Due to a bug in TAK Server (https://issues.tak.gov/browse/TKS-1023) patch the Mission List Layers to only use Mission Name
+
+### v11.11.0 - 2025-10-29
+
+- :rocket: Add interactive subcommand selection
+
+### v11.10.1 - 2025-10-24
+
+- :rocket: Additional `dtg` Log support
+
+### v11.10.0 - 2025-10-24
+
+- :rocket: Allow setting Log `dtg` values
+
+### v11.9.8 - 2025-10-09
+
+- :bug: Throw invalid password for 401 or 403 code on OAuth Generation
+
+### v11.9.7 - 2025-10-09
+
+- :bug: Make `Package.MIMEType` optional
+
+### v11.9.6 - 2025-10-09
+
+- :bug: Make `Mission.Content[].SubmissionUser` optional
+- :bug: Make `Mission.Content[].MimeType` optional
+
+### v11.9.5 - 2025-10-09
+
+- :bug: Make `Package.SubmissionUser` optional
+
+### v11.9.4 - 2025-10-09
+
+- :bug: Make `Package.Keywords` optional
+
+### v11.9.3 - 2025-10-09
+
+- :bug: Make `Package.Tool` optional
+
+### v11.9.2 - 2025-10-07
+
+- :bug: Pass LogID value in Mission Log Update
+
+### v11.9.1 - 2025-09-29
+
+- :rocket: Don't allow forward slashes in Mission Names
+
+### v11.9.0 - 2025-09-29
+
+- :rocket: Mission Creation is now done by a single query param
+
+### v11.8.0 - 2025-09-11
+
+- :rocket: Include Int Certs in returned CA chain
+
+### v11.7.0 - 2025-09-11
+
+- :tada: Add `Security` Module
+
+### v11.6.0 - 2025-09-07
+
+- :tada: Allow setting Groups when creating a Mission Package
+- :rocket: Add the ability to set keywords on a Mission Package
+
+### v11.5.0 - 2025-09-07
+
+- :rocket: Migrate to `xml-js` and remove `xml2js` to reduce dependency count
+
+### v11.4.0 - 2025-09-07
+
+- :tada: Allow constructor opts to pass through CoT Parser options
+
+### v11.3.1
+
+- :bug: Remove Debug Calls
+- :arrow_up: Update Core Deps
+
+### v11.3.0
+
+- :tada: Add support for Group Selection in Video Creation API (v2)
+
+### v11.2.2
+
+- :bug: Make CreatorUID Optional
+
+### v11.2.1
+
+- :bug: Make CreatorUID Optional
+
 ### v11.2.0
 
-- :rocket: Migrate from external "form-data" library to native FormData class
-- :arrow_down: Remove "form-data" dependency
+- :rocket: Explicitly export Type Definitions in package.json
+- :rocket: Include declaration files in build process
+
+### v11.1.1
+
+- :rocket: Handle different content-types in Package List API
 
 ### v11.1.0
 
