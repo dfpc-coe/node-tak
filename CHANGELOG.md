@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.15.0 - 2025-11-30
+
+- :tada: Introduce Listing Mission Invites
+
 ### v11.14.0 - 2025-11-19
 
 - :rocket: Allow filtering Data Packages by name
