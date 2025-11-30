@@ -3,6 +3,7 @@ import Package from './api/package.js';
 import Query from './api/query.js';
 import Locate from './api/locate.js';
 import Mission from './api/mission.js';
+import MissionInvite from './api/mission-invite.js';
 import MissionLog from './api/mission-log.js';
 import MissionLayer from './api/mission-layer.js';
 import Credentials from './api/credentials.js';
@@ -25,8 +26,9 @@ export const CommandList: Record<string, keyof TAKAPI> = {
     security: 'Security',
     profile: 'Profile',
     oauth: 'OAuth',
-    mission: 'Mission',
     locate: 'Locate',
+    mission: 'Mission',
+    'mission-invite': 'MissionInvite',
     'mission-log': 'MissionLog',
     'mission-layer': 'MissionLayer',
     credential: 'Credentials',
@@ -51,11 +53,12 @@ export default class TAKAPI {
     url: URL;
     Package: Package;
     OAuth: OAuth;
-    Mission: Mission;
     Locate: Locate;
     Security: Security;
     Iconsets: Iconsets;
+    Mission: Mission;
     MissionLog: MissionLog;
+    MissionInvite: MissionInvite;
     MissionLayer: MissionLayer;
     Credentials: Credentials;
     Contacts: Contacts;
@@ -83,6 +86,7 @@ export default class TAKAPI {
         this.Iconsets = new Iconsets(this);
         this.Mission = new Mission(this);
         this.MissionLog = new MissionLog(this);
+        this.MissionInvite = new MissionInvite(this);
         this.MissionLayer = new MissionLayer(this);
         this.Credentials = new Credentials(this);
         this.Contacts = new Contacts(this);
