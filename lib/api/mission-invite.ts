@@ -1,12 +1,6 @@
-import xmljs from 'xml-js';
 import type { ParsedArgs } from 'minimist'
-import CoT, { CoTParser } from '@tak-ps/node-cot';
 import { Type, Static } from '@sinclair/typebox';
-import Err from '@openaddresses/batch-error';
-import { Readable } from 'node:stream'
-import { TAKItem, TAKList } from './types.js';
-import { MissionLog } from './mission-log.js';
-import type { Feature } from '@tak-ps/node-cot';
+import { TAKList } from './types.js';
 import Commands, { CommandOutputFormat } from '../commands.js';
 
 export enum MissionSubscriberRole {
@@ -16,8 +10,6 @@ export enum MissionSubscriberRole {
 }
 
 export const MissionInvite = Type.String();
-
-export const GUIDMatch = new RegExp(/^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$/);
 
 export const TAKList_MissionInvites = TAKList(MissionInvite);
 
@@ -48,10 +40,6 @@ export default class MissionInviteCommands extends Commands {
         } else {
             throw new Error('Unsupported Subcommand');
         }
-    }
-
-    #isGUID(id: string): boolean {
-        return GUIDMatch.test(id)
     }
 
     /**
