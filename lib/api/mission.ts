@@ -184,9 +184,14 @@ export const MissionCreateInput = Type.Object({
     allowDupe: Type.Optional(Type.Boolean({ default: false })),
 });
 
+export const MissionInvite = Type.Object({
+
+});
+
 export const GUIDMatch = new RegExp(/^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$/);
 
 export const TAKList_Mission = TAKList(Mission);
+export const TAKList_MissionInvites = TAKList(MissionInvite);
 export const TAKList_MissionChange = TAKList(MissionChange);
 export const TAKList_MissionSubscriber = TAKList(MissionSubscriber);
 export const TAKItem_MissionSubscriber = TAKItem(MissionSubscriber);
@@ -201,7 +206,7 @@ export default class MissionCommands extends Commands {
             params: Type.Object({}),
             query: Type.Object({}),
             formats: [ CommandOutputFormat.JSON ]
-        }
+        },
     }
 
     async cli(args: ParsedArgs): Promise<object | string> {
