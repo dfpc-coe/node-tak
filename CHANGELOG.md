@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.16.0 - 2025-12-02
+
+- :tada: Mission Updates
+
 ### v11.15.0 - 2025-11-30
 
 - :tada: Introduce Listing Mission Invites
