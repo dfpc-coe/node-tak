@@ -184,14 +184,23 @@ export const MissionCreateInput = Type.Object({
     allowDupe: Type.Optional(Type.Boolean({ default: false })),
 });
 
-export const MissionInvite = Type.Object({
-
+export const MissionUpdateInput = Type.Object({
+    creatorUid: Type.Optional(Type.String()),
+    description: Type.Optional(Type.String()),
+    chatRoom: Type.Optional(Type.String()),
+    baseLayer: Type.Optional(Type.String()),
+    bbox: Type.Optional(Type.String()),
+    path: Type.Optional(Type.String()),
+    classification: Type.Optional(Type.String()),
+    tool: Type.Optional(Type.String()),
+    expiration: Type.Optional(Type.Integer()),
+    inviteOnly: Type.Optional(Type.Boolean()),
 });
 
 export const GUIDMatch = new RegExp(/^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$/);
 
 export const TAKList_Mission = TAKList(Mission);
-export const TAKList_MissionInvites = TAKList(MissionInvite);
+export const TAKList_MissionInvites = TAKList(Type.String());
 export const TAKList_MissionChange = TAKList(MissionChange);
 export const TAKList_MissionSubscriber = TAKList(MissionSubscriber);
 export const TAKItem_MissionSubscriber = TAKItem(MissionSubscriber);
@@ -659,6 +668,52 @@ export default class MissionCommands extends Commands {
             console.error(err);
             return false;
         }
+    }
+
+    /**
+     * Update Mission
+     *
+     * {@link https://docs.tak.gov/api/takserver/redoc#tag/mission-api/operation/createMissionAllowDupe TAK Server Docs}.
+     */
+    async update(
+        name: string,
+        body: Static<typeof MissionUpdateInput>,
+        opts?: Static<typeof MissionOptions>
+    ): Promise<Static<typeof Mission>> {
+        const mission = await this.get(name, {}, opts);
+
+        const url = new URL(`/Marti/api/missions/guid/${encodeURIComponent(mission.name)}`, this.api.url)
+
+        const bodyParams: Static<typeof MissionUpdateInput> = {
+            creatorUid: body.creatorUid ?? mission.creatorUid,
+            description: body.description ?? mission.description,
+            chatRoom: body.chatRoom ?? mission.chatRoom,
+            baseLayer: body.baseLayer ?? mission.baseLayer,
+            bbox: body.bbox ?? mission.bbox,
+            path: body.path ?? mission.path,
+            classification: body.classification ?? mission.classification,
+            tool: body.tool ?? mission.tool,
+            expiration: body.expiration ?? mission.expiration,
+            inviteOnly: body.inviteOnly ?? mission.inviteOnly
+        };
+
+        let q: keyof Static<typeof MissionUpdateInput>;
+        for (q in bodyParams) {
+            if (body[q] !== undefined) {
+                url.searchParams.append(q, String(body[q]));
+            }
+        }
+
+        url.searchParams.append('allowDupe', 'false');
+
+        const missions = await this.api.fetch(url, {
+            method: 'POST'
+        });
+
+        if (!missions.data.length) throw new Error('Create Mission didn\'t return a mission or an error');
+
+        return missions.data[0];
+
     }
 
     /**
