@@ -37,7 +37,7 @@ export const Mission = Type.Object({
     path: Type.Optional(Type.String()),
     classification: Type.Optional(Type.String()),
     tool: Type.String(),
-    keywords: Type.Array(Type.Unknown()),
+    keywords: Type.Array(Type.String()),
     creatorUid: Type.Optional(Type.String()),
     createTime: Type.String(),
     externalData: Type.Array(Type.Unknown()),
@@ -168,6 +168,7 @@ export const MissionListInput = Type.Object({
 export const MissionCreateInput = Type.Object({
     name: Type.String(),
     group: Type.Optional(Type.Union([Type.Array(Type.String()), Type.String()])),
+    keywords: Type.Optional(Type.Array(Type.String())),
     creatorUid: Type.String(),
     description: Type.Optional(Type.String({ default: '' })),
     chatRoom: Type.Optional(Type.String()),
@@ -187,6 +188,7 @@ export const MissionCreateInput = Type.Object({
 export const MissionUpdateInput = Type.Object({
     creatorUid: Type.Optional(Type.String()),
     description: Type.Optional(Type.String()),
+    keywords: Type.Optional(Type.Array(Type.String())),
     chatRoom: Type.Optional(Type.String()),
     baseLayer: Type.Optional(Type.String()),
     bbox: Type.Optional(Type.String()),
@@ -680,7 +682,7 @@ export default class MissionCommands extends Commands {
         body: Static<typeof MissionUpdateInput>,
         opts?: Static<typeof MissionOptions>
     ): Promise<Static<typeof Mission>> {
-        const mission = await this.get(name, {}, opts);
+        let mission = await this.get(name, {}, opts);
 
         const url = new URL(`/Marti/api/missions/guid/${encodeURIComponent(mission.name)}`, this.api.url)
 
@@ -712,8 +714,15 @@ export default class MissionCommands extends Commands {
 
         if (!missions.data.length) throw new Error('Create Mission didn\'t return a mission or an error');
 
-        return missions.data[0];
+        mission = missions.data[0];
 
+        if (body.keywords && body.keywords.length) {
+            mission = await this.#putKeywords(mission.name, body.keywords, {
+                token: mission.token
+            });
+        }
+
+        return mission;
     }
 
     /**
@@ -773,13 +782,42 @@ export default class MissionCommands extends Commands {
 
         let q: keyof Static<typeof MissionCreateInput>;
         for (q in body) {
-            if (body[q] !== undefined && q !== 'name') {
+            if (body[q] !== undefined && ['name', 'keywords'].includes(q)) {
                 url.searchParams.append(q, String(body[q]));
             }
         }
 
         const missions = await this.api.fetch(url, {
             method: 'POST'
+        });
+
+        if (!missions.data.length) throw new Error('Create Mission didn\'t return a mission or an error');
+
+        let mission = missions.data[0];
+
+        if (body.keywords && body.keywords.length) {
+            mission = await this.#putKeywords(mission.name, body.keywords, {
+                token: mission.token
+            });
+        }
+
+        return mission;
+    }
+
+    /**
+     * Update Mission Keywords
+     */
+    async #putKeywords(
+        name: string,
+        keywords: string[],
+        opts?: Static<typeof MissionOptions>
+    ): Promise<Static<typeof Mission>> {
+        const url = new URL(`/Marti/api/missions/${this.#encodeName(name)}/keywords`, this.api.url);
+
+        const missions = await this.api.fetch(url, {
+            method: 'PUT',
+            headers: this.#headers(opts),
+            body: keywords
         });
 
         if (!missions.data.length) throw new Error('Create Mission didn\'t return a mission or an error');

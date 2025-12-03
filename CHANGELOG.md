@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.17.0 - 2025-12-02
+
+- :tada: Allow setting keywords when creating or updating Missions
+
 ### v11.16.0 - 2025-12-02
 
 - :tada: Mission Updates
