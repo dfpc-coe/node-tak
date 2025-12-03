@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.17.2 - 2025-12-02
+
+- :rocket: Use `PUT` For Mission Creation
+
 ### v11.17.1 - 2025-12-02
 
 - :rocket: Fix Group Assignments in Mission Updates

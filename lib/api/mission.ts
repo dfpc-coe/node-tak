@@ -191,6 +191,7 @@ export const MissionUpdateInput = Type.Object({
     keywords: Type.Optional(Type.Array(Type.String())),
     chatRoom: Type.Optional(Type.String()),
     baseLayer: Type.Optional(Type.String()),
+    group: Type.Optional(Type.Union([Type.Array(Type.String()), Type.String()])),
     bbox: Type.Optional(Type.String()),
     path: Type.Optional(Type.String()),
     classification: Type.Optional(Type.String()),
@@ -789,7 +790,7 @@ export default class MissionCommands extends Commands {
         }
 
         const missions = await this.api.fetch(url, {
-            method: 'POST'
+            method: 'PUT'
         });
 
         if (!missions.data.length) throw new Error('Create Mission didn\'t return a mission or an error');
