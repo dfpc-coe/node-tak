@@ -784,13 +784,13 @@ export default class MissionCommands extends Commands {
 
         let q: keyof Static<typeof MissionCreateInput>;
         for (q in body) {
-            if (body[q] !== undefined && ['name', 'keywords'].includes(q)) {
+            if (body[q] !== undefined && !['name', 'keywords'].includes(q)) {
                 url.searchParams.append(q, String(body[q]));
             }
         }
 
         const missions = await this.api.fetch(url, {
-            method: 'PUT'
+            method: 'POST'
         });
 
         if (!missions.data.length) throw new Error('Create Mission didn\'t return a mission or an error');

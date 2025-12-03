@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.17.3 - 2025-12-02
+
+- :bug: Fix Mission Creation with Groups
+
 ### v11.17.2 - 2025-12-02
 
 - :rocket: Use `PUT` For Mission Creation
