@@ -687,6 +687,7 @@ export default class MissionCommands extends Commands {
         const url = new URL(`/Marti/api/missions/guid/${encodeURIComponent(mission.name)}`, this.api.url)
 
         const bodyParams: Static<typeof MissionUpdateInput> = {
+            group: body.group ?? mission.groups,
             creatorUid: body.creatorUid ?? mission.creatorUid,
             description: body.description ?? mission.description,
             chatRoom: body.chatRoom ?? mission.chatRoom,
