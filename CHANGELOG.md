@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.17.4 - 2025-12-03
+
+- :bug: Update Mission must occur via `guid`
+
 ### v11.17.3 - 2025-12-02
 
 - :bug: Fix Mission Creation with Groups

@@ -685,7 +685,7 @@ export default class MissionCommands extends Commands {
     ): Promise<Static<typeof Mission>> {
         let mission = await this.get(name, {}, opts);
 
-        const url = new URL(`/Marti/api/missions/guid/${encodeURIComponent(mission.name)}`, this.api.url)
+        const url = new URL(`/Marti/api/missions/${encodeURIComponent(mission.name)}`, this.api.url)
 
         const bodyParams: Static<typeof MissionUpdateInput> = {
             group: body.group ?? mission.groups,
