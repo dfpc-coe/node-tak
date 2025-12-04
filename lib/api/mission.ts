@@ -28,9 +28,29 @@ export const MissionContent = Type.Object({
     expiration: Type.Integer()
 });
 
+export const MissionChange = Type.Object({
+    isFederatedChange: Type.Boolean(),
+    type: Type.String(),
+    missionName: Type.String(),
+    timestamp: Type.String(),
+    serverTime: Type.String(),
+    creatorUid: Type.Optional(Type.String()),
+    contentUid: Type.Optional(Type.String()),
+    details: Type.Optional(Type.Object({
+        type: Type.String(),
+        callsign: Type.String(),
+        color: Type.Optional(Type.String()),
+        location: Type.Object({
+            lat: Type.Number(),
+            lon: Type.Number()
+        })
+    })),
+    contentResource: Type.Optional(MissionContent)
+});
+
 export const Mission = Type.Object({
     name: Type.String(),
-    description: Type.Optional(Type.String()),
+    description: Type.String(),
     chatRoom: Type.Optional(Type.String()),
     baseLayer: Type.Optional(Type.String()),
     bbox: Type.Optional(Type.String()),
@@ -60,27 +80,7 @@ export const Mission = Type.Object({
     passwordProtected: Type.Boolean(),
     token: Type.Optional(Type.String()),                        // Only present when mission created
     groups: Type.Optional(Type.Union([Type.String(), Type.Array(Type.String())])),           // Only present on Mission.get()
-    missionChanges: Type.Optional(Type.Array(Type.Unknown()))   // Only present on Mission.get()
-});
-
-export const MissionChange = Type.Object({
-    isFederatedChange: Type.Boolean(),
-    type: Type.String(),
-    missionName: Type.String(),
-    timestamp: Type.String(),
-    serverTime: Type.String(),
-    creatorUid: Type.Optional(Type.String()),
-    contentUid: Type.Optional(Type.String()),
-    details: Type.Optional(Type.Object({
-        type: Type.String(),
-        callsign: Type.String(),
-        color: Type.Optional(Type.String()),
-        location: Type.Object({
-            lat: Type.Number(),
-            lon: Type.Number()
-        })
-    })),
-    contentResource: Type.Optional(MissionContent)
+    missionChanges: Type.Optional(Type.Array(MissionChange))   // Only present on Mission.get()
 });
 
 export const MissionRole = Type.Object({
@@ -243,6 +243,17 @@ export default class MissionCommands extends Commands {
 
     #encodeName(name: string): string {
         return encodeURIComponent(name.trim())
+    }
+
+    /*
+     * The Mission type is currently cast from an unknown to a Mission
+     * from the fetch call from the server. There are a few standardizations
+     * we make for better usability.
+     */
+    #stdMission(mission: Static<typeof Mission>): Static<typeof Mission> {
+        if (mission.description === undefined) mission.description = '';
+
+        return mission;
     }
 
     #headers(opts?: Static<typeof MissionOptions>): object {
@@ -645,7 +656,8 @@ export default class MissionCommands extends Commands {
         });
 
         if (!missions.data.length) throw new Err(404, null, `No Mission for GUID: ${guid}`);
-        return missions.data[0];
+
+        return this.#stdMission(missions.data[0]);
     }
 
     /**
@@ -724,7 +736,7 @@ export default class MissionCommands extends Commands {
             });
         }
 
-        return mission;
+        return this.#stdMission(mission);
     }
 
     /**
@@ -755,7 +767,7 @@ export default class MissionCommands extends Commands {
 
         if (!missions.data.length) throw new Err(404, null, `No Mission for Name: ${name}`);
 
-        return missions.data[0];
+        return this.#stdMission(missions.data[0]);
     }
 
     /**
@@ -780,6 +792,8 @@ export default class MissionCommands extends Commands {
             throw new Err(400, null, 'Mission Name cannot contain forward slashes');
         }
 
+        if (body.description === undefined) body.description = '';
+
         if (body.group && Array.isArray(body.group)) body.group = body.group.join(',');
 
         let q: keyof Static<typeof MissionCreateInput>;
@@ -803,7 +817,7 @@ export default class MissionCommands extends Commands {
             });
         }
 
-        return mission;
+        return this.#stdMission(mission);
     }
 
     /**
@@ -826,7 +840,7 @@ export default class MissionCommands extends Commands {
 
         const mission = missions.data[0];
 
-        return mission;
+        return this.#stdMission(mission);
     }
 
     /**

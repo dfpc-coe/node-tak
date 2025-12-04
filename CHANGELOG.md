@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.18.0 - 2025-12-04
+
+- :rocket: Update Mission type to require description
+
 ### v11.17.4 - 2025-12-03
 
 - :bug: Update Mission must occur via `guid`
