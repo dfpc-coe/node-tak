@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.18.2 - 2025-12-16
+
+- :rocket: Add Build Step
+
 ### v11.18.1 - 2025-12-15
 
 - :rocket: Update Release Process
