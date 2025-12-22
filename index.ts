@@ -43,8 +43,6 @@ export default class TAK extends EventEmitter {
     version?: string;
 
     /**
-     * @constructor
-     *
      * @param url   - Full URL of Streaming COT Endpoint IE: "https://ops.cotak.gov:8089"
      * @param auth  - TAK Certificate Pair
      * @param opts  - Options Object
@@ -224,7 +222,7 @@ export default class TAK extends EventEmitter {
     /**
      * Write a CoT to the TAK Connection
      *
-     * @param {CoT} cot CoT Object
+     * @param {CoT} cots CoT Object
      */
     async write(cots: CoT[]): Promise<void> {
         for (const cot of cots) {
@@ -258,6 +256,8 @@ export default class TAK extends EventEmitter {
     }
 }
 
+export * from './lib/api.js';
+export { CommandOutputFormat } from './lib/commands.js';
 export {
     TAKAPI,
     CoT,

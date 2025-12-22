@@ -4,10 +4,10 @@ import Package from './api/package.js';
 import Certificate from './api/certificate.js';
 import Query from './api/query.js';
 import Locate from './api/locate.js';
-import Mission from './api/mission.js';
+import Mission, { MissionSubscriberRole } from './api/mission.js';
 import MissionInvite from './api/mission-invite.js';
 import MissionLog from './api/mission-log.js';
-import MissionLayer from './api/mission-layer.js';
+import MissionLayer, { MissionLayerType } from './api/mission-layer.js';
 import Credentials from './api/credentials.js';
 import Security from './api/security.js';
 import Contacts from './api/contacts.js';
@@ -182,3 +182,29 @@ export default class TAKAPI {
 function isPlainObject(value: object) {
     return  value?.constructor === Object;
 }
+
+export {
+    OAuth,
+    Package,
+    Certificate,
+    Query,
+    Locate,
+    Mission,
+    MissionInvite,
+    MissionLog,
+    MissionLayer,
+    Credentials,
+    Security,
+    Contacts,
+    Profile,
+    Files,
+    Iconsets,
+    Injectors,
+    Repeater,
+    Group,
+    Subscription,
+    Video,
+    Export,
+    MissionSubscriberRole,
+    MissionLayerType
+};
