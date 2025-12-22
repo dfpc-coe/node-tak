@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.19.0 - 2025-12-21
+
+- :tada: Introduce first batch of Certificate APIs
+
 ### v11.18.2 - 2025-12-16
 
 - :rocket: Add Build Step
