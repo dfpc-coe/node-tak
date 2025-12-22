@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.20.1 - 2025-12-21
+
+- :bug: Update Github Actions Workflow
+
 ### v11.20.0 - 2025-12-21
 
 - :tada: Introduce deleting/revoking by ID and add TS Docs
