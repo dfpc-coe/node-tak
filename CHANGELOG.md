@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.20.0 - 2025-12-21
+
+- :tada: Introduce deleting/revoking by ID and add TS Docs
+
 ### v11.19.0 - 2025-12-21
 
 - :tada: Introduce first batch of Certificate APIs
