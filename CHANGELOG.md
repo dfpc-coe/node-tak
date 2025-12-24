@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.20.2 - 2025-12-24
+
+- :bug: Update Github Actions Workflow
+
 ### v11.20.1 - 2025-12-21
 
 - :bug: Update Github Actions Workflow
