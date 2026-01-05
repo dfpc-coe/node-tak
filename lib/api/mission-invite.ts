@@ -18,7 +18,23 @@ export enum MissionInviteType {
     TEAM = 'team'
 }
 
-export const MissionInvite = Type.Any();
+
+export const MissionRole = Type.Object({
+    name: Type.Optional(Type.String()),
+    description: Type.Optional(Type.String()),
+    permissions: Type.Optional(Type.Array(Type.String()))
+});
+
+export const MissionInvite = Type.Object({
+    missionName: Type.Optional(Type.String()),
+    invitee: Type.Optional(Type.String()),
+    type: Type.Optional(Type.String()),
+    creatorUid: Type.Optional(Type.String()),
+    createTime: Type.Optional(Type.String()),
+    token: Type.Optional(Type.String()),
+    role: Type.Optional(MissionRole),
+    missionGuid: Type.Optional(Type.String())
+});
 export const MissionInviteList = TAKList(MissionInvite);
 
 export const MissionInviteWrapper = Type.Object({
