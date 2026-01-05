@@ -5,7 +5,7 @@ import Certificate from './api/certificate.js';
 import Query from './api/query.js';
 import Locate from './api/locate.js';
 import Mission, { MissionSubscriberRole } from './api/mission.js';
-import MissionInvite from './api/mission-invite.js';
+import MissionInvite, { MissionInviteType } from './api/mission-invite.js';
 import MissionLog from './api/mission-log.js';
 import MissionLayer, { MissionLayerType } from './api/mission-layer.js';
 import Credentials from './api/credentials.js';
@@ -206,5 +206,6 @@ export {
     Video,
     Export,
     MissionSubscriberRole,
-    MissionLayerType
+    MissionLayerType,
+    MissionInviteType
 };

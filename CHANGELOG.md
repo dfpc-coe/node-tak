@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.21.0 - 2025-01-05
+
+- :tada: Add Mission Invite & Uninvite Support
+
 ### v11.20.2 - 2025-12-24
 
 - :bug: Update Github Actions Workflow
