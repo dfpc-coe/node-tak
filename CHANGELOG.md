@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.22.0 - 2025-01-05
+
+- :rocket: Add Mission Invite Get and improve List Support
+
 ### v11.21.0 - 2025-01-05
 
 - :tada: Add Mission Invite & Uninvite Support

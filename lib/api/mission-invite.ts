@@ -18,9 +18,15 @@ export enum MissionInviteType {
     TEAM = 'team'
 }
 
-export const MissionInvite = Type.String();
+export const MissionInvite = Type.Any();
+export const MissionInviteList = TAKList(MissionInvite);
 
-export const TAKList_MissionInvites = TAKList(MissionInvite);
+export const MissionInviteWrapper = Type.Object({
+    name: Type.String(),
+    invites: MissionInviteList
+});
+
+export const TAKList_MissionInvites = TAKList(MissionInviteWrapper);
 
 /**
  * @class
@@ -30,6 +36,14 @@ export default class MissionInviteCommands extends Commands {
         list: {
             description: 'List Mission Invites',
             params: Type.Object({}),
+            query: Type.Object({}),
+            formats: [ CommandOutputFormat.JSON ]
+        },
+        get: {
+            description: 'Get Mission Invites for a Mission',
+            params: Type.Object({
+                name: Type.String()
+            }),
             query: Type.Object({}),
             formats: [ CommandOutputFormat.JSON ]
         },
@@ -70,7 +84,23 @@ export default class MissionInviteCommands extends Commands {
                 return list;
             } else {
                 return list.data.map((invite) => {
-                    return `${invite}`;
+                    return `${invite.name}: ${invite.invites.data.length} Invites`;
+                }).join('\n');
+            }
+        } else if (args._[3] === 'get') {
+            const name = args._[4];
+
+            if (!name) throw new Error('Usage: get <name>');
+
+            const list = await this.get(name, {
+                token: args.token
+            });
+
+            if (args.format === 'json') {
+                return list;
+            } else {
+                return list.data.map((invite) => {
+                    return JSON.stringify(invite);
                 }).join('\n');
             }
         } else if (args._[3] === 'invite') {
@@ -128,6 +158,45 @@ export default class MissionInviteCommands extends Commands {
 
         if (clientUid) {
             url.searchParams.append('clientUid', clientUid);
+        }
+
+        const missionNames = await this.api.fetch(url, {
+            method: 'GET',
+            headers: this.#headers(opts)
+        });
+
+        const promises = missionNames.data.map(async (name: string) => {
+            const invites = await this.get(name, opts);
+            return {
+                name,
+                invites
+            };
+        });
+
+        const results = await Promise.all(promises);
+
+        return {
+            version: missionNames.version,
+            type: missionNames.type,
+            data: results,
+            nodeId: missionNames.nodeId
+        };
+    }
+
+    /**
+     * Get Mission Invitations
+     *
+     * {@link https://docs.tak.gov/api/takserver/redoc#tag/mission-api/operation/getMissionInvitations TAK Server Docs}.
+     */
+    async get(
+        missionName: string,
+        opts?: Static<typeof MissionOptions>
+    ): Promise<Static<typeof MissionInviteList>> {
+        let url;
+        if (GUIDMatch.test(missionName)) {
+            url = new URL(`/Marti/api/missions/guid/${encodeURIComponent(missionName)}/invitations`, this.api.url);
+        } else {
+            url = new URL(`/Marti/api/missions/${encodeURIComponent(missionName)}/invitations`, this.api.url);
         }
 
         return await this.api.fetch(url, {
