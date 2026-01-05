@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.23.0 - 2025-01-05
+
+- :rocket: Updated Mission Invite after talking to TPC Developers
+
 ### v11.22.0 - 2025-01-05
 
 - :rocket: Add Mission Invite Get and improve List Support

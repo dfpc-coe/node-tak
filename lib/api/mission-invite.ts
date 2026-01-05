@@ -35,14 +35,8 @@ export const MissionInvite = Type.Object({
     role: Type.Optional(MissionRole),
     missionGuid: Type.Optional(Type.String())
 });
+
 export const MissionInviteList = TAKList(MissionInvite);
-
-export const MissionInviteWrapper = Type.Object({
-    name: Type.String(),
-    invites: MissionInviteList
-});
-
-export const TAKList_MissionInvites = TAKList(MissionInviteWrapper);
 
 /**
  * @class
@@ -100,7 +94,7 @@ export default class MissionInviteCommands extends Commands {
                 return list;
             } else {
                 return list.data.map((invite) => {
-                    return `${invite.name}: ${invite.invites.data.length} Invites`;
+                    return `${invite.missionName}: ${invite.invitee} (${invite.role?.name || 'Unknown Role'})`;
                 }).join('\n');
             }
         } else if (args._[3] === 'get') {
@@ -169,34 +163,17 @@ export default class MissionInviteCommands extends Commands {
     async list(
         clientUid?: string,
         opts?: Static<typeof MissionOptions>
-    ): Promise<Static<typeof TAKList_MissionInvites>> {
-        const url = new URL('/Marti/api/missions/all/invitations', this.api.url);
+    ): Promise<Static<typeof MissionInviteList>> {
+        const url = new URL('/Marti/api/missions/invitations', this.api.url);
 
         if (clientUid) {
             url.searchParams.append('clientUid', clientUid);
         }
 
-        const missionNames = await this.api.fetch(url, {
+        return await this.api.fetch(url, {
             method: 'GET',
             headers: this.#headers(opts)
         });
-
-        const promises = missionNames.data.map(async (name: string) => {
-            const invites = await this.get(name, opts);
-            return {
-                name,
-                invites
-            };
-        });
-
-        const results = await Promise.all(promises);
-
-        return {
-            version: missionNames.version,
-            type: missionNames.type,
-            data: results,
-            nodeId: missionNames.nodeId
-        };
     }
 
     /**
