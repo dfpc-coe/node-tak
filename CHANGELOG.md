@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.24.0 - 2025-01-06
+
+- :rocket: Require clientUid in Mission Invite List
+
 ### v11.23.0 - 2025-01-05
 
 - :rocket: Updated Mission Invite after talking to TPC Developers

@@ -161,19 +161,19 @@ export default class MissionInviteCommands extends Commands {
      * {@link https://docs.tak.gov/api/takserver/redoc#tag/mission-api/operation/getAllMissionInvitations TAK Server Docs}.
      */
     async list(
-        clientUid?: string,
+        clientUid: string,
         opts?: Static<typeof MissionOptions>
     ): Promise<Static<typeof MissionInviteList>> {
         const url = new URL('/Marti/api/missions/invitations', this.api.url);
 
-        if (clientUid) {
-            url.searchParams.append('clientUid', clientUid);
-        }
+        url.searchParams.append('clientUid', clientUid);
 
-        return await this.api.fetch(url, {
+        const invites = await this.api.fetch(url, {
             method: 'GET',
             headers: this.#headers(opts)
         });
+
+        return invites;
     }
 
     /**
