@@ -32,18 +32,24 @@ export const MissionChange = Type.Object({
     isFederatedChange: Type.Boolean(),
     type: Type.String(),
     missionName: Type.String(),
+    missionGuid: Type.String(),
     timestamp: Type.String(),
     serverTime: Type.String(),
     creatorUid: Type.Optional(Type.String()),
     contentUid: Type.Optional(Type.String()),
     details: Type.Optional(Type.Object({
         type: Type.String(),
-        callsign: Type.String(),
+        callsign: Type.Optional(Type.String()),
+        title: Type.Optional(Type.String()),
+        iconsetPath: Type.Optional(Type.String()),
         color: Type.Optional(Type.String()),
-        location: Type.Object({
+        attachments: Type.Optional(Type.Array(Type.String())),
+        name: Type.Optional(Type.String()),
+        category: Type.Optional(Type.String()),
+        location: Type.Optional(Type.Object({
             lat: Type.Number(),
             lon: Type.Number()
-        })
+        }))
     })),
     contentResource: Type.Optional(MissionContent)
 });
