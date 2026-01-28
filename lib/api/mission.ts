@@ -32,7 +32,7 @@ export const MissionChange = Type.Object({
     isFederatedChange: Type.Boolean(),
     type: Type.String(),
     missionName: Type.String(),
-    missionGuid: Type.String(),
+    missionGuid: Type.Optional(Type.String()),
     timestamp: Type.String(),
     serverTime: Type.String(),
     creatorUid: Type.Optional(Type.String()),

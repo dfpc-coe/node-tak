@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.25.1 - 2025-01-28
+
+- :rocket: MissionGuid is optional
+
 ### v11.25.0 - 2025-01-28
 
 - :rocket: Update MissionChange type
