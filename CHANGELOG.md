@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.25.0 - 2025-01-28
+
+- :rocket: Update MissionChange type
+
 ### v11.24.0 - 2025-01-06
 
 - :rocket: Require clientUid in Mission Invite List
