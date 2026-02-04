@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.25.2 - 2025-02-03
+
+- :arrow_up: Update Core Deps
+
 ### v11.25.1 - 2025-01-28
 
 - :rocket: MissionGuid is optional
