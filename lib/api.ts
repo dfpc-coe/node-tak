@@ -11,6 +11,7 @@ import MissionLayer, { MissionLayerType } from './api/mission-layer.js';
 import Credentials from './api/credentials.js';
 import Security from './api/security.js';
 import Contacts from './api/contacts.js';
+import Client from './api/client.js';
 import Profile from './api/profile.js';
 import Files from './api/files.js';
 import Iconsets from './api/iconsets.js';
@@ -37,6 +38,7 @@ export const CommandList: Record<string, keyof TAKAPI> = {
     certificate: 'Certificate',
     iconsets: 'Iconsets',
     contact: 'Contacts',
+    client: 'Client',
     subscription: 'Subscription',
     injector: 'Injectors',
     repeater: 'Repeater',
@@ -64,6 +66,7 @@ export default class TAKAPI {
     MissionInvite: MissionInvite;
     MissionLayer: MissionLayer;
     Credentials: Credentials;
+    Client: Client;
     Contacts: Contacts;
     Certificate: Certificate;
     Subscription: Subscription;
@@ -93,6 +96,7 @@ export default class TAKAPI {
         this.MissionLog = new MissionLog(this);
         this.MissionInvite = new MissionInvite(this);
         this.MissionLayer = new MissionLayer(this);
+        this.Client = new Client(this);
         this.Credentials = new Credentials(this);
         this.Contacts = new Contacts(this);
         this.Subscription = new Subscription(this);
@@ -193,6 +197,7 @@ export {
     MissionInvite,
     MissionLog,
     MissionLayer,
+    Client,
     Credentials,
     Security,
     Contacts,

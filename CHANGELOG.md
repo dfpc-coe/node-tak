@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.26.0 - 2025-02-05
+
+- :tada: Add support for Client Endpoint List
+
 ### v11.25.2 - 2025-02-03
 
 - :arrow_up: Update Core Deps
