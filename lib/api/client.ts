@@ -1,5 +1,6 @@
 import { Type, Static } from '@sinclair/typebox';
 import type { ParsedArgs } from 'minimist'
+import { TAKList } from './types.js';
 import Commands, { CommandOutputFormat } from '../commands.js';
 
 export const ClientEndpoint = Type.Object({
@@ -10,6 +11,8 @@ export const ClientEndpoint = Type.Object({
     role: Type.String(),
     lastStatus: Type.String(),
 });
+
+export const ClientEndpointList = TAKList(ClientEndpoint);
 
 export const ClientListQuery = Type.Object({
     secAgo: Type.Optional(Type.Integer({ default: 0 })),
@@ -41,7 +44,7 @@ export default class Client extends Commands {
         }
     }
 
-    async list(query: Static<typeof ClientListQuery> = {}): Promise<Array<Static<typeof ClientEndpoint>>> {
+    async list(query: Static<typeof ClientListQuery> = {}): Promise<Static<typeof ClientEndpointList>> {
         const url = new URL(`/Marti/api/clientEndPoints`, this.api.url);
 
         if (query.secAgo) url.searchParams.append('secAgo', String(query.secAgo));
