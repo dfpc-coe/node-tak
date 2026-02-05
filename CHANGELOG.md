@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.26.1 - 2025-02-05
+
+- :rocket: Allow specifying Client Endpoint List query parameters
+
 ### v11.26.0 - 2025-02-05
 
 - :tada: Add support for Client Endpoint List
