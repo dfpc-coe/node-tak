@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v11.27.0 - 2025-02-11
+
+- :rocket: Add additional group list query params
+
 ### v11.26.2 - 2025-02-05
 
 - :bug: Wrap return type of Client list in TAKList object

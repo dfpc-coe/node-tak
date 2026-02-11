@@ -14,7 +14,8 @@ export const Group = Type.Object({
 })
 
 export const GroupListInput = Type.Object({
-    useCache: Type.Optional(Type.Boolean())
+    useCache: Type.Optional(Type.Boolean()),
+    sendLatestSA: Type.Optional(Type.Boolean())
 })
 
 export const TAKList_Group = TAKList(Group);
@@ -22,7 +23,7 @@ export const TAKList_Group = TAKList(Group);
 export default class GroupCommands extends Commands {
     schema = {
         list: {
-            description: 'List Missions',
+            description: 'List Groups',
             params: Type.Object({}),
             query: Type.Object({}),
             formats: [ CommandOutputFormat.JSON ]
