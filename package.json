@@ -1,7 +1,7 @@
 {
     "name": "@tak-ps/node-tak",
     "type": "module",
-    "version": "11.25.1",
+    "version": "11.27.0",
     "description": "Lightweight JavaScript library for communicating with TAK Server",
     "author": "Nick Ingalls <nick@ingalls.ca>",
     "main": "dist/index.js",
@@ -39,7 +39,7 @@
         "xml-js": "^1.6.11"
     },
     "peerDependencies": {
-        "@tak-ps/node-cot": "^14.7.1"
+        "@tak-ps/node-cot": "^14.20.0"
     },
     "devDependencies": {
         "@inquirer/prompts": "^8.0.1",

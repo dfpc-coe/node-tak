@@ -10,6 +10,26 @@
 
 ## Version History
 
+### v11.27.0 - 2025-02-11
+
+- :rocket: Add additional group list query params
+
+### v11.26.2 - 2025-02-05
+
+- :bug: Wrap return type of Client list in TAKList object
+
+### v11.26.1 - 2025-02-05
+
+- :rocket: Allow specifying Client Endpoint List query parameters
+
+### v11.26.0 - 2025-02-05
+
+- :tada: Add support for Client Endpoint List
+
+### v11.25.2 - 2025-02-03
+
+- :arrow_up: Update Core Deps
+
 ### v11.25.1 - 2025-01-28
 
 - :rocket: MissionGuid is optional
