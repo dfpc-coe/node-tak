@@ -291,19 +291,6 @@ export default class TAK extends EventEmitter {
         this.write([CoT.ping()]);
     }
 
-    async writer(body: string): Promise<void> {
-        return new Promise<void>((resolve) => {
-            if (!this.client || this.client.destroyed) {
-                throw new Error(
-                    'A Connection Client must first be created before it can be written',
-                );
-            }
-            this.client!.write(body + '\n', () => {
-                resolve();
-            });
-        });
-    }
-
     /**
      * Drain the queue to the socket.
      *
