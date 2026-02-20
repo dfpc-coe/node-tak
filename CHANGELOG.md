@@ -10,9 +10,9 @@
 
 ## Version History
 
-### v11.27.0 - 2025-02-11
+### v12.0.0 - 2025-02-11
 
-- :rocket: Add additional group list query params
+- :tada: Significantly improve memory performance of client when writing large amounts of data
 
 ### v11.26.2 - 2025-02-05
 
