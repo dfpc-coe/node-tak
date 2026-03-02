@@ -303,6 +303,8 @@ export default class TAK extends EventEmitter {
 
         if (this.client) {
             this.client.destroy();
+            this.client.removeAllListeners();
+            this.client = undefined;
         }
 
         if (this.pingInterval) {
