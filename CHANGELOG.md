@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.1.0 - 2025-03-02
+
+- :bug: Fix connect_ssl race condition where a stale socket's delayed close or end event could destroy a newly-reconnected socket, leaving the connection permanently dead after a server restart.
+
 ### v12.0.0 - 2025-02-11
 
 - :tada: Significantly improve memory performance of client when writing large amounts of data
