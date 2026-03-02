@@ -161,8 +161,16 @@ export default class TAK extends EventEmitter {
     connect_ssl(): Promise<TAK> {
         return new Promise((resolve) => {
             this.destroyed = false;
+            this.open = false;
 
-            this.client = tls.connect({
+            // Capture the socket in a local variable so that event handlers
+            // registered on *this* socket can detect when they are stale
+            // (i.e. a reconnect has already created a newer socket) and
+            // bail out early.  Without this guard, the old socket's delayed
+            // `close` event fires AFTER connect_ssl() sets this.destroyed=false
+            // for the new connection and incorrectly calls this.destroy(),
+            // killing the newly-created socket with no retry triggered.
+            const client = tls.connect({
                 host: this.url.hostname,
                 port: parseInt(this.url.port),
                 rejectUnauthorized: this.auth.rejectUnauthorized ?? false,
@@ -172,15 +180,19 @@ export default class TAK extends EventEmitter {
                 ca: this.auth.ca,
             });
 
-            this.client.setNoDelay();
+            this.client = client;
 
-            this.client.on('connect', () => {
+            client.setNoDelay();
+
+            client.on('connect', () => {
+                if (client !== this.client) return;
                 console.error(
                     `ok - ${this.id} @ connect:${this.client ? this.client.authorized : 'NO CLIENT'} - ${this.client ? this.client.authorizationError : 'NO CLIENT'}`,
                 );
             });
 
-            this.client.on('secureConnect', () => {
+            client.on('secureConnect', () => {
+                if (client !== this.client) return;
                 console.error(
                     `ok - ${this.id} @ secure:${this.client ? this.client.authorized : 'NO CLIENT'} - ${this.client ? this.client.authorizationError : 'NO CLIENT'}`,
                 );
@@ -189,8 +201,9 @@ export default class TAK extends EventEmitter {
             });
 
             let buff = '';
-            this.client
+            client
                 .on('data', async (data: Buffer) => {
+                    if (client !== this.client) return;
                     // Eventually Parse ProtoBuf
                     buff = buff + data.toString();
 
@@ -232,25 +245,39 @@ export default class TAK extends EventEmitter {
                     }
                 })
                 .on('timeout', () => {
+                    if (client !== this.client) return;
                     this.emit('timeout');
                 })
                 .on('error', (err: Error) => {
+                    if (client !== this.client) return;
                     console.error(`[socket] error:`, err.message);
                     this.emit('error', err);
                 })
                 .on('end', () => {
+                    if (client !== this.client) return;
                     this.open = false;
                     this.emit('end');
-                    if (!this.destroyed) {
+                    // After emitting 'end', a reconnect triggered synchronously
+                    // by a listener may have already replaced this.client with
+                    // a fresh socket and reset this.destroyed to false.
+                    // Re-check socket identity so we don't destroy the
+                    // newly-created socket.
+                    if (client === this.client && !this.destroyed) {
                         this.destroy();
                     }
                 })
                 .on('close', () => {
+                    if (client !== this.client) return;
                     if (!this.destroyed) {
                         this.destroy();
+                        // Emit 'close' so consumers can trigger a retry when
+                        // the socket closes without a preceding 'end' event
+                        // (e.g. TCP RST where only error+close fires).
+                        this.emit('close');
                     }
                 })
                 .on('drain', () => {
+                    if (client !== this.client) return;
                     this.process();
                 });
 
@@ -276,6 +303,8 @@ export default class TAK extends EventEmitter {
 
         if (this.client) {
             this.client.destroy();
+            this.client.removeAllListeners();
+            this.client = undefined;
         }
 
         if (this.pingInterval) {

@@ -29,7 +29,9 @@ try {
         });
 
         if (!answer) {
-            throw new Error('No config file and not creating one');
+            throw new Error('No config file and not creating one', {
+                cause: err
+            });
         }
 
         config = {
