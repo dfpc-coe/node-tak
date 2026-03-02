@@ -2,7 +2,6 @@ import test from 'tape';
 import { EventEmitter } from 'node:events';
 import TAK, { CoT } from '../index.js';
 
- 
 function createTAK(opts: { writeQueueSize?: number; socketBatchSize?: number } = {}): TAK {
     return new TAK(new URL('ssl://localhost:8089'), { cert: 'test', key: 'test' }, opts);
 }
