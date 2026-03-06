@@ -15,17 +15,19 @@ export enum MissionSubscriberRole {
     MISSION_READONLY_SUBSCRIBER = 'MISSION_READONLY_SUBSCRIBER'
 }
 
+// These properties are optional as a REMOVE_CONTENT will
+// only have "hash"
 export const MissionContent = Type.Object({
-    keywords: Type.Array(Type.String()),
-    name: Type.String(),
+    keywords: Type.Optional(Type.Array(Type.String())),
+    name: Type.Optional(Type.String()),
     hash: Type.String(),
-    submissionTime: Type.String(),
-    uid: Type.String(),
-    size: Type.Integer(),
+    submissionTime: Type.Optional(Type.String()),
+    uid: Type.Optional(Type.String()),
+    size: Type.Optional(Type.Integer()),
     creatorUid: Type.Optional(Type.String()),
     mimeType: Type.Optional(Type.String()),
     submitter: Type.Optional(Type.String()),
-    expiration: Type.Integer()
+    expiration: Type.Optional(Type.Integer())
 });
 
 export const MissionChange = Type.Object({
