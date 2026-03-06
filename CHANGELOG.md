@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.2.0 - 2025-03-06
+
+- :rocket: Adjust mission contentResource to support REMOVE_CONTENT
+
 ### v12.1.0 - 2025-03-02
 
 - :bug: Fix connect_ssl race condition where a stale socket's delayed close or end event could destroy a newly-reconnected socket, leaving the connection permanently dead after a server restart.
