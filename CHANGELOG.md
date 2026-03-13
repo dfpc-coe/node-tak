@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.2.1 - 2025-03-13
+
+- :rocket: Switch to using body to avoid URL encoding issues
+
 ### v12.2.0 - 2025-03-06
 
 - :rocket: Adjust mission contentResource to support REMOVE_CONTENT

@@ -36,12 +36,14 @@ export default class OAuthCommands extends Commands {
     }> {
         const url = new URL(`/oauth/token`, this.api.url);
 
-        url.searchParams.append('grant_type', 'password');
-        url.searchParams.append('username', query.username);
-        url.searchParams.append('password', query.password);
+        const params = new URLSearchParams();
+        params.append('grant_type', 'password');
+        params.append('username', query.username);
+        params.append('password', query.password);
 
         const authres = await this.api.fetch(url, {
-            method: 'POST'
+            method: 'POST',
+            body: params
         }, true);
 
         const text = await authres.text();
