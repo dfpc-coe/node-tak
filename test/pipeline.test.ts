@@ -1,6 +1,7 @@
 import test from 'tape';
 import { EventEmitter } from 'node:events';
 import TAK, { CoT } from '../index.js';
+import { CoTParser } from '@tak-ps/node-cot';
 
 function createTAK(opts: { writeQueueSize?: number; socketBatchSize?: number } = {}): TAK {
     return new TAK(new URL('ssl://localhost:8089'), { cert: 'test', key: 'test' }, opts);
@@ -253,6 +254,58 @@ test('write - caller can safely modify array after write returns', async (t) => 
     t.equals(writeCalls.length, 1, 'socket.write was called');
     t.ok(writeCalls[0].includes('<event'), 'CoT was sent before array was cleared');
     t.equals(tak.queue.length, 0, 'queue empty');
+    t.end();
+});
+
+test('write - stripFlow replaces existing flow tags in outbound XML', async (t) => {
+    const tak = createTAK();
+    const writeCalls: string[] = [];
+    tak.client = createFakeSocket({
+        write(...args: unknown[]) {
+            writeCalls.push(args[0] as string);
+            return true;
+        },
+    });
+
+    const cot = await CoTParser.from_geojson({
+        id: '123',
+        type: 'Feature',
+        path: '/',
+        properties: {
+            type: 'a-f-G',
+            how: 'm-g',
+            callsign: 'BasicTest',
+            center: [1.1, 2.2, 0],
+            time: '2023-08-04T15:17:43.649Z',
+            start: '2023-08-04T15:17:43.649Z',
+            stale: '2023-08-04T15:17:43.649Z',
+            flow: {
+                'TAK-Server-test': '2026-03-08T04:48:00Z'
+            },
+            metadata: {}
+        },
+        geometry: {
+            type: 'Point',
+            coordinates: [1.1, 2.2, 0]
+        }
+    });
+
+    await tak.write([cot], { stripFlow: true });
+
+    t.equals(writeCalls.length, 1, 'socket.write was called');
+    t.notOk(writeCalls[0].includes('TAK-Server-test='), 'server flow tag removed from outbound XML');
+    t.ok(writeCalls[0].includes('NodeCoT-'), 'node-cot flow tag added to outbound XML');
+
+    const outbound = CoTParser.from_xml(writeCalls[0]);
+    const outboundFlow = outbound.raw.event.detail?.['_flow-tags_'];
+
+    t.ok(outboundFlow, 'outbound CoT contains flow tags');
+    t.equal(Object.keys(outboundFlow || {}).length, 1, 'outbound CoT flow object is reset to one initial tag');
+    t.notOk(outboundFlow?.['TAK-Server-test'], 'outbound CoT flow object clears prior TAK Server tags');
+
+    const feat = await CoTParser.to_geojson(cot);
+    t.equal(feat.properties.flow?.['TAK-Server-test'], '2026-03-08T04:48:00Z', 'original CoT remains unchanged');
+
     t.end();
 });
 
