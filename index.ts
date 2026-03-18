@@ -86,8 +86,24 @@ export type TAKOptions = {
     socketBatchSize?: number;
 };
 
+export type WriteOptions = {
+    /** Remove any existing flow tags and replace them with a fresh
+     *  `NodeCoT-*` entry before serializing to XML.
+     *  Useful when re-submitting CoTs back to TAK Server over 8089.
+     *  @default false */
+    stripFlow?: boolean;
+};
+
 const DEFAULT_WRITE_QUEUE_SIZE = 10_000;
 const DEFAULT_SOCKET_BATCH_SIZE = 64;
+
+function cloneCoT(cot: CoT): CoT {
+    const cloned = new CoT(JSON.parse(JSON.stringify(cot.raw)));
+    cloned.metadata = JSON.parse(JSON.stringify(cot.metadata));
+    cloned.path = cot.path;
+
+    return cloned;
+}
 
 export default class TAK extends EventEmitter {
     id: number | string;
@@ -394,14 +410,17 @@ export default class TAK extends EventEmitter {
      *
      * @param cots Array of CoT objects to send
      */
-    async write(cots: CoT[]): Promise<void> {
+    async write(cots: CoT[], opts: WriteOptions = {}): Promise<void> {
         for (let i = 0; i < cots.length; ) {
             if (this.destroyed) return;
 
             // Serialize upfront and push XML strings into the ring buffer
             while (
                 i < cots.length &&
-                this.queue.push(CoTParser.to_xml(cots[i]))
+                this.queue.push(CoTParser.to_xml(
+                    opts.stripFlow ? cloneCoT(cots[i]) : cots[i],
+                    opts.stripFlow ? { resetFlow: true } : undefined,
+                ))
             ) {
                 i++;
             }
