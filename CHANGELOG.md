@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.4.0 - 2025-03-18
+
+- :arrow_up: Update pinned node-cot dep
+
 ### v12.3.1 - 2025-03-18
 
 - :arrow_up: Update pinned node-cot dep
