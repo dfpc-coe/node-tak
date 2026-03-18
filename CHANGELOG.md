@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.3.0 - 2025-03-18
+
+- :rocket: Enable Flow Stripping Option
+
 ### v12.2.1 - 2025-03-13
 
 - :rocket: Switch to using body to avoid URL encoding issues
