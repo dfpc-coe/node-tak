@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.5.0 - 2025-04-06
+
+- :arrow_up: Update to TypeScript@6
+
 ### v12.4.0 - 2025-03-18
 
 - :arrow_up: Update pinned node-cot dep
