@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.6.0 - 2025-04-08
+
+- :arrow_up: Migrate to DFPC controlled P12 extractor library
+
 ### v12.5.0 - 2025-04-06
 
 - :arrow_up: Update to TypeScript@6

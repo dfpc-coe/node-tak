@@ -7,7 +7,7 @@ import minimist from 'minimist';
 import { Static } from '@sinclair/typebox';
 import { CoTParser } from '@tak-ps/node-cot'
 import TAK from './index.js';
-import { getPemFromP12 } from 'p12-pem'
+import { getPemFromP12 } from '@tak-ps/node-p12'
 import TAKAPI, { CommandList } from './lib/api.js';
 import { APIAuthPassword, APIAuthCertificate } from './lib/auth.js';
 import Commands, { CommandConfig } from './lib/commands.js';
