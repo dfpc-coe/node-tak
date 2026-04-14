@@ -1,4 +1,5 @@
-import test from 'tape';
+import test from 'node:test';
+import assert from 'node:assert/strict';
 import { EventEmitter } from 'node:events';
 import TAK, { CoT } from '../index.js';
 import { CoTParser } from '@tak-ps/node-cot';
@@ -20,26 +21,24 @@ function createFakeSocket(opts: { write?: (...args: unknown[]) => boolean } = {}
     });
 }
 
-test('write - resolves when all CoTs are queued and sent', async (t) => {
+test('write - resolves when all CoTs are queued and sent', async () => {
     const tak = createTAK();
     tak.client = createFakeSocket();
 
     const cots = [CoT.ping(), CoT.ping()];
     await tak.write(cots);
 
-    t.equals(tak.queue.length, 0, 'queue empty after write + pull');
-    t.end();
+    assert.equal(tak.queue.length, 0, 'queue empty after write + pull');
 });
 
-test('write - returns early when destroyed', async (t) => {
+test('write - returns early when destroyed', async () => {
     const tak = createTAK();
     tak.destroyed = true;
     await tak.write([CoT.ping()]);
-    t.equals(tak.queue.length, 0, 'nothing queued');
-    t.end();
+    assert.equal(tak.queue.length, 0, 'nothing queued');
 });
 
-test('write - multiple concurrent writes', async (t) => {
+test('write - multiple concurrent writes', async () => {
     const tak = createTAK();
     tak.client = createFakeSocket();
 
@@ -48,12 +47,11 @@ test('write - multiple concurrent writes', async (t) => {
     const p2 = tak.write([CoT.ping()]).then(() => order.push(2));
     await Promise.all([p1, p2]);
 
-    t.deepEquals(order, [1, 2], 'writes resolve in order');
-    t.equals(tak.queue.length, 0, 'queue drained');
-    t.end();
+    assert.deepEqual(order, [1, 2], 'writes resolve in order');
+    assert.equal(tak.queue.length, 0, 'queue drained');
 });
 
-test('pull - batches CoTs into single socket.write call', async (t) => {
+test('pull - batches CoTs into single socket.write call', async () => {
     const tak = createTAK({ socketBatchSize: 64 });
     const writeCalls: string[] = [];
     tak.client = createFakeSocket({
@@ -65,13 +63,12 @@ test('pull - batches CoTs into single socket.write call', async (t) => {
 
     await tak.write([CoT.ping(), CoT.ping()]);
 
-    t.equals(writeCalls.length, 1, 'socket.write called once for batch');
-    t.ok(writeCalls[0].includes('<event'), 'batch contains XML events');
-    t.equals(tak.queue.length, 0, 'queue drained');
-    t.end();
+    assert.equal(writeCalls.length, 1, 'socket.write called once for batch');
+    assert.ok(writeCalls[0].includes('<event'), 'batch contains XML events');
+    assert.equal(tak.queue.length, 0, 'queue drained');
 });
 
-test('pull - respects backpressure and resumes on process()', async (t) => {
+test('pull - respects backpressure and resumes on process()', async () => {
     const tak = createTAK({ socketBatchSize: 1 });
     let callCount = 0;
     const socket = createFakeSocket({
@@ -89,19 +86,18 @@ test('pull - respects backpressure and resumes on process()', async (t) => {
     // Both CoTs get queued immediately, pull() sends 1 and hits backpressure
     await tak.write([CoT.ping(), CoT.ping()]);
 
-    t.equals(callCount, 1, 'one write before backpressure');
-    t.equals(tak.queue.length, 1, 'one item still in queue');
+    assert.equal(callCount, 1, 'one write before backpressure');
+    assert.equal(tak.queue.length, 1, 'one item still in queue');
 
     // Simulate backpressure clearing (equivalent to drain event)
     socket.writableNeedDrain = false;
     tak.process();
 
-    t.equals(callCount, 2, 'second write after backpressure cleared');
-    t.equals(tak.queue.length, 0, 'queue drained');
-    t.end();
+    assert.equal(callCount, 2, 'second write after backpressure cleared');
+    assert.equal(tak.queue.length, 0, 'queue drained');
 });
 
-test('pull - error in socket.write triggers destroy + error event', async (t) => {
+test('pull - error in socket.write triggers destroy + error event', async () => {
     const tak = createTAK();
     tak.client = createFakeSocket({
         write() { throw new Error('write failed'); },
@@ -115,13 +111,12 @@ test('pull - error in socket.write triggers destroy + error event', async (t) =>
     // write() sees destroyed=true on next check and returns
     await tak.write([CoT.ping()]);
 
-    t.equals(tak.destroyed, true, 'destroyed after write error');
-    t.ok(errorFired, 'error event fired');
-    t.equals(errorMsg, 'write failed', 'error message matches');
-    t.end();
+    assert.equal(tak.destroyed, true, 'destroyed after write error');
+    assert.ok(errorFired, 'error event fired');
+    assert.equal(errorMsg, 'write failed', 'error message matches');
 });
 
-test('pull - noop when already writing', (t) => {
+test('pull - noop when already writing', () => {
     const tak = createTAK();
     tak.client = createFakeSocket();
     tak.writing = true;
@@ -131,18 +126,16 @@ test('pull - noop when already writing', (t) => {
     // pull() should return immediately since writing=true
     tak.process();
 
-    t.equals(tak.queue.length, 1, 'queue unchanged');
-    t.end();
+    assert.equal(tak.queue.length, 1, 'queue unchanged');
 });
 
-test('flush - resolves immediately when nothing queued', async (t) => {
+test('flush - resolves immediately when nothing queued', async () => {
     const tak = createTAK();
     await tak.flush();
-    t.pass('flush resolved immediately');
-    t.end();
+    assert.ok(true, 'flush resolved immediately');
 });
 
-test('flush - rejects when destroyed mid-flush', async (t) => {
+test('flush - rejects when destroyed mid-flush', async () => {
     const tak = createTAK();
     tak.client = createFakeSocket();
 
@@ -155,15 +148,14 @@ test('flush - rejects when destroyed mid-flush', async (t) => {
 
     try {
         await p;
-        t.fail('should have rejected');
+        assert.fail('should have rejected');
     } catch (err) {
-        t.ok(err instanceof Error, 'error is an Error');
-        t.ok((err as Error).message.includes('destroyed'), 'error mentions destroyed');
+        assert.ok(err instanceof Error, 'error is an Error');
+        assert.ok((err as Error).message.includes('destroyed'), 'error mentions destroyed');
     }
-    t.end();
 });
 
-test('flush - waits for queue to drain via process()', async (t) => {
+test('flush - waits for queue to drain via process()', async () => {
     const tak = createTAK({ socketBatchSize: 1 });
     let callCount = 0;
     const socket = createFakeSocket({
@@ -179,7 +171,7 @@ test('flush - waits for queue to drain via process()', async (t) => {
     tak.client = socket;
 
     await tak.write([CoT.ping(), CoT.ping()]);
-    t.equals(tak.queue.length, 1, 'one item in queue after backpressure');
+    assert.equal(tak.queue.length, 1, 'one item in queue after backpressure');
 
     // Clear backpressure and drain
     socket.writableNeedDrain = false;
@@ -187,12 +179,11 @@ test('flush - waits for queue to drain via process()', async (t) => {
     tak.process();
     await flushP;
 
-    t.equals(tak.queue.length, 0, 'queue empty after flush');
-    t.equals(callCount, 2, 'both items sent');
-    t.end();
+    assert.equal(tak.queue.length, 0, 'queue empty after flush');
+    assert.equal(callCount, 2, 'both items sent');
 });
 
-test('write - yields when queue is full and resumes after destroy', async (t) => {
+test('write - yields when queue is full and resumes after destroy', async () => {
     // writeQueueSize=4 → queue capacity = 4
     const tak = createTAK({ writeQueueSize: 4 });
 
@@ -202,17 +193,16 @@ test('write - yields when queue is full and resumes after destroy', async (t) =>
         .then(() => { writeResolved = true; });
     await new Promise(r => setImmediate(r));
 
-    t.equals(tak.queue.length, 4, 'queue at capacity');
-    t.equals(writeResolved, false, 'write blocked waiting for space');
+    assert.equal(tak.queue.length, 4, 'queue at capacity');
+    assert.equal(writeResolved, false, 'write blocked waiting for space');
 
     // Destroy unblocks write (destroyed check in loop)
     tak.destroy();
     await p;
-    t.ok(writeResolved, 'write resolved after destroy');
-    t.end();
+    assert.ok(writeResolved, 'write resolved after destroy');
 });
 
-test('write - resumes after queue drains', async (t) => {
+test('write - resumes after queue drains', async () => {
     // writeQueueSize=8 → queue capacity = 8, socketBatchSize=4
     const tak = createTAK({ writeQueueSize: 8, socketBatchSize: 4 });
     let callCount = 0;
@@ -230,12 +220,11 @@ test('write - resumes after queue drains', async (t) => {
         CoT.ping(), CoT.ping(), CoT.ping(), CoT.ping(), CoT.ping(),
     ]);
 
-    t.equals(tak.queue.length, 0, 'all drained');
-    t.ok(callCount >= 2, 'multiple socket.write calls needed');
-    t.end();
+    assert.equal(tak.queue.length, 0, 'all drained');
+    assert.ok(callCount >= 2, 'multiple socket.write calls needed');
 });
 
-test('write - caller can safely modify array after write returns', async (t) => {
+test('write - caller can safely modify array after write returns', async () => {
     const tak = createTAK();
     const writeCalls: string[] = [];
     tak.client = createFakeSocket({
@@ -251,13 +240,12 @@ test('write - caller can safely modify array after write returns', async (t) => 
     // Modify the array after write — should not affect what was sent
     cots.length = 0;
 
-    t.equals(writeCalls.length, 1, 'socket.write was called');
-    t.ok(writeCalls[0].includes('<event'), 'CoT was sent before array was cleared');
-    t.equals(tak.queue.length, 0, 'queue empty');
-    t.end();
+    assert.equal(writeCalls.length, 1, 'socket.write was called');
+    assert.ok(writeCalls[0].includes('<event'), 'CoT was sent before array was cleared');
+    assert.equal(tak.queue.length, 0, 'queue empty');
 });
 
-test('write - stripFlow replaces existing flow tags in outbound XML', async (t) => {
+test('write - stripFlow replaces existing flow tags in outbound XML', async () => {
     const tak = createTAK();
     const writeCalls: string[] = [];
     tak.client = createFakeSocket({
@@ -292,30 +280,27 @@ test('write - stripFlow replaces existing flow tags in outbound XML', async (t) 
 
     await tak.write([cot], { stripFlow: true });
 
-    t.equals(writeCalls.length, 1, 'socket.write was called');
-    t.notOk(writeCalls[0].includes('TAK-Server-test='), 'server flow tag removed from outbound XML');
-    t.ok(writeCalls[0].includes('NodeCoT-'), 'node-cot flow tag added to outbound XML');
+    assert.equal(writeCalls.length, 1, 'socket.write was called');
+    assert.ok(!writeCalls[0].includes('TAK-Server-test='), 'server flow tag removed from outbound XML');
+    assert.ok(writeCalls[0].includes('NodeCoT-'), 'node-cot flow tag added to outbound XML');
 
     const outbound = CoTParser.from_xml(writeCalls[0]);
     const outboundFlow = outbound.raw.event.detail?.['_flow-tags_'];
 
-    t.ok(outboundFlow, 'outbound CoT contains flow tags');
-    t.equal(Object.keys(outboundFlow || {}).length, 1, 'outbound CoT flow object is reset to one initial tag');
-    t.notOk(outboundFlow?.['TAK-Server-test'], 'outbound CoT flow object clears prior TAK Server tags');
+    assert.ok(outboundFlow, 'outbound CoT contains flow tags');
+    assert.equal(Object.keys(outboundFlow || {}).length, 1, 'outbound CoT flow object is reset to one initial tag');
+    assert.ok(!outboundFlow?.['TAK-Server-test'], 'outbound CoT flow object clears prior TAK Server tags');
 
     const feat = await CoTParser.to_geojson(cot);
-    t.equal(feat.properties.flow?.['TAK-Server-test'], '2026-03-08T04:48:00Z', 'original CoT remains unchanged');
-
-    t.end();
+    assert.equal(feat.properties.flow?.['TAK-Server-test'], '2026-03-08T04:48:00Z', 'original CoT remains unchanged');
 });
 
-test('destroy - sets destroyed and clears ping interval', (t) => {
+test('destroy - sets destroyed and clears ping interval', () => {
     const tak = createTAK();
     tak.pingInterval = setInterval(() => {}, 60000);
 
     tak.destroy();
 
-    t.equals(tak.destroyed, true, 'destroyed is true');
-    t.equals(tak.pingInterval, undefined, 'pingInterval cleared');
-    t.end();
+    assert.equal(tak.destroyed, true, 'destroyed is true');
+    assert.equal(tak.pingInterval, undefined, 'pingInterval cleared');
 });

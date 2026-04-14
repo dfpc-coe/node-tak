@@ -1,9 +1,9 @@
 import TAK, { CoT } from '../index.js';
-import test from 'tape';
+import test from 'node:test';
+import assert from 'node:assert/strict';
 
-test('Ensure Export', (t) => {
-    t.ok(TAK);
-    t.ok(CoT);
-    t.end();
+test('Ensure Export', () => {
+    assert.ok(TAK);
+    assert.ok(CoT);
 });
 

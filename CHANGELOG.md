@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.9.0 - 2025-04-13
+
+- :arrow_up: Remove `tape` in favor of `node:test` and update tests accordingly
+
 ### v12.8.0 - 2025-04-13
 
 - :arrow_up: Remove use of `form-data`
