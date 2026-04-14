@@ -1,7 +1,6 @@
 import { TAKItem } from './types.js';
-import type { ParsedArgs } from 'minimist'
 import { Type, Static } from '@sinclair/typebox';
-import Commands, { CommandOutputFormat } from '../commands.js';
+import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
 
 export const IsSecure = TAKItem(Type.String())
 export const IsValid = TAKItem(Type.String())

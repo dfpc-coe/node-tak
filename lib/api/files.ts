@@ -1,8 +1,7 @@
 import FormData from 'form-data';
-import type { ParsedArgs } from 'minimist'
 import { Readable } from 'node:stream';
 import mime from 'mime';
-import Commands, { CommandOutputFormat } from '../commands.js';
+import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
 import { TAKList } from './types.js';
 import { Type, Static } from '@sinclair/typebox';
 

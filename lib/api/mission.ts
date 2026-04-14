@@ -1,5 +1,4 @@
 import xmljs from 'xml-js';
-import type { ParsedArgs } from 'minimist'
 import CoT, { CoTParser } from '@tak-ps/node-cot';
 import { Type, Static } from '@sinclair/typebox';
 import Err from '@openaddresses/batch-error';
@@ -7,7 +6,7 @@ import { Readable } from 'node:stream'
 import { TAKItem, TAKList } from './types.js';
 import { MissionLog } from './mission-log.js';
 import type { Feature } from '@tak-ps/node-cot';
-import Commands, { CommandOutputFormat } from '../commands.js';
+import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
 
 export enum MissionSubscriberRole {
     MISSION_OWNER = 'MISSION_OWNER',

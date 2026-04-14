@@ -1,7 +1,6 @@
 import { Static, Type } from '@sinclair/typebox';
-import type { ParsedArgs } from 'minimist'
 import { TAKList } from './types.js';
-import Commands, { CommandOutputFormat } from '../commands.js';
+import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
 
 export const Group = Type.Object({
     name: Type.String(),

@@ -1,8 +1,7 @@
 import Err from '@openaddresses/batch-error';
-import type { ParsedArgs } from 'minimist'
 import { Static, Type } from '@sinclair/typebox';
 import { randomUUID } from 'node:crypto';
-import Commands, { CommandOutputFormat } from '../commands.js';
+import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
 
 export const FeedInput = Type.Object({
     uuid: Type.Optional(Type.String()),

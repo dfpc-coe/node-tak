@@ -1,8 +1,7 @@
-import type { ParsedArgs } from 'minimist'
 import { Type, Static } from '@sinclair/typebox';
 import { TAKList } from './types.js';
 import { GUIDMatch, MissionOptions } from './mission.js';
-import Commands, { CommandOutputFormat } from '../commands.js';
+import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
 
 export enum MissionSubscriberRole {
     MISSION_OWNER = 'MISSION_OWNER',
@@ -85,9 +84,20 @@ export default class MissionInviteCommands extends Commands {
     }
 
     async cli(args: ParsedArgs): Promise<object | string> {
+        const clientUid = typeof args.clientUid === 'string' ? args.clientUid : undefined;
+        const token = typeof args.token === 'string' ? args.token : undefined;
+        const creatorUid =
+            typeof args.creatorUid === 'string' ? args.creatorUid : undefined;
+        const role =
+            typeof args.role === 'string'
+                ? (args.role as MissionSubscriberRole)
+                : undefined;
+
         if (args._[3] === 'list') {
-            const list = await this.list(args.clientUid, {
-                token: args.token
+            if (!clientUid) throw new Error('Usage: list --clientUid <clientUid>');
+
+            const list = await this.list(clientUid, {
+                token
             });
 
             if (args.format === 'json') {
@@ -103,7 +113,7 @@ export default class MissionInviteCommands extends Commands {
             if (!name) throw new Error('Usage: get <name>');
 
             const list = await this.get(name, {
-                token: args.token
+                token
             });
 
             if (args.format === 'json') {
@@ -119,12 +129,13 @@ export default class MissionInviteCommands extends Commands {
             const invitee = args._[6];
 
             if (!name || !type || !invitee) throw new Error('Usage: invite <name> <type> <invitee>');
+            if (!creatorUid) throw new Error('Usage: invite requires --creatorUid <uid>');
 
             await this.invite(name, type, invitee, {
-                creatorUid: args.creatorUid,
-                role: args.role
+                creatorUid,
+                role
             }, {
-                token: args.token
+                token
             });
             return { message: 'OK' };
         } else if (args._[3] === 'uninvite') {
@@ -133,11 +144,12 @@ export default class MissionInviteCommands extends Commands {
             const invitee = args._[6];
 
             if (!name || !type || !invitee) throw new Error('Usage: uninvite <name> <type> <invitee>');
+            if (!creatorUid) throw new Error('Usage: uninvite requires --creatorUid <uid>');
 
             await this.uninvite(name, type, invitee, {
-                creatorUid: args.creatorUid
+                creatorUid
             }, {
-                token: args.token
+                token
             });
             return { message: 'OK' };
         } else {

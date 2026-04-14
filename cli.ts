@@ -3,19 +3,39 @@
 import fs from 'node:fs/promises'
 import os from  'node:os';
 import path from 'node:path';
-import minimist from 'minimist';
+import { parseArgs } from 'node:util';
 import { Static } from '@sinclair/typebox';
 import { CoTParser } from '@tak-ps/node-cot'
 import TAK from './index.js';
 import { getPemFromP12 } from '@tak-ps/node-p12'
 import TAKAPI, { CommandList } from './lib/api.js';
 import { APIAuthPassword, APIAuthCertificate } from './lib/auth.js';
-import Commands, { CommandConfig } from './lib/commands.js';
+import Commands, {
+    CommandConfig,
+    CommandOutputFormat,
+    type ParsedArgs,
+} from './lib/commands.js';
 import { select, confirm, number, input, password, Separator } from '@inquirer/prompts';
 
-const args = minimist(process.argv, {
-    string: ['profile', 'format', 'auth'],
+const parsed = parseArgs({
+    args: process.argv.slice(2),
+    allowPositionals: true,
+    strict: false,
+    options: {
+        profile: { type: 'string' },
+        format: { type: 'string' },
+        auth: { type: 'string' },
+    },
 });
+
+const args: ParsedArgs = {
+    _: process.argv,
+    ...parsed.values,
+};
+
+let profile = typeof args.profile === 'string' ? args.profile : undefined;
+const format = typeof args.format === 'string' ? args.format : undefined;
+const authPath = typeof args.auth === 'string' ? args.auth : undefined;
 
 const configPath = path.resolve(os.homedir(), './.tak.json');
 let config: Static<typeof CommandConfig>;
@@ -48,8 +68,8 @@ try {
     }
 }
 
-if (!args.profile && config.profiles && Object.keys(config.profiles).length) {
-    args.profile = await select({
+if (!profile && config.profiles && Object.keys(config.profiles).length) {
+    profile = await select({
         message: 'Choose a profile',
         choices: [
             { name: 'New Profile', value: '' },
@@ -62,12 +82,15 @@ if (!args.profile && config.profiles && Object.keys(config.profiles).length) {
             }),
         )
     });
+
+    args.profile = profile;
 }
 
-if (!args.profile) {
+if (!profile) {
     console.error('Create new TAK Server Profile:');
 
-    args.profile = await input({ message: 'Enter a name for this profile' });
+    profile = await input({ message: 'Enter a name for this profile' });
+    args.profile = profile;
 
     const host = await input({ message: 'Server hostname', default: 'ops.example.com' });
 
@@ -88,25 +111,29 @@ if (!args.profile) {
     } while (!stream || isNaN(stream))
 
     if (!config.profiles) config.profiles = {};
-    config.profiles[args.profile] = {
+    config.profiles[profile] = {
         host,
         ports: { webtak, marti, stream }
     };
 }
 
-if (args.profile && !config.profiles[args.profile]) {
-    throw new Error(`Profile "${args.profile}" is not defined in config file`);
-} else if (!args.auth && !config.profiles[args.profile].auth) {
+if (!profile) {
+    throw new Error('No profile selected');
+}
+
+if (profile && !config.profiles[profile]) {
+    throw new Error(`Profile "${profile}" is not defined in config file`);
+} else if (!authPath && !config.profiles[profile].auth) {
     const user = await input({ message: 'TAK Username' });
     const pass = await password({ message: 'TAK Password' });
 
     const api = await TAKAPI.init(
-        new URL('https://' + config.profiles[args.profile].host + ':' + config.profiles[args.profile].ports.webtak),
+        new URL('https://' + config.profiles[profile].host + ':' + config.profiles[profile].ports.webtak),
         new APIAuthPassword(user, pass)
     );
 
     const auth = await api.Credentials.generate();
-    config.profiles[args.profile].auth = {
+    config.profiles[profile].auth = {
         cert: auth.cert,
         key: auth.key,
         ca: auth.ca[0]
@@ -136,12 +163,12 @@ await fs.writeFile(
 )
 
 
-let auth = config.profiles[args.profile].auth;
+let auth = config.profiles[profile].auth;
 
-if (args.auth) {
+if (authPath) {
     const password = process.env.TAK_P12_PASSWORD || await input({ message: 'P12 Container Password' });
 
-    const certs = getPemFromP12(args.auth, password)
+    const certs = getPemFromP12(authPath, password)
 
     const cert = certs.pemCertificate
         .split('-----BEGIN CERTIFICATE-----')
@@ -158,11 +185,11 @@ if (args.auth) {
     auth = { cert, key }
 }
 
-if (!auth) throw new Error(`No Auth in ${args.profile} profile`);
+if (!auth) throw new Error(`No Auth in ${profile} profile`);
 
 if (command === 'stream') {
     const tak = await TAK.connect(
-        new URL('ssl://' + config.profiles[args.profile].host + ':' + config.profiles[args.profile].ports.stream),
+        new URL('ssl://' + config.profiles[profile].host + ':' + config.profiles[profile].ports.stream),
         auth
     );
 
@@ -170,12 +197,12 @@ if (command === 'stream') {
         console.log(JSON.stringify(CoTParser.to_geojson(cot)));
     });
 } else {
-    if (!config.profiles[args.profile].auth) {
-        throw new Error(`No Auth in ${args.profile} profile`);
+    if (!config.profiles[profile].auth) {
+        throw new Error(`No Auth in ${profile} profile`);
     }
 
     const tak = new TAKAPI(
-        new URL('https://' + config.profiles[args.profile].host + ':' + config.profiles[args.profile].ports.marti),
+        new URL('https://' + config.profiles[profile].host + ':' + config.profiles[profile].ports.marti),
         new APIAuthCertificate(auth.cert, auth.key)
     );
 
@@ -216,8 +243,11 @@ if (command === 'stream') {
 
     if (!invoke.schema[subcommand]) {
         throw new Error(`Unsupported Subcommand: ${subcommand}`);
-    } else if (args.format && !invoke.schema[subcommand].formats.includes(args.format)) {
-        throw new Error(`tak ${command} ${subcommand} does not support --format ${args.format}. Supported formats are: ${invoke.schema[subcommand].formats.join(",")}`);
+    } else if (
+        format &&
+        !invoke.schema[subcommand].formats.includes(format as CommandOutputFormat)
+    ) {
+        throw new Error(`tak ${command} ${subcommand} does not support --format ${format}. Supported formats are: ${invoke.schema[subcommand].formats.join(",")}`);
     }
 
     try {

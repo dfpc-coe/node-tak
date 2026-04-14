@@ -1,7 +1,6 @@
 import { Type, Static } from '@sinclair/typebox';
-import type { ParsedArgs } from 'minimist'
 import { TAKList } from './types.js';
-import Commands, { CommandOutputFormat } from '../commands.js';
+import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
 
 export const ClientEndpoint = Type.Object({
     callsign: Type.String(),
@@ -33,11 +32,19 @@ export default class Client extends Commands {
 
     async cli(args: ParsedArgs): Promise<object | string> {
         if (args._[3] === 'list') {
+            const secAgo = typeof args.secAgo === 'string' ? Number(args.secAgo) : undefined;
+            const group =
+                typeof args.group === 'string'
+                    ? [args.group]
+                    : Array.isArray(args.group)
+                        ? args.group.filter((value): value is string => typeof value === 'string')
+                        : undefined;
+
             return await this.list({
-                secAgo: args.secAgo,
+                secAgo: secAgo !== undefined && Number.isNaN(secAgo) ? undefined : secAgo,
                 showCurrentlyConnectedClients: args.showCurrentlyConnectedClients ? String(args.showCurrentlyConnectedClients) : undefined,
                 showMostRecentOnly: args.showMostRecentOnly ? String(args.showMostRecentOnly) : undefined,
-                group: args.group ? (Array.isArray(args.group) ? args.group : [args.group]) : undefined
+                group
             });
         } else {
             throw new Error('Unsupported Subcommand');

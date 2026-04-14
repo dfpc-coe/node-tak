@@ -1,8 +1,13 @@
 import { TAKAuth } from './auth.js';
-import type { ParsedArgs } from 'minimist';
 import TAKAPI from './api.js';
 import type { TObject } from '@sinclair/typebox';
 import { Type } from '@sinclair/typebox';
+
+export type ParsedArgValue = string | boolean;
+export type ParsedArgs = {
+    _: string[];
+    [key: string]: ParsedArgValue | ParsedArgValue[] | undefined;
+};
 
 export const CommandConfig = Type.Object({
     version: Type.Integer(),

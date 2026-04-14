@@ -1,7 +1,6 @@
 import { APIAuthPassword } from '../auth.js';
-import type { ParsedArgs } from 'minimist'
 import { Static, Type } from '@sinclair/typebox';
-import Commands, { CommandOutputFormat } from '../commands.js';
+import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
 import pem from 'pem';
 import xmljs from 'xml-js';
 
