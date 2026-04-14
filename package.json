@@ -31,7 +31,6 @@
         "@openaddresses/batch-error": "^2.12.0",
         "@sinclair/typebox": "^0.34.41",
         "@tak-ps/node-p12": "^1.0.1",
-        "form-data": "^4.0.2",
         "mime": "^4.0.7",
         "pem": "^1.14.8",
         "undici": "^8.0.0",

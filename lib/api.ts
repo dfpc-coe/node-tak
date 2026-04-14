@@ -1,4 +1,3 @@
-import FormData from 'form-data';
 import OAuth from './api/oauth.js';
 import Package from './api/package.js';
 import Certificate from './api/certificate.js';
@@ -147,8 +146,9 @@ export default class TAKAPI {
             ) {
                 opts.body = JSON.stringify(opts.body);
                 opts.headers['Content-Type'] = 'application/json';
-            } else if (opts.body instanceof FormData) {
-                opts.headers = opts.body.getHeaders();
+            } else if (typeof FormData !== 'undefined' && opts.body instanceof FormData) {
+                // Let fetch/undici set multipart headers and boundary automatically.
+                delete opts.headers['Content-Type'];
             } else if (opts.body instanceof URLSearchParams) {
                 opts.headers['Content-Type'] = 'application/x-www-form-urlencoded'
                 opts.body = String(opts.body);

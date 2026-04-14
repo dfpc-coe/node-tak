@@ -1,4 +1,3 @@
-import FormData from 'form-data';
 import { Readable } from 'node:stream';
 import mime from 'mime';
 import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
@@ -145,12 +144,10 @@ export default class FileCommands extends Commands {
             }
         }
 
-        if (body instanceof Buffer) {
-            body = Readable.from(body as Buffer);
-        }
-
         const form = new FormData()
-        form.append('assetfile', body as Readable);
+        const contentType = opts.mimetype || mime.getType(opts.name) || undefined;
+        const file = await toBlob(body, contentType);
+        form.append('assetfile', file, opts.name);
 
         const res = await this.api.fetch(url, {
             method: 'POST',
@@ -213,4 +210,27 @@ export default class FileCommands extends Commands {
             method: 'GET'
         });
     }
+}
+
+async function toBlob(body: Readable | Buffer, type?: string): Promise<Blob> {
+    if (body instanceof Buffer) {
+        const bytes = new Uint8Array(body);
+        return type ? new Blob([bytes], { type }) : new Blob([bytes]);
+    }
+
+    const chunks: Buffer[] = [];
+
+    for await (const chunk of body) {
+        if (chunk instanceof Buffer) {
+            chunks.push(chunk);
+        } else if (typeof chunk === 'string') {
+            chunks.push(Buffer.from(chunk));
+        } else {
+            chunks.push(Buffer.from(chunk));
+        }
+    }
+
+    const buff = Buffer.concat(chunks);
+    const bytes = new Uint8Array(buff);
+    return type ? new Blob([bytes], { type }) : new Blob([bytes]);
 }

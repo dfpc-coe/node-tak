@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.8.0 - 2025-04-13
+
+- :arrow_up: Remove use of `form-data`
+
 ### v12.7.0 - 2025-04-13
 
 - :arrow_up: Migrate to Typescript 6.0
