@@ -3,6 +3,7 @@ import { Type } from '@sinclair/typebox';
 import { Client } from 'undici';
 import TAKAPI from './api.js';
 import stream2buffer  from './stream.js';
+import { encodeMultipartFormData } from './multipart.js';
 
 /**
  * Store the TAK Client Certificate for a connection
@@ -96,6 +97,18 @@ export class APIAuthCertificate extends APIAuth {
                 rejectUnauthorized: false,
             }
         });
+
+        if (typeof FormData !== 'undefined' && opts.body instanceof FormData) {
+            const multipart = await encodeMultipartFormData(opts.body);
+            opts = {
+                ...opts,
+                headers: {
+                    ...(opts.headers || {}),
+                    ...multipart.headers
+                },
+                body: multipart.body
+            };
+        }
 
         const res = await client.request({
             path: String(url).replace(api.url.origin, ''),

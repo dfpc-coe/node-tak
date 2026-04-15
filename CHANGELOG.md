@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.10.0 - 2025-04-14
+
+- :rocket: handle multipart form data internally
+
 ### v12.9.0 - 2025-04-13
 
 - :arrow_up: Remove `tape` in favor of `node:test` and update tests accordingly
