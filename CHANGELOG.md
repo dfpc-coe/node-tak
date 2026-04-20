@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.11.0 - 2025-04-20
+
+- :tada: Handle Mission Package Updates
+
 ### v12.10.0 - 2025-04-14
 
 - :rocket: handle multipart form data internally

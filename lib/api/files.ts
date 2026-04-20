@@ -203,6 +203,30 @@ export default class FileCommands extends Commands {
         });
     }
 
+    async update(hash: string, opts: {
+        keywords?: string[];
+        expiration?: number;
+    }): Promise<void> {
+        if (opts.keywords !== undefined) {
+            const url = new URL(`/Marti/sync/metadata/${encodeURIComponent(hash)}/keywords`, this.api.url);
+
+            await this.api.fetch(url, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(opts.keywords)
+            });
+        }
+
+        if (opts.expiration !== undefined) {
+            const url = new URL(`/Marti/sync/metadata/${encodeURIComponent(hash)}/expiration`, this.api.url);
+            url.searchParams.append('expiration', String(opts.expiration));
+
+            await this.api.fetch(url, {
+                method: 'PUT',
+            });
+        }
+    }
+
     async config(): Promise<Static<typeof Config>> {
         const url = new URL('/files/api/config', this.api.url);
 
