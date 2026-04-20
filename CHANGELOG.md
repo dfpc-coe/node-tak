@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.11.1 - 2025-04-20
+
+- :bug: Fix URL endpoints
+
 ### v12.11.0 - 2025-04-20
 
 - :tada: Handle Mission Package Updates

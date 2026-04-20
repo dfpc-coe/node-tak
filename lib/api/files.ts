@@ -208,17 +208,17 @@ export default class FileCommands extends Commands {
         expiration?: number;
     }): Promise<void> {
         if (opts.keywords !== undefined) {
-            const url = new URL(`/Marti/sync/metadata/${encodeURIComponent(hash)}/keywords`, this.api.url);
+            const url = new URL(`/Marti/api/sync/metadata/${encodeURIComponent(hash)}/keywords`, this.api.url);
 
             await this.api.fetch(url, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(opts.keywords)
+                body: opts.keywords
             });
         }
 
         if (opts.expiration !== undefined) {
-            const url = new URL(`/Marti/sync/metadata/${encodeURIComponent(hash)}/expiration`, this.api.url);
+            const url = new URL(`/Marti/api/sync/metadata/${encodeURIComponent(hash)}/expiration`, this.api.url);
             url.searchParams.append('expiration', String(opts.expiration));
 
             await this.api.fetch(url, {
