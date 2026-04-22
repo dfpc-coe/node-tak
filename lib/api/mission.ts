@@ -381,6 +381,55 @@ export default class MissionCommands extends Commands {
     }
 
     /**
+     * Return children associated with this mission
+     *
+     * {@link https://docs.tak.gov/api/takserver/redoc#tag/mission-api/operation/getChildren TAK Server Docs}.
+     */
+    async children(
+        name: string,
+        opts?: Static<typeof MissionOptions>
+    ): Promise<Static<typeof TAKList_Mission>> {
+        const url = this.#isGUID(name)
+            ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/children`, this.api.url)
+            : new URL(`/Marti/api/missions/${this.#encodeName(name)}/children`, this.api.url);
+
+        return await this.api.fetch(url, {
+            method: 'GET',
+            headers: this.#headers(opts)
+        });
+    }
+
+    /**
+     * Set the parent mission for a child mission
+     *
+     * {@link https://docs.tak.gov/api/takserver/redoc#tag/mission-api/operation/setParent TAK Server Docs}.
+     */
+    async setParent(
+        child: string,
+        parent: string,
+        opts?: Static<typeof MissionOptions>
+    ) {
+        if (this.#isGUID(child) || this.#isGUID(parent)) {
+            const childGuid = this.#isGUID(child) ? child : (await this.get(child, {}, opts)).guid;
+            const parentGuid = this.#isGUID(parent) ? parent : (await this.get(parent, {}, opts)).guid;
+
+            const url = new URL(`/Marti/api/missions/guid/${encodeURIComponent(childGuid)}/parent/guid/${encodeURIComponent(parentGuid)}`, this.api.url);
+
+            return await this.api.fetch(url, {
+                method: 'PUT',
+                headers: this.#headers(opts)
+            });
+        }
+
+        const url = new URL(`/Marti/api/missions/${this.#encodeName(child)}/parent/${this.#encodeName(parent)}`, this.api.url);
+
+        return await this.api.fetch(url, {
+            method: 'PUT',
+            headers: this.#headers(opts)
+        });
+    }
+
+    /**
      * Remove a file from the mission
      *
      * {@link https://docs.tak.gov/api/takserver/redoc#tag/mission-api/operation/removeMissionContent TAK Server Docs}.

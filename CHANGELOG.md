@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.12.0 - 2025-04-21
+
+- :tada: Add Mission Children/Parent API
+
 ### v12.11.1 - 2025-04-20
 
 - :bug: Fix URL endpoints
