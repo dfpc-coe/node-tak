@@ -23,6 +23,48 @@ import Export from './api/export.js';
 import Err from '@openaddresses/batch-error';
 import * as auth from './auth.js';
 
+type ErrorWithCause = Error & {
+    code?: unknown;
+    cause?: unknown;
+};
+
+function formatFetchError(err: unknown): string {
+    if (!(err instanceof Error)) return String(err);
+
+    const root = err as ErrorWithCause;
+
+    const messages = new Set<string>();
+
+    const push = (value: unknown) => {
+        if (!value) return;
+
+        const message = String(value).trim();
+
+        if (!message || message === 'fetch failed') return;
+
+        messages.add(message);
+    };
+
+    push(root.code);
+    push(root.message);
+
+    let cause: unknown = root.cause;
+    while (cause) {
+        if (cause instanceof Error) {
+            const nested = cause as ErrorWithCause;
+            push(nested.code);
+            push(nested.message);
+            cause = nested.cause;
+        } else {
+            push(cause);
+            break;
+        }
+    }
+
+    if (messages.size) return Array.from(messages).join(': ');
+    return root.message;
+}
+
 export const CommandList: Record<string, keyof TAKAPI> = {
     package: 'Package',
     security: 'Security',
@@ -178,7 +220,7 @@ export default class TAKAPI {
             }
         } catch (err) {
             if (err instanceof Error && err.name === 'PublicError') throw err;
-            throw new Err(400, null, err instanceof Error ? err.message : String(err));
+            throw new Err(400, null, formatFetchError(err));
         }
     }
 }

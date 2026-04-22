@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.13.0 - 2025-04-22
+
+- :rocket: Surface cause of a failed network request in error message
+
 ### v12.12.0 - 2025-04-21
 
 - :tada: Add Mission Children/Parent API

@@ -5,10 +5,11 @@ import { Client } from 'undici';
 import type { IncomingHttpHeaders } from 'node:http';
 import type { Dispatcher } from 'undici';
 import TAKAPI from '../lib/api.js';
-import { APIAuthCertificate } from '../lib/auth.js';
+import { APIAuthCertificate, APIAuthPassword } from '../lib/auth.js';
 import stream2buffer from '../lib/stream.js';
 
 type RequestArgs = Parameters<Client['request']>[0];
+type ErrorWithCode = Error & { code?: string };
 
 test('Files.uploadPackage serializes multipart for certificate auth', async () => {
     const originalRequest = Client.prototype.request;
@@ -59,4 +60,49 @@ test('Files.uploadPackage serializes multipart for certificate auth', async () =
     } finally {
         Client.prototype.request = originalRequest;
     }
+});
+
+test('APIAuthPassword surfaces transport causes during login', async () => {
+    const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthPassword('alice', 'secret'));
+    const originalFetch = api.auth.fetch;
+
+    api.auth.fetch = async () => {
+        const cause: ErrorWithCode = new Error('certificate has expired');
+        cause.code = 'CERT_HAS_EXPIRED';
+
+        throw new TypeError('fetch failed', { cause });
+    };
+
+    await assert.rejects(
+        api.auth.init(api),
+        (err: unknown) => {
+            assert.ok(err instanceof Error);
+            assert.equal(err.name, 'PublicError');
+            assert.match(err.message, /CERT_HAS_EXPIRED/);
+            assert.match(err.message, /certificate has expired/);
+
+            return true;
+        }
+    );
+
+    api.auth.fetch = async () => {
+        const cause: ErrorWithCode = new Error('connect ECONNREFUSED 127.0.0.1:8443');
+        cause.code = 'ECONNREFUSED';
+
+        throw new TypeError('fetch failed', { cause });
+    };
+
+    await assert.rejects(
+        api.auth.init(api),
+        (err: unknown) => {
+            assert.ok(err instanceof Error);
+            assert.equal(err.name, 'PublicError');
+            assert.match(err.message, /ECONNREFUSED/);
+            assert.match(err.message, /connect ECONNREFUSED 127\.0\.0\.1:8443/);
+
+            return true;
+        }
+    );
+
+    api.auth.fetch = originalFetch;
 });
