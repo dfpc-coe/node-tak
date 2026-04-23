@@ -787,7 +787,7 @@ export default class MissionCommands extends Commands {
         mission = missions.data[0];
 
         if (body.keywords && body.keywords.length) {
-            mission = await this.#putKeywords(mission.name, body.keywords, {
+            mission = await this.setKeywords(mission.name, body.keywords, {
                 token: mission.token
             });
         }
@@ -868,7 +868,7 @@ export default class MissionCommands extends Commands {
         let mission = missions.data[0];
 
         if (body.keywords && body.keywords.length) {
-            mission = await this.#putKeywords(mission.name, body.keywords, {
+            mission = await this.setKeywords(mission.name, body.keywords, {
                 token: mission.token
             });
         }
@@ -877,14 +877,21 @@ export default class MissionCommands extends Commands {
     }
 
     /**
-     * Update Mission Keywords
+     * Replace the full list of keywords on a Mission.
+     *
+     * {@link https://docs.tak.gov/api/takserver/redoc#tag/mission-api/operation/setKeywords TAK Server Docs}.
      */
-    async #putKeywords(
+    async setKeywords(
         name: string,
         keywords: string[],
-        opts?: Static<typeof MissionOptions>
+        opts?: Static<typeof MissionOptions>,
+        creatorUid?: string
     ): Promise<Static<typeof Mission>> {
         const url = new URL(`/Marti/api/missions/${this.#encodeName(name)}/keywords`, this.api.url);
+
+        if (creatorUid !== undefined) {
+            url.searchParams.append('creatorUid', creatorUid);
+        }
 
         const missions = await this.api.fetch(url, {
             method: 'PUT',
@@ -892,7 +899,36 @@ export default class MissionCommands extends Commands {
             body: keywords
         });
 
-        if (!missions.data.length) throw new Error('Create Mission didn\'t return a mission or an error');
+        if (!missions.data.length) throw new Error('Set Mission Keywords didn\'t return a mission or an error');
+
+        const mission = missions.data[0];
+
+        return this.#stdMission(mission);
+    }
+
+    /**
+     * Remove a single keyword from a Mission.
+     *
+     * {@link https://docs.tak.gov/api/takserver/redoc#tag/mission-api/operation/removeKeyword TAK Server Docs}.
+     */
+    async deleteKeyword(
+        name: string,
+        keyword: string,
+        opts?: Static<typeof MissionOptions>,
+        creatorUid?: string
+    ): Promise<Static<typeof Mission>> {
+        const url = new URL(`/Marti/api/missions/${this.#encodeName(name)}/keywords/${encodeURIComponent(keyword)}`, this.api.url);
+
+        if (creatorUid !== undefined) {
+            url.searchParams.append('creatorUid', creatorUid);
+        }
+
+        const missions = await this.api.fetch(url, {
+            method: 'DELETE',
+            headers: this.#headers(opts),
+        });
+
+        if (!missions.data.length) throw new Error('Delete Mission Keyword didn\'t return a mission or an error');
 
         const mission = missions.data[0];
 

@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.14.0 - 2025-04-23
+
+- :rocket: Add support for setting keywords and deleting keywords on Missions
+
 ### v12.13.0 - 2025-04-22
 
 - :rocket: Surface cause of a failed network request in error message
