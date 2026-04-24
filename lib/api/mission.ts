@@ -199,6 +199,7 @@ export const MissionUpdateInput = Type.Object({
     chatRoom: Type.Optional(Type.String()),
     baseLayer: Type.Optional(Type.String()),
     group: Type.Optional(Type.Union([Type.Array(Type.String()), Type.String()])),
+    allowGroupChange: Type.Optional(Type.Boolean()),
     bbox: Type.Optional(Type.String()),
     path: Type.Optional(Type.String()),
     classification: Type.Optional(Type.String()),
@@ -769,11 +770,32 @@ export default class MissionCommands extends Commands {
             inviteOnly: body.inviteOnly ?? mission.inviteOnly
         };
 
+        // Group changes by non-admin Mission Owners require `allowGroupChange=true`
+        // on the request, or TAK Server will respond with 403.
+        // See MissionApi.java in takserver-core for the server-side check.
+        if (body.group !== undefined && body.allowGroupChange === undefined) {
+            body.allowGroupChange = true;
+        }
+
         let q: keyof Static<typeof MissionUpdateInput>;
         for (q in bodyParams) {
-            if (body[q] !== undefined) {
-                url.searchParams.append(q, String(body[q]));
+            if (body[q] === undefined) continue;
+
+            const value = body[q];
+
+            if (q === 'group' && Array.isArray(value)) {
+                // The TAK Server `group` query parameter is repeatable
+                // (eg `?group=a&group=b`).
+                for (const g of value) {
+                    url.searchParams.append('group', String(g));
+                }
+            } else {
+                url.searchParams.append(q, String(value));
             }
+        }
+
+        if (body.allowGroupChange !== undefined) {
+            url.searchParams.append('allowGroupChange', String(body.allowGroupChange));
         }
 
         url.searchParams.append('allowDupe', 'false');
