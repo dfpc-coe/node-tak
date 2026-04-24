@@ -801,7 +801,8 @@ export default class MissionCommands extends Commands {
         url.searchParams.append('allowDupe', 'false');
 
         const missions = await this.api.fetch(url, {
-            method: 'POST'
+            method: 'POST',
+            headers: this.#headers(opts),
         });
 
         if (!missions.data.length) throw new Error('Create Mission didn\'t return a mission or an error');

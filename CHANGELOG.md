@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.15.1 - 2025-04-24
+
+- :bug: Use provided headers in Mission Update
+
 ### v12.15.0 - 2025-04-24
 
 - :rocket: Add support for changing groups on Missions
