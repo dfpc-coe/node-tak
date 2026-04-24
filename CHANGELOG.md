@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.15.0 - 2025-04-24
+
+- :rocket: Add support for changing groups on Missions
+
 ### v12.14.0 - 2025-04-23
 
 - :rocket: Add support for setting keywords and deleting keywords on Missions
