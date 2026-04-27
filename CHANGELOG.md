@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.15.2 - 2025-04-27
+
+- :bug: MimeType fallback on File upload
+
 ### v12.15.1 - 2025-04-24
 
 - :bug: Use provided headers in Mission Update

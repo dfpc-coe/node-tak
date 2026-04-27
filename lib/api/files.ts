@@ -186,13 +186,13 @@ export default class FileCommands extends Commands {
         const res = await this.api.fetch(url, {
             method: 'POST',
             headers: {
-                'Content-Type': opts.contentType ? opts.contentType : mime.getType(opts.name),
+                'Content-Type': opts.contentType || mime.getType(opts.name) || 'application/octet-stream',
                 'Content-Length': opts.contentLength
             },
             body: body as Readable
         });
 
-        return JSON.parse(res);
+        return typeof res === 'string' ? JSON.parse(res) : res;
     }
 
     async count() {

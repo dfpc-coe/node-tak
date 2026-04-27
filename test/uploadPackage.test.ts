@@ -62,6 +62,60 @@ test('Files.uploadPackage serializes multipart for certificate auth', async () =
     }
 });
 
+test('Files.upload falls back to application/octet-stream when name has no extension', async () => {
+    const originalRequest = Client.prototype.request;
+
+    let captured: RequestArgs | undefined;
+
+    Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
+        captured = opts;
+
+        return {
+            statusCode: 200,
+            headers: {
+                'content-type': 'application/json'
+            },
+            body: Readable.from([Buffer.from(JSON.stringify({
+                UID: 'uid-1',
+                SubmissionDateTime: '2026-01-01T00:00:00.000Z',
+                Keywords: [],
+                MIMEType: 'application/octet-stream',
+                SubmissionUser: 'user-1',
+                PrimaryKey: 'pk-1',
+                Hash: 'hash-1',
+                CreatorUid: 'user-1',
+                Name: 'hash-without-extension'
+            }))]),
+            trailers: {}
+        } as unknown as Dispatcher.ResponseData;
+    };
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+
+        const res = await api.Files.upload({
+            name: 'hash-without-extension',
+            contentLength: 9,
+            keywords: [],
+            creatorUid: 'user-1'
+        }, Buffer.from('zip-bytes'));
+
+        assert.equal(res.Hash, 'hash-1');
+        assert.ok(captured);
+        assert.equal(captured.path, '/Marti/sync/upload?name=hash-without-extension&keywords=&creatorUid=user-1');
+
+        const headers = captured.headers as IncomingHttpHeaders;
+        assert.equal(headers['Content-Type'], 'application/octet-stream');
+        assert.equal(headers['Content-Length'], 9);
+
+        assert.ok(captured.body instanceof Readable);
+        const body = await stream2buffer(captured.body);
+        assert.equal(body.toString('utf8'), 'zip-bytes');
+    } finally {
+        Client.prototype.request = originalRequest;
+    }
+});
+
 test('APIAuthPassword surfaces transport causes during login', async () => {
     const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthPassword('alice', 'secret'));
     const originalFetch = api.auth.fetch;
