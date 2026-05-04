@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.15.3 - 2025-05-03
+
+- :arrow_up: Update Core Deps
+
 ### v12.15.2 - 2025-04-27
 
 - :bug: MimeType fallback on File upload
