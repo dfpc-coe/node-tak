@@ -18,6 +18,7 @@ export enum TAKGroup {
     WHITE = "White",
     YELLOW = "Yellow",
     ORANGE = "Orange",
+    MAROON = "Maroon",
     MAGENTA = "Magenta",
     RED = "Red",
     MAROON = "Maroon",
