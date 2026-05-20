@@ -10,131 +10,135 @@
 
 ## Version History
 
-### v12.15.3 - 2025-05-03
+### v12.16.0 - 2026-05-03
 
 - :arrow_up: Update Core Deps
 
-### v12.15.2 - 2025-04-27
+### v12.15.3 - 2026-05-03
+
+- :arrow_up: Update Core Deps
+
+### v12.15.2 - 2026-04-27
 
 - :bug: MimeType fallback on File upload
 
-### v12.15.1 - 2025-04-24
+### v12.15.1 - 2026-04-24
 
 - :bug: Use provided headers in Mission Update
 
-### v12.15.0 - 2025-04-24
+### v12.15.0 - 2026-04-24
 
 - :rocket: Add support for changing groups on Missions
 
-### v12.14.0 - 2025-04-23
+### v12.14.0 - 2026-04-23
 
 - :rocket: Add support for setting keywords and deleting keywords on Missions
 
-### v12.13.0 - 2025-04-22
+### v12.13.0 - 2026-04-22
 
 - :rocket: Surface cause of a failed network request in error message
 
-### v12.12.0 - 2025-04-21
+### v12.12.0 - 2026-04-21
 
 - :tada: Add Mission Children/Parent API
 
-### v12.11.1 - 2025-04-20
+### v12.11.1 - 2026-04-20
 
 - :bug: Fix URL endpoints
 
-### v12.11.0 - 2025-04-20
+### v12.11.0 - 2026-04-20
 
 - :tada: Handle Mission Package Updates
 
-### v12.10.0 - 2025-04-14
+### v12.10.0 - 2026-04-14
 
 - :rocket: handle multipart form data internally
 
-### v12.9.0 - 2025-04-13
+### v12.9.0 - 2026-04-13
 
 - :arrow_up: Remove `tape` in favor of `node:test` and update tests accordingly
 
-### v12.8.0 - 2025-04-13
+### v12.8.0 - 2026-04-13
 
 - :arrow_up: Remove use of `form-data`
 
-### v12.7.0 - 2025-04-13
+### v12.7.0 - 2026-04-13
 
 - :arrow_up: Migrate to Typescript 6.0
 
-### v12.6.0 - 2025-04-08
+### v12.6.0 - 2026-04-08
 
 - :arrow_up: Migrate to DFPC controlled P12 extractor library
 
-### v12.5.0 - 2025-04-06
+### v12.5.0 - 2026-04-06
 
 - :arrow_up: Update to TypeScript@6
 
-### v12.4.0 - 2025-03-18
+### v12.4.0 - 2026-03-18
 
 - :arrow_up: Update pinned node-cot dep
 
-### v12.3.1 - 2025-03-18
+### v12.3.1 - 2026-03-18
 
 - :arrow_up: Update pinned node-cot dep
 
-### v12.3.0 - 2025-03-18
+### v12.3.0 - 2026-03-18
 
 - :rocket: Enable Flow Stripping Option
 
-### v12.2.1 - 2025-03-13
+### v12.2.1 - 2026-03-13
 
 - :rocket: Switch to using body to avoid URL encoding issues
 
-### v12.2.0 - 2025-03-06
+### v12.2.0 - 2026-03-06
 
 - :rocket: Adjust mission contentResource to support REMOVE_CONTENT
 
-### v12.1.0 - 2025-03-02
+### v12.1.0 - 2026-03-02
 
 - :bug: Fix connect_ssl race condition where a stale socket's delayed close or end event could destroy a newly-reconnected socket, leaving the connection permanently dead after a server restart.
 
-### v12.0.0 - 2025-02-11
+### v12.0.0 - 2026-02-11
 
 - :tada: Significantly improve memory performance of client when writing large amounts of data
 
-### v11.26.2 - 2025-02-05
+### v11.26.2 - 2026-02-05
 
 - :bug: Wrap return type of Client list in TAKList object
 
-### v11.26.1 - 2025-02-05
+### v11.26.1 - 2026-02-05
 
 - :rocket: Allow specifying Client Endpoint List query parameters
 
-### v11.26.0 - 2025-02-05
+### v11.26.0 - 2026-02-05
 
 - :tada: Add support for Client Endpoint List
 
-### v11.25.2 - 2025-02-03
+### v11.25.2 - 2026-02-03
 
 - :arrow_up: Update Core Deps
 
-### v11.25.1 - 2025-01-28
+### v11.25.1 - 2026-01-28
 
 - :rocket: MissionGuid is optional
 
-### v11.25.0 - 2025-01-28
+### v11.25.0 - 2026-01-28
 
 - :rocket: Update MissionChange type
 
-### v11.24.0 - 2025-01-06
+### v11.24.0 - 2026-01-06
 
 - :rocket: Require clientUid in Mission Invite List
 
-### v11.23.0 - 2025-01-05
+### v11.23.0 - 2026-01-05
 
 - :rocket: Updated Mission Invite after talking to TPC Developers
 
-### v11.22.0 - 2025-01-05
+### v11.22.0 - 2026-01-05
 
 - :rocket: Add Mission Invite Get and improve List Support
 
-### v11.21.0 - 2025-01-05
+### v11.21.0 - 2026-01-05
 
 - :tada: Add Mission Invite & Uninvite Support
 
