@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.17.0 - 2026-05-21
+
+- :rocket: Add support for entryUID and ContentHashes in Mission Logs
+
 ### v12.16.0 - 2026-05-03
 
 - :arrow_up: Update Core Deps

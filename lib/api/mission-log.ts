@@ -11,8 +11,11 @@ export const MissionLog = Type.Object({
     missionNames: Type.Array(Type.String()),
     servertime: Type.String(),
     dtg: Type.Optional(Type.String()),
+    entryUid: Type.Optional(Type.String({
+        description: 'CoT UID this log entry references; appears as a clickable link in TAK clients'
+    })),
     created: Type.String(),
-    contentHashes: Type.Array(Type.Unknown()),
+    contentHashes: Type.Array(Type.String()),
     keywords: Type.Array(Type.String())
 });
 
@@ -22,9 +25,12 @@ export const CreateMissionLog = Type.Object({
         default: new Date().toISOString(),
         description: 'Date-time group in ISO 8601 format (e.g., "2024-01-01T12:00:00Z")'
     }),
+    entryUid: Type.Optional(Type.String({
+        description: 'CoT UID this log entry references; appears as a clickable link in TAK clients'
+    })),
     content: Type.String(),
     creatorUid: Type.String(),
-    contentHashes: Type.Optional(Type.Array(Type.Unknown())),
+    contentHashes: Type.Optional(Type.Array(Type.String())),
     keywords: Type.Optional(Type.Array(Type.String()))
 });
 
@@ -110,6 +116,8 @@ export default class MissionLogCommands extends Commands {
                 dtg: body.dtg,
                 content: body.content,
                 creatorUid: body.creatorUid,
+                entryUid: body.entryUid,
+                contentHashes: body.contentHashes,
                 keywords: body.keywords,
                 missionNames: [ mission ],
             }
@@ -139,6 +147,8 @@ export default class MissionLogCommands extends Commands {
                 id: body.id,
                 dtg: body.dtg,
                 content: body.content,
+                entryUid: body.entryUid,
+                contentHashes: body.contentHashes,
                 creatorUid: body.creatorUid,
                 keywords: body.keywords,
                 missionNames: [ mission ],
