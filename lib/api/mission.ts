@@ -779,9 +779,9 @@ export default class MissionCommands extends Commands {
 
         let q: keyof Static<typeof MissionUpdateInput>;
         for (q in bodyParams) {
-            if (body[q] === undefined) continue;
+            const value = bodyParams[q];
 
-            const value = body[q];
+            if (value === undefined) continue;
 
             if (q === 'group' && Array.isArray(value)) {
                 // The TAK Server `group` query parameter is repeatable
@@ -810,9 +810,7 @@ export default class MissionCommands extends Commands {
         mission = missions.data[0];
 
         if (body.keywords !== undefined) {
-            mission = await this.setKeywords(mission.name, body.keywords, {
-                token: mission.token
-            });
+            mission = await this.setKeywords(mission.name, body.keywords, opts);
         }
 
         return this.#stdMission(mission);

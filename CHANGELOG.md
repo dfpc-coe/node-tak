@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.18.2 - 2026-06-23
+
+- :bug: Fix issue with undefined handling in Mission Update
+
 ### v12.18.1 - 2026-06-22
 
 - :bug: Check for undefined keywords instead of empty array
