@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.18.1 - 2026-06-22
+
+- :bug: Check for undefined keywords instead of empty array
+
 ### v12.18.0 - 2026-06-12
 
 - :arrow_up: Update Core Deps

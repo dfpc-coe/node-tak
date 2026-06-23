@@ -237,7 +237,7 @@ export default class MissionCommands extends Commands {
                 return list;
             } else {
                 return list.data.map((mission) => {
-                    return `${mission.name} - ${mission.description}`;
+                    return `${mission.name} (${mission.guid}) - ${mission.description}`;
                 }).join('\n');
             }
         } else {
@@ -809,7 +809,7 @@ export default class MissionCommands extends Commands {
 
         mission = missions.data[0];
 
-        if (body.keywords && body.keywords.length) {
+        if (body.keywords !== undefined) {
             mission = await this.setKeywords(mission.name, body.keywords, {
                 token: mission.token
             });
@@ -890,7 +890,7 @@ export default class MissionCommands extends Commands {
 
         let mission = missions.data[0];
 
-        if (body.keywords && body.keywords.length) {
+        if (body.keywords !== undefined) {
             mission = await this.setKeywords(mission.name, body.keywords, {
                 token: mission.token
             });
