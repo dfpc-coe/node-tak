@@ -2,7 +2,7 @@ import { APIAuthPassword } from '../auth.js';
 import { Static, Type } from '@sinclair/typebox';
 import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
 import pem from 'pem';
-import xmljs from 'xml-js';
+import { xml2js } from '@tak-ps/xml-js';
 
 export const CertificateResponse = Type.Object({
     ca: Type.Array(Type.String()),
@@ -38,7 +38,7 @@ export default class CredentialCommands extends Commands {
     async generate(): Promise<Static<typeof CertificateResponse>> {
         if (!(this.api.auth instanceof APIAuthPassword)) throw new Error('Must use Password Auth');
 
-        const config: any = xmljs.xml2js(await this.config(), { compact: true });
+        const config: any = xml2js(await this.config(), { compact: true });
 
         let organization = null;
         let organizationUnit = null;

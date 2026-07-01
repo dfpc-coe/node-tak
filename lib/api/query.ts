@@ -1,5 +1,5 @@
 import Err from '@openaddresses/batch-error';
-import xmljs from 'xml-js';
+import { xml2js } from '@tak-ps/xml-js';
 import { Type, Static } from '@sinclair/typebox';
 import CoT, { CoTParser } from '@tak-ps/node-cot';
 import type { Feature } from '@tak-ps/node-cot';
@@ -42,7 +42,7 @@ export default class QueryCommands extends Commands {
     async historyFeats(uid: string, opts?: Static<typeof HistoryOptions>): Promise<Array<Static<typeof Feature.Feature>>> {
         const feats: Static<typeof Feature.Feature>[] = [];
 
-        const res: any = xmljs.xml2js(await this.history(uid, opts), { compact: true });
+        const res: any = xml2js(await this.history(uid, opts), { compact: true });
 
         if (!Object.keys(res).length || !Object.keys(res.events).length) return feats;
         if (!res.events.event || (Array.isArray(res.events.event) && !res.events.event.length)) return feats;

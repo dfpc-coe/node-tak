@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v12.19.0 - 2025-07-01
+
+- :arrow_up: Migrate to `@tak-ps/xml-js` which is a fill TypeScript port of `xml-js`
+- :bug: Fix attribute escaping in `xml-js` to ensure callsigns with `&` are properly escaped
+
 ### v12.18.3 - 2026-06-24
 
 - :arrow_up: Update Core Deps

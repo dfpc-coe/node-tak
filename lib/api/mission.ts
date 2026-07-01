@@ -1,4 +1,4 @@
-import xmljs from 'xml-js';
+import { xml2js } from '@tak-ps/xml-js';
 import CoT, { CoTParser } from '@tak-ps/node-cot';
 import { Type, Static } from '@sinclair/typebox';
 import Err from '@openaddresses/batch-error';
@@ -331,7 +331,7 @@ export default class MissionCommands extends Commands {
     ): Promise<Static<typeof Feature.Feature>[]> {
         const feats: Static<typeof Feature.Feature>[] = [];
 
-        const res: any = xmljs.xml2js(await this.latestCots(name, opts), { compact: true });
+        const res: any = xml2js(await this.latestCots(name, opts), { compact: true });
 
         if (!Object.keys(res.events).length) return feats;
         if (!res.events.event || (Array.isArray(res.events.event) && !res.events.event.length)) return feats;
