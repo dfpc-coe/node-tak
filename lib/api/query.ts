@@ -20,7 +20,12 @@ export default class QueryCommands extends Commands {
 
     async singleFeat(uid: string): Promise<Static<typeof Feature.Feature>> {
         const cotstr = await this.single(uid);
-        return CoTParser.to_geojson(CoTParser.from_xml(cotstr))
+
+        try {
+            return CoTParser.to_geojson(CoTParser.from_xml(cotstr))
+        } catch (err) {
+            throw new Err(502, err instanceof Error ? err : new Error(String(err)), 'TAK Server returned an unparsable CoT for this UID');
+        }
     }
 
     async single(uid: string): Promise<string> {

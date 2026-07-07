@@ -1,5 +1,6 @@
 import { Readable } from 'node:stream';
 import mime from 'mime';
+import Err from '@openaddresses/batch-error';
 import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
 import { TAKList } from './types.js';
 import { Type, Static } from '@sinclair/typebox';
@@ -84,6 +85,13 @@ export default class FileCommands extends Commands {
         const res = await this.api.fetch(url, {
             method: 'GET'
         }, true);
+
+        // The raw fetch path skips status validation - without this check a
+        // TAK Server error page would be streamed as if it were file content
+        if (res.status < 200 || res.status >= 400) {
+            const body = await res.text().catch(() => '');
+            throw new Err(res.status, null, body || `Status Code: ${res.status}`);
+        }
 
         return res.body;
     }
