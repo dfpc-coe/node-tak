@@ -10,7 +10,7 @@
 
 ## Version History
 
-### v12.19.0 - 2025-07-07
+### v12.20.0 - 2025-07-07
 
 - :rocket: Return an error if a File.download results in an upstream 404
 - :arrow_up: Update Core Deps
