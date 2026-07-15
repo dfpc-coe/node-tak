@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v12.23.0 - 2026-07-15
+
+- :tada: Add `MissionLayer.attachUids()` to file Mission CoT UIDs under a Mission Layer (moving them from any current layer)
+- :tada: Add `MissionLayer.setParent()` to re-parent Mission Layers, including moving `ITEM` layers back to the Mission root
+
 ### v12.22.0 - 2026-07-14
 
 - :rocket: Version Sync

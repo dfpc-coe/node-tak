@@ -60,6 +60,18 @@ export const CreateInput = Type.Object({
     creatorUid: Type.String()
 })
 
+export const AttachUidsInput = Type.Object({
+    uids: Type.Array(Type.String()),
+    creatorUid: Type.String()
+});
+
+export const SetParentInput = Type.Object({
+    layerUids: Type.Array(Type.String()),
+    parentUid: Type.Optional(Type.String()),
+    afterUid: Type.Optional(Type.String()),
+    creatorUid: Type.String()
+});
+
 export const TAKList_MissionLayer = TAKList(MissionLayer);
 export const TAKItem_MissionLayer = TAKItem(MissionLayer);
 
@@ -235,6 +247,66 @@ export default class MissionLayerCommands extends Commands {
                 headers: this.#headers(opts),
             });
         }
+    }
+
+    /**
+     * Attach CoT UIDs to a Mission Layer.
+     *
+     * The UIDs must already be present in the Mission - the TAK Server will
+     * file each UID under the given layer, moving it from any layer it is
+     * currently filed under.
+     */
+    async attachUids(
+        name: string,
+        layerUid: string,
+        query: Static<typeof AttachUidsInput>,
+        opts?: Static<typeof MissionOptions>
+    ) {
+        const url = this.#isGUID(name)
+            ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/contents`, this.api.url)
+            : new URL(`/Marti/api/missions/${this.#encodeName(name)}/contents`, this.api.url);
+
+        url.searchParams.append('creatorUid', query.creatorUid);
+
+        return await this.api.fetch(url, {
+            method: 'PUT',
+            headers: this.#headers(opts),
+            body: {
+                paths: {
+                    [layerUid]: [{ uids: query.uids }]
+                }
+            }
+        });
+    }
+
+    /**
+     * Re-parent Mission Layers.
+     *
+     * Layers of type ITEM represent filed Mission content, so this can also
+     * be used to move content out of a layer by omitting parentUid, which
+     * moves it back to the Mission root.
+     */
+    async setParent(
+        name: string,
+        query: Static<typeof SetParentInput>,
+        opts?: Static<typeof MissionOptions>
+    ) {
+        const url = this.#isGUID(name)
+            ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/layers/parent`, this.api.url)
+            : new URL(`/Marti/api/missions/${this.#encodeName(name)}/layers/parent`, this.api.url);
+
+        for (const layerUid of query.layerUids) {
+            url.searchParams.append('layerUid', layerUid);
+        }
+
+        if (query.parentUid !== undefined) url.searchParams.append('parentUid', query.parentUid);
+        if (query.afterUid !== undefined) url.searchParams.append('afterUid', query.afterUid);
+        url.searchParams.append('creatorUid', query.creatorUid);
+
+        return await this.api.fetch(url, {
+            method: 'PUT',
+            headers: this.#headers(opts),
+        });
     }
 
     async rename(
