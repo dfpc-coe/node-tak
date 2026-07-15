@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.22.0 - 2026-07-14
+
+- :rocket: Version Sync
+
 ### v12.21.0 - 2026-07-14
 
 - :bug: Fix `Mission.setRole()` to send `role` as a bare enum query param (matching TAK Server) and stop reading a non-existent JSON body from the response
