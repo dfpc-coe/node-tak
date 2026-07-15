@@ -10,6 +10,11 @@
 
 ## Version History
 
+### v12.21.0 - 2026-07-14
+
+- :bug: Fix `Mission.setRole()` to send `role` as a bare enum query param (matching TAK Server) and stop reading a non-existent JSON body from the response
+- :white_check_mark: Add test coverage for `Mission.setRole`, `Mission.subscriptionRoles`, and `Mission.unsubscribe`
+
 ### v12.20.1 - 2025-07-13
 
 - :arrow_up: Update Core Deps

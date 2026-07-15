@@ -163,7 +163,7 @@ export const GetInput = Type.Object({
 export const SetRoleInput = Type.Object({
     clientUid: Type.String(),
     username: Type.String(),
-    role: MissionRole
+    role: Type.Enum(MissionSubscriberRole)
 });
 
 export const MissionListInput = Type.Object({
@@ -536,7 +536,7 @@ export default class MissionCommands extends Commands {
     }
 
     /**
-     * Return Role associated with a given mission if subscribed
+     * Set the Role of a given user on a Mission
      *
      * {@link https://docs.tak.gov/api/takserver/redoc#tag/mission-api/operation/setMissionRole TAK Server Docs}.
      */
@@ -544,7 +544,7 @@ export default class MissionCommands extends Commands {
         name: string,
         query: Static<typeof SetRoleInput>,
         opts?: Static<typeof MissionOptions>
-    ): Promise<Static<typeof MissionRole>> {
+    ): Promise<void> {
         const url = this.#isGUID(name)
             ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/role`, this.api.url)
             : new URL(`/Marti/api/missions/${this.#encodeName(name)}/role`, this.api.url);
@@ -556,12 +556,10 @@ export default class MissionCommands extends Commands {
             }
         }
 
-        const res = await this.api.fetch(url, {
+        await this.api.fetch(url, {
             method: 'PUT',
             headers: this.#headers(opts),
         });
-
-        return res.data;
     }
 
     /**
