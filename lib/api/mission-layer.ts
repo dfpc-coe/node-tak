@@ -15,7 +15,8 @@ export enum MissionLayerType {
 }
 
 export const MissionLayer = Type.Object({
-    name: Type.String({ minLength: 1 }),
+    // ITEM Layers represent filed Mission content and are returned without a name
+    name: Type.Optional(Type.String({ minLength: 1 })),
     type: Type.Enum(MissionLayerType),
     parentUid: Type.Optional(Type.String()),
     uid: Type.String(),
@@ -135,6 +136,9 @@ export default class MissionLayerCommands extends Commands {
         pathCurrent: string,
         layer: Static<typeof MissionLayer>
     ) {
+        // ITEM Layers have no name and thus no addressable path
+        if (layer.name === undefined) return;
+
         pathCurrent = `${pathCurrent}/${encodeURIComponent(layer.name)}`;
         pathMap.set(`${pathCurrent}/`, layer);
 

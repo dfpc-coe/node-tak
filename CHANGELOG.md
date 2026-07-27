@@ -10,6 +10,10 @@
 
 ## Version History
 
+### v12.23.1 - 2026-07-27
+
+- :bug: `MissionLayer.name` is now optional - `ITEM` layers represent filed Mission content and are returned by the TAK Server without a name, failing schema validation
+
 ### v12.23.0 - 2026-07-15
 
 - :tada: Add `MissionLayer.attachUids()` to file Mission CoT UIDs under a Mission Layer (moving them from any current layer)
