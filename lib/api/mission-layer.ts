@@ -1,10 +1,9 @@
 import { TAKList, TAKItem } from './types.js';
 import { Type, Static } from '@sinclair/typebox';
-import type { MissionOptions } from './mission.js';
+import type { MissionOptions, MissionLatestFeats } from './mission.js';
 import { GUIDMatch } from './mission.js';
 import Err from '@openaddresses/batch-error';
 import Commands, { CommandOutputFormat } from '../commands.js';
-import type { Feature } from '@tak-ps/node-cot';
 
 export enum MissionLayerType {
     GROUP = 'GROUP',
@@ -180,19 +179,21 @@ export default class MissionLayerCommands extends Commands {
         name: string,
         layerUid: string, // Layer UID
         opts?: Static<typeof MissionOptions>
-    ): Promise<Static<typeof Feature.Feature>[]> {
+    ): Promise<Static<typeof MissionLatestFeats>> {
         const layer = (await this.get(name, layerUid, opts)).data;
-        const feats = await this.api.Mission.latestFeats(name, opts);
+        const res = await this.api.Mission.latestFeats(name, opts);
 
         const layerUids = new Set((layer.uids || []).map((u) => {
             return u.data
         }));
 
-        const filtered = feats.filter((f) => {
+        const features = res.features.filter((f) => {
             return layerUids.has(f.id)
         });
 
-        return filtered;
+        // Invalid CoTs cannot be filtered by layer as their parse failed
+        // so all Mission-wide invalid CoTs are returned
+        return { features, invalid: res.invalid };
     }
 
     async get(

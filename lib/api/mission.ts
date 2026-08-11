@@ -1,11 +1,10 @@
-import { xml2js } from '@tak-ps/xml-js';
-import CoT, { CoTParser } from '@tak-ps/node-cot';
+import { CoTParser } from '@tak-ps/node-cot';
 import { Type, Static } from '@sinclair/typebox';
 import Err from '@openaddresses/batch-error';
 import { Readable } from 'node:stream'
 import { TAKItem, TAKList } from './types.js';
 import { MissionLog } from './mission-log.js';
-import type { Feature } from '@tak-ps/node-cot';
+import { Feature } from '@tak-ps/node-cot';
 import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
 
 export enum MissionSubscriberRole {
@@ -106,6 +105,21 @@ export const MissionSubscriber = Type.Object({
 
 export const MissionOptions = Type.Object({
     token: Type.Optional(Type.String())
+});
+
+/**
+ * A Mission CoT that could not be parsed or failed validation,
+ * with the raw xml-js event included so the caller can extract
+ * whatever context (UID, Callsign, etc.) it needs
+ */
+export const MissionInvalidFeature = Type.Object({
+    error: Type.String(),
+    feature: Type.Unknown()
+});
+
+export const MissionLatestFeats = Type.Object({
+    features: Type.Array(Feature.Feature),
+    invalid: Type.Array(MissionInvalidFeature)
 });
 
 export const AttachContentsInput = Type.Object({
@@ -324,23 +338,38 @@ export default class MissionCommands extends Commands {
 
     /**
      * Return all current features in the Data Sync as CoT GeoJSON Features
+     *
+     * Each CoT in the TAK Server response is parsed & validated individually -
+     * those that fail are returned in the `invalid` array so a single poisoned
+     * CoT doesn't prevent the valid features from being returned
      */
     async latestFeats(
         name: string,
         opts?: Static<typeof MissionOptions>
-    ): Promise<Static<typeof Feature.Feature>[]> {
-        const feats: Static<typeof Feature.Feature>[] = [];
+    ): Promise<Static<typeof MissionLatestFeats>> {
+        const features: Static<typeof Feature.Feature>[] = [];
 
-        const res: any = xml2js(await this.latestCots(name, opts), { compact: true });
+        const res = CoTParser.from_xml_document(await this.latestCots(name, opts));
 
-        if (!Object.keys(res.events).length) return feats;
-        if (!res.events.event || (Array.isArray(res.events.event) && !res.events.event.length)) return feats;
+        const invalid: Static<typeof MissionInvalidFeature>[] = res.invalid.map((entry) => {
+            return {
+                error: entry.error,
+                feature: entry.event
+            };
+        });
 
-        for (const event of Array.isArray(res.events.event) ? res.events.event : [res.events.event] ) {
-            feats.push(await CoTParser.to_geojson(new CoT({ event })));
+        for (const cot of res.cots) {
+            try {
+                features.push(await CoTParser.to_geojson(cot));
+            } catch (err) {
+                invalid.push({
+                    error: err instanceof Error ? err.message : String(err),
+                    feature: cot.raw.event
+                });
+            }
         }
 
-        return feats;
+        return { features, invalid };
     }
 
     /**

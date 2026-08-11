@@ -1,4 +1,4 @@
-import { APIAuthPassword } from '../auth.js';
+import { APIAuthPassword, APIAuthToken } from '../auth.js';
 import { Static, Type } from '@sinclair/typebox';
 import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
 import pem from 'pem';
@@ -35,8 +35,25 @@ export default class CredentialCommands extends Commands {
         });
     }
 
-    async generate(): Promise<Static<typeof CertificateResponse>> {
-        if (!(this.api.auth instanceof APIAuthPassword)) throw new Error('Must use Password Auth');
+    async generate(opts: {
+        username?: string
+    } = {}): Promise<Static<typeof CertificateResponse>> {
+        let username: string;
+        const headers: Record<string, string> = {
+            Accept: 'application/json'
+        };
+
+        if (this.api.auth instanceof APIAuthPassword) {
+            username = opts.username || this.api.auth.username;
+            headers.Authorization = 'Basic ' + btoa(this.api.auth.username + ":" + this.api.auth.password);
+        } else if (this.api.auth instanceof APIAuthToken) {
+            // TAK Server derives the enrollment username from the token claims and requires
+            // the CSR CN to match it - the caller must supply that username explicitly
+            if (!opts.username) throw new Error('Token Auth requires a username for the Certificate CN');
+            username = opts.username;
+        } else {
+            throw new Error('Must use Password or Token Auth');
+        }
 
         const config: any = xml2js(await this.config(), { compact: true });
 
@@ -58,20 +75,17 @@ export default class CredentialCommands extends Commands {
         } = await createCSR({
             organization,
             organizationUnit,
-            commonName: this.api.auth.username
+            commonName: username
         });
 
         const url = new URL(`/Marti/api/tls/signClient/v2`, this.api.url);
-        url.searchParams.append('clientUid', this.api.auth.username + ' (ETL)');
+        url.searchParams.append('clientUid', username + ' (ETL)');
         url.searchParams.append('version', '3');
 
         const res = await this.api.fetch(url, {
             method: 'POST',
             nocookies: true,
-            headers: {
-                Accept: 'application/json',
-                Authorization: 'Basic ' + btoa(this.api.auth.username + ":" + this.api.auth.password)
-            },
+            headers,
             body: keys.csr
         });
 
