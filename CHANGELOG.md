@@ -12,6 +12,8 @@
 
 ### Pending
 
+### v12.24.0 - 2026-08-11
+
 - :tada: `Mission.latestFeats()` & `MissionLayer.latestFeats()` now parse each CoT in the TAK Server response individually via `CoTParser.from_xml_document()` and return `{ features, invalid }` - unparseable CoTs are collected in `invalid` as `{ error, feature }` (the raw unmutated xml-js event) so a single poisoned CoT no longer prevents the valid Data Sync features from being returned (previously the entire call would throw)
 - :arrow_up: `@tak-ps/node-cot` peerDependency is now `^14.52.0` as `CoTParser.from_xml_document()` is required
 - :tada: `Credentials.generate()` now supports `APIAuthToken` (OIDC/OAuth Bearer) authentication for Certificate Enrollment - the caller must supply `opts.username` as TAK Server requires the CSR CN to match the username derived from the token claims
