@@ -24,6 +24,38 @@ function collapse(input: string): string {
     return input.replace(/\s+/g, ' ').trim();
 }
 
+/** Linear-time tag stripper for malformed HTML - drops the contents of HIDDEN elements */
+function stripTags(html: string): string {
+    let out = '';
+    let i = 0;
+
+    while (i < html.length) {
+        const open = html.indexOf('<', i);
+        if (open === -1) {
+            out += html.slice(i);
+            break;
+        }
+
+        out += html.slice(i, open) + ' ';
+
+        const close = html.indexOf('>', open);
+        if (close === -1) break;
+
+        const tag = html.slice(open + 1, close).trim().split(/\s/, 1)[0].toLowerCase();
+        i = close + 1;
+
+        if (HIDDEN.has(tag)) {
+            const end = html.toLowerCase().indexOf(`</${tag}`, i);
+            if (end === -1) break;
+            i = html.indexOf('>', end);
+            if (i === -1) break;
+            i += 1;
+        }
+    }
+
+    return collapse(out);
+}
+
 function textOf(el: Element, opts: { skipPre?: boolean } = {}): string {
     if (el.type === 'text') return String(el.text ?? '');
     if (el.type !== 'element' || !el.elements) return '';
@@ -70,9 +102,7 @@ export function parseHTMLError(body: unknown): HTMLErrorDetails | null {
         root = xmljs.xml2js(body, { compact: false }) as Element;
     } catch {
         // Not well-formed XHTML - fall back to visible text
-        details.text = collapse(body
-            .replace(/<(style|script|head)[\s>][\s\S]*?<\/\1>/gi, ' ')
-            .replace(/<[^>]*>/g, ' '));
+        details.text = stripTags(body);
 
         return details;
     }
@@ -94,7 +124,7 @@ export function parseHTMLError(body: unknown): HTMLErrorDetails | null {
         } else if (name === 'pre') {
             const value = textOf(el)
                 .split('\n')
-                .map((line) => line.replace(/\s+$/, ''))
+                .map((line) => line.trimEnd())
                 .join('\n')
                 .trim();
 
@@ -165,7 +195,7 @@ export class TAKServerError extends Err {
     constructor(status: number, html: string, parsed?: HTMLErrorDetails) {
         const details = parsed || parseHTMLError(html) || {
             fields: {},
-            text: collapse(html.replace(/<[^>]*>/g, ' '))
+            text: stripTags(html)
         };
 
         super(status, null, summarizeHTMLError(details, status));

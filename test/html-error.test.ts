@@ -31,6 +31,25 @@ test('html-error: entities are decoded', () => {
     assert.equal(parsed.fields.Message, 'a – b & <c> \'d\' A');
 });
 
+test('html-error: malformed HTML strips hidden blocks & unterminated tags', () => {
+    const parsed = parseHTMLError('<html><script>let a = "<b>";</script><body><STYLE>b {x:y}</STYLE><p class="x">Gateway <b>Timeout</b><script>never closed');
+    assert.ok(parsed);
+    assert.equal(parsed.text, 'Gateway Timeout');
+    assert.equal(parseHTMLError('<html><body>Broken <tag')?.text, 'Broken');
+
+    // Large pathological input stays fast
+    const big = '<html>' + '<head\t'.repeat(50000) + '<'.repeat(50000);
+    const start = Date.now();
+    assert.ok(parseHTMLError(big));
+    assert.ok(Date.now() - start < 1000);
+});
+
+test('html-error: TAKServerError from non-HTML body', () => {
+    const err = new TAKServerError(502, 'upstream <b>down</b>');
+    assert.equal(err.message, 'upstream down');
+    assert.equal(err.details, 'upstream down');
+});
+
 test('html-error: malformed HTML falls back to visible text', () => {
     const parsed = parseHTMLError('<html><head><style>b {x:y}</style></head><body><p>Bad Gateway<br>upstream unavailable</body></html>');
     assert.ok(parsed);
