@@ -26,6 +26,7 @@ function collapse(input: string): string {
 
 /** Linear-time tag stripper for malformed HTML - drops the contents of HIDDEN elements */
 function stripTags(html: string): string {
+    const lower = html.toLowerCase();
     let out = '';
     let i = 0;
 
@@ -41,11 +42,11 @@ function stripTags(html: string): string {
         const close = html.indexOf('>', open);
         if (close === -1) break;
 
-        const tag = html.slice(open + 1, close).trim().split(/\s/, 1)[0].toLowerCase();
+        const tag = lower.slice(open + 1, close).trim().split(/\s/, 1)[0];
         i = close + 1;
 
         if (HIDDEN.has(tag)) {
-            const end = html.toLowerCase().indexOf(`</${tag}`, i);
+            const end = lower.indexOf(`</${tag}`, i);
             if (end === -1) break;
             i = html.indexOf('>', end);
             if (i === -1) break;

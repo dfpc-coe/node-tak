@@ -37,11 +37,17 @@ test('html-error: malformed HTML strips hidden blocks & unterminated tags', () =
     assert.equal(parsed.text, 'Gateway Timeout');
     assert.equal(parseHTMLError('<html><body>Broken <tag')?.text, 'Broken');
 
-    // Large pathological input stays fast
-    const big = '<html>' + '<head\t'.repeat(50000) + '<'.repeat(50000);
-    const start = Date.now();
-    assert.ok(parseHTMLError(big));
-    assert.ok(Date.now() - start < 1000);
+    // Pathological input scales linearly (CodeQL polynomial regex finding)
+    const time = (n: number) => {
+        const big = '<html>' + '<head\t'.repeat(n) + '<'.repeat(n);
+        const start = performance.now();
+        assert.ok(parseHTMLError(big));
+        return performance.now() - start;
+    };
+    time(1000); // warm up
+    const small = time(10000);
+    const large = time(40000);
+    assert.ok(large < Math.max(small * 10, 50), `4x input took ${large}ms vs ${small}ms`);
 });
 
 test('html-error: TAKServerError from non-HTML body', () => {
