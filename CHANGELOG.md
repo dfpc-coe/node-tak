@@ -12,6 +12,9 @@
 
 ### Pending
 
+- :tada: TAK Server HTML error pages (Tomcat/Spring "Exception Report" documents) returned by the API are now parsed into a `TAKServerError` instead of the raw HTML being used as the error message - `message`/`safe` contain the human readable `Message` (falling back to `Description`, the Exception's message, the page `<title>` or the visible text) while `details` contains a plain-text breakdown (status line, labelled fields & exception trace) suitable for an "Advanced" UI section and `html` retains the unmodified page. Pages are parsed with the existing `@tak-ps/xml-js` dependency (Tomcat emits well-formed XHTML) with a visible-text fallback for malformed documents. `TAKServerError`, `parseHTMLError()`, `isHTML()`, `summarizeHTMLError()` & `formatHTMLError()` are exported
+- :bug: Errors thrown within `TAKAPI.fetch` are now rethrown when they are any `Err` subclass (previously matched on `name === 'PublicError'` only)
+
 ### v12.24.0 - 2026-08-11
 
 - :tada: `Mission.latestFeats()` & `MissionLayer.latestFeats()` now parse each CoT in the TAK Server response individually via `CoTParser.from_xml_document()` and return `{ features, invalid }` - unparseable CoTs are collected in `invalid` as `{ error, feature }` (the raw unmutated xml-js event) so a single poisoned CoT no longer prevents the valid Data Sync features from being returned (previously the entire call would throw)

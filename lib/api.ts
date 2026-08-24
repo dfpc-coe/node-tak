@@ -21,6 +21,7 @@ import Subscription from './api/subscriptions.js';
 import Video from './api/video.js';
 import Export from './api/export.js';
 import Err from '@openaddresses/batch-error';
+import { TAKServerError, isHTML } from './utils/html-error.js';
 import * as auth from './auth.js';
 
 type ErrorWithCause = Error & {
@@ -210,6 +211,9 @@ export default class TAKAPI {
                     bdy = null;
                 }
 
+                // TAK Server returns HTML error pages
+                if (isHTML(bdy)) throw new TAKServerError(res.status, bdy);
+
                 throw new Err(res.status, null, bdy || `Status Code: ${res.status}`);
             }
 
@@ -219,7 +223,7 @@ export default class TAKAPI {
                 return await res.text();
             }
         } catch (err) {
-            if (err instanceof Error && err.name === 'PublicError') throw err;
+            if (err instanceof Err) throw err;
             throw new Err(400, null, formatFetchError(err));
         }
     }
