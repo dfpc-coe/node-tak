@@ -9,6 +9,7 @@ import TAKAPI from './lib/api.js';
 import { TAKAuth } from './lib/auth.js';
 import { Queue } from './lib/utils/queue.js';
 export * from './lib/auth.js';
+export * from './lib/utils/html-error.js';
 
 /* eslint-disable no-control-regex */
 export const REGEX_CONTROL = /[\u000B-\u001F\u007F-\u009F]/g;
