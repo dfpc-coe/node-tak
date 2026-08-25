@@ -13,6 +13,7 @@
 ### Pending
 
 - :tada: Add `Certificate.listActive()` (`GET /Marti/api/certadmin/cert/active`) & `Certificate.downloadIds()` (`GET /Marti/api/certadmin/cert/download/{ids}`, returns the ZIP archive as a `Readable`)
+- :tada: Add `Certificate.validate(pem)` which evaluates expiry locally and looks up the TAK Server revocation record by SHA-256 fingerprint (the same `hash` consulted by `X509Authenticator`) via the user's certificate list, returning `expired`/`revoked`/`known`/`valid` along with the matching `certificate` record - `CertificateValidation` is exported
 
 ### v12.25.0 - 2026-08-24
 

@@ -1,6 +1,7 @@
 import Commands from '../commands.js';
 import Err from '@openaddresses/batch-error';
 import { Readable } from 'node:stream';
+import { X509Certificate } from 'node:crypto';
 import { Type } from '@sinclair/typebox';
 import type { Static } from '@sinclair/typebox';
 import { TAKItem, TAKList } from './types.js';
@@ -23,6 +24,33 @@ export const Certificate = Type.Object({
 
 export const TAKList_Certificate = TAKList(Certificate);
 export const TAKItem_Certificate = TAKItem(Certificate);
+
+export const CertificateValidation = Type.Object({
+    fingerprint: Type.String({ description: 'SHA-256 fingerprint of the DER encoded certificate - the TAK Server `hash`' }),
+    subject: Type.String(),
+    username: Type.String({ description: 'Common Name of the certificate subject - the TAK Server `userDn`' }),
+    validFrom: Type.String(),
+    validTo: Type.String(),
+    expired: Type.Boolean({ description: 'validTo is in the past' }),
+    known: Type.Boolean({ description: 'The TAK Server has a record for this fingerprint' }),
+    revoked: Type.Boolean({ description: 'The TAK Server record carries a revocationDate' }),
+    revocationDate: Type.Optional(Type.String({ format: 'date-time' })),
+    valid: Type.Boolean({ description: 'Neither expired nor revoked' }),
+    certificate: Type.Optional(Certificate)
+});
+
+/**
+ * Extract the Common Name from an X509 subject string as reported by Node
+ * (newline separated `key=value` pairs)
+ */
+function commonName(subject: string): string | undefined {
+    for (const line of subject.split('\n')) {
+        const [key, ...rest] = line.split('=');
+        if (key.trim() === 'CN') return rest.join('=').trim();
+    }
+
+    return undefined;
+}
 
 export default class CertificateCommands extends Commands {
     schema = {}
@@ -92,6 +120,52 @@ export default class CertificateCommands extends Commands {
         const url = new URL('/Marti/api/certadmin/cert/expired', this.api.url);
 
         return await this.api.fetch(url) as Static<typeof TAKList_Certificate>;
+    }
+
+    /**
+     * Validate a PEM encoded client certificate against local expiry and the TAK Server revocation record
+     *
+     * Expiry is evaluated locally from the certificate. Revocation is looked up via the
+     * Certificate Admin API using the same SHA-256 fingerprint the TAK Server `X509Authenticator`
+     * consults - the certificate is matched from the user's certificate list rather than
+     * `get(hash)` as the TAK Server reports an unknown hash as a 500 rather than a 404.
+     *
+     * Note: The TAK Server only enforces revocation when `auth.x509checkRevocation` (or
+     * `x509TokenAuth`) is enabled in CoreConfig - `revoked` reports the stored state regardless
+     */
+    async validate(
+        pem: string,
+        opts: {
+            now?: Date;
+        } = {}
+    ): Promise<Static<typeof CertificateValidation>> {
+        const x509 = new X509Certificate(pem);
+        const now = opts.now ?? new Date();
+
+        const username = commonName(x509.subject);
+        if (!username) throw new Error('Certificate subject does not contain a Common Name');
+
+        const fingerprint = x509.fingerprint256.toUpperCase();
+
+        const certificate = (await this.list(username)).data
+            .find((cert) => cert.hash.toUpperCase() === fingerprint);
+
+        const expired = Date.parse(x509.validTo) < now.getTime();
+        const revoked = !!certificate?.revocationDate;
+
+        return {
+            fingerprint,
+            subject: x509.subject,
+            username,
+            validFrom: x509.validFrom,
+            validTo: x509.validTo,
+            expired,
+            known: !!certificate,
+            revoked,
+            revocationDate: certificate?.revocationDate,
+            valid: !expired && !revoked,
+            certificate
+        };
     }
 
     /**
