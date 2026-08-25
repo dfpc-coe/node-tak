@@ -1,4 +1,6 @@
 import Commands from '../commands.js';
+import Err from '@openaddresses/batch-error';
+import { Readable } from 'node:stream';
 import { Type } from '@sinclair/typebox';
 import type { Static } from '@sinclair/typebox';
 import { TAKItem, TAKList } from './types.js';
@@ -42,6 +44,19 @@ export default class CertificateCommands extends Commands {
         if (username) {
             url.searchParams.append('username', username);
         }
+
+        return await this.api.fetch(url) as Static<typeof TAKList_Certificate>;
+    }
+
+    /**
+     * List Active Certificates
+     *
+     * The most recently issued certificate for each Client UID / User DN pair
+     *
+     * {@link https://docs.tak.gov/api/takserver/redoc#tag/cert-manager-admin-api/operation/getActive TAK Server Docs}.
+     */
+    async listActive(): Promise<Static<typeof TAKList_Certificate>> {
+        const url = new URL('/Marti/api/certadmin/cert/active', this.api.url);
 
         return await this.api.fetch(url) as Static<typeof TAKList_Certificate>;
     }
@@ -105,6 +120,36 @@ export default class CertificateCommands extends Commands {
         return await this.api.fetch(url, {
             method: 'GET',
         }) as string;
+    }
+
+    /**
+     * Download Certificates by Id
+     *
+     * Returns a ZIP archive stream containing one `{n}_{userDn}_ClientCert.pem` entry per certificate
+     *
+     * {@link https://docs.tak.gov/api/takserver/redoc#tag/cert-manager-admin-api/operation/downloadCertificates TAK Server Docs}.
+     */
+    async downloadIds(
+        ids: Array<string | number>
+    ): Promise<Readable> {
+        if (ids.length === 0) {
+            throw new Error('At least one ID must be provided');
+        }
+
+        const url = new URL(`/Marti/api/certadmin/cert/download/${ids.map((id) => encodeURIComponent(String(id))).join(',')}`, this.api.url);
+
+        const res = await this.api.fetch(url, {
+            method: 'GET'
+        }, true);
+
+        // The raw fetch path skips status validation - without this check a
+        // TAK Server error page would be streamed as if it were the ZIP archive
+        if (res.status < 200 || res.status >= 400) {
+            const body = await res.text().catch(() => '');
+            throw new Err(res.status, null, body || `Status Code: ${res.status}`);
+        }
+
+        return res.body;
     }
 
     /**

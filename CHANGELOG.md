@@ -12,6 +12,8 @@
 
 ### Pending
 
+- :tada: Add `Certificate.listActive()` (`GET /Marti/api/certadmin/cert/active`) & `Certificate.downloadIds()` (`GET /Marti/api/certadmin/cert/download/{ids}`, returns the ZIP archive as a `Readable`)
+
 ### v12.25.0 - 2026-08-24
 
 - :tada: TAK Server HTML error pages (Tomcat/Spring "Exception Report" documents) returned by the API are now parsed into a `TAKServerError` instead of the raw HTML being used as the error message - `message`/`safe` contain the human readable `Message` (falling back to `Description`, the Exception's message, the page `<title>` or the visible text) while `details` contains a plain-text breakdown (status line, labelled fields & exception trace) suitable for an "Advanced" UI section and `html` retains the unmodified page. Pages are parsed with the existing `@tak-ps/xml-js` dependency (Tomcat emits well-formed XHTML) with a visible-text fallback for malformed documents. `TAKServerError`, `parseHTMLError()`, `isHTML()`, `summarizeHTMLError()` & `formatHTMLError()` are exported
