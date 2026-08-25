@@ -60,6 +60,9 @@ function mockRoutes(routes: Record<string, () => Dispatcher.ResponseData>): { pa
     const paths: string[] = [];
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
+        // undici rejects a missing method with UND_ERR_INVALID_ARG - APIAuthCertificate must default it
+        assert.equal(typeof opts.method, 'string', `method must be set for ${opts.path}`);
+
         const path = String(opts.path);
         paths.push(path);
         const route = routes[path];

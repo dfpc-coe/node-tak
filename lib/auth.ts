@@ -111,6 +111,8 @@ export class APIAuthCertificate extends APIAuth {
         }
 
         const res = await client.request({
+            // undici's Client.request requires a method - default to GET like fetch()
+            method: 'GET',
             path: String(url).replace(api.url.origin, ''),
             ...opts
         });
