@@ -12,6 +12,8 @@
 
 ### Pending
 
+### v12.26.0 - 2026-08-24
+
 - :tada: Add `Certificate.listActive()` (`GET /Marti/api/certadmin/cert/active`) & `Certificate.downloadIds()` (`GET /Marti/api/certadmin/cert/download/{ids}`, returns the ZIP archive as a `Readable`)
 - :tada: Add `Certificate.validate(pem)` which evaluates expiry locally and looks up the TAK Server revocation record by SHA-256 fingerprint (the same `hash` consulted by `X509Authenticator`) via the user's certificate list, returning `expired`/`revoked`/`known`/`valid` along with the matching `certificate` record - `CertificateValidation` is exported. The record is fetched with `get(hash)` (a single cached row on the TAK Server) falling back to the user's certificate list when the server answers 500, which is how it reports an unknown hash
 - :tada: Add `Certificate.probe()` which checks whether the TAK Server accepts the API's own credentials via `GET /Marti/api/version` - the cheapest authoritative check as the X509 filter runs (and rethrows) on every request. Returns `{ accepted, version }` or `{ accepted: false, reason: 'revoked' | 'rejected' | 'tls', message }`; non-authentication errors are rethrown. `CertificateProbe` is exported
