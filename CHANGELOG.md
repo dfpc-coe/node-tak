@@ -12,6 +12,8 @@
 
 ### Pending
 
+### v12.26.1 - 2026-08-24
+
 - :bug: `APIAuthCertificate.fetch()` now defaults the request method to `GET` - undici's `Client.request` requires one, so every call that omitted it (`Certificate.list*()`, `Certificate.get()`, `Certificate.probe()`, `MissionLog` list) failed with `UND_ERR_INVALID_ARG: method must be a string` under certificate auth
 
 ### v12.26.0 - 2026-08-24
