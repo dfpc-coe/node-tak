@@ -2,6 +2,7 @@ import Commands from '../commands.js';
 import Err from '@openaddresses/batch-error';
 import { Readable } from 'node:stream';
 import { X509Certificate } from 'node:crypto';
+import { TAKServerError } from '../utils/html-error.js';
 import { Type } from '@sinclair/typebox';
 import type { Static } from '@sinclair/typebox';
 import { TAKItem, TAKList } from './types.js';
@@ -37,6 +38,17 @@ export const CertificateValidation = Type.Object({
     revocationDate: Type.Optional(Type.String({ format: 'date-time' })),
     valid: Type.Boolean({ description: 'Neither expired nor revoked' }),
     certificate: Type.Optional(Certificate)
+});
+
+export const CertificateProbe = Type.Object({
+    accepted: Type.Boolean({ description: 'The TAK Server authenticated the credentials' }),
+    version: Type.Optional(Type.String({ description: 'TAK Server version string when accepted' })),
+    reason: Type.Optional(Type.Union([
+        Type.Literal('revoked', { description: 'X509Authenticator raised RevokedException' }),
+        Type.Literal('rejected', { description: 'Authentication failed for another reason (BadCredentialsException)' }),
+        Type.Literal('tls', { description: 'The TLS handshake failed - typically an expired or untrusted client certificate' })
+    ])),
+    message: Type.Optional(Type.String())
 });
 
 /**
@@ -123,12 +135,54 @@ export default class CertificateCommands extends Commands {
     }
 
     /**
+     * Probe whether the TAK Server accepts the credentials this API instance was created with
+     *
+     * The X509 filter runs on every request and rethrows on failure, so `GET /Marti/api/version`
+     * (an anonymous, DB-free endpoint returning a short string) is the cheapest authoritative
+     * check - unlike {@link validate} it reflects the server's actual enforcement (e.g. whether
+     * `x509checkRevocation` is enabled) and requires no admin credentials. An expired client
+     * certificate is rejected during the TLS handshake and surfaces as `reason: 'tls'`.
+     *
+     * Only authentication failures are returned as a verdict - any other error (server
+     * unreachable, unexpected status) is rethrown so it is not mistaken for a rejection
+     */
+    async probe(): Promise<Static<typeof CertificateProbe>> {
+        const url = new URL('/Marti/api/version', this.api.url);
+
+        try {
+            const version = String(await this.api.fetch(url)).trim();
+
+            return { accepted: true, version };
+        } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            const details = err instanceof TAKServerError ? err.details : '';
+            const haystack = `${message}\n${details}`;
+
+            let reason: Static<typeof CertificateProbe>['reason'];
+            if (/RevokedException|revoked certificate/i.test(haystack)) {
+                reason = 'revoked';
+            } else if (/BadCredentialsException|AuthenticationException|TAK Server authentication/i.test(haystack)) {
+                reason = 'rejected';
+            } else if (
+                err instanceof Err && err.status === 400 && !(err instanceof TAKServerError)
+                && /certificate|handshake|alert|EPROTO|ECONNRESET|SSL|TLS/i.test(haystack)
+            ) {
+                reason = 'tls';
+            } else {
+                throw err;
+            }
+
+            return { accepted: false, reason, message };
+        }
+    }
+
+    /**
      * Validate a PEM encoded client certificate against local expiry and the TAK Server revocation record
      *
      * Expiry is evaluated locally from the certificate. Revocation is looked up via the
      * Certificate Admin API using the same SHA-256 fingerprint the TAK Server `X509Authenticator`
-     * consults - the certificate is matched from the user's certificate list rather than
-     * `get(hash)` as the TAK Server reports an unknown hash as a 500 rather than a 404.
+     * consults - `get(hash)` first (a single cached row) falling back to the user's certificate
+     * list when the TAK Server answers 500, which is how it reports an unknown hash.
      *
      * Note: The TAK Server only enforces revocation when `auth.x509checkRevocation` (or
      * `x509TokenAuth`) is enabled in CoreConfig - `revoked` reports the stored state regardless
@@ -147,8 +201,19 @@ export default class CertificateCommands extends Commands {
 
         const fingerprint = x509.fingerprint256.toUpperCase();
 
-        const certificate = (await this.list(username)).data
-            .find((cert) => cert.hash.toUpperCase() === fingerprint);
+        let certificate: Static<typeof Certificate> | undefined;
+        try {
+            // Single cached row lookup - the same query X509Authenticator performs
+            certificate = (await this.get(fingerprint)).data;
+        } catch (err) {
+            // The TAK Server reports an unknown hash via sendError(500), which is
+            // indistinguishable from a genuine failure - disambiguate against the
+            // (uncached, but authoritative) list of the user's certificates
+            if (!(err instanceof Err) || err.status < 500) throw err;
+
+            certificate = (await this.list(username)).data
+                .find((cert) => cert.hash.toUpperCase() === fingerprint);
+        }
 
         const expired = Date.parse(x509.validTo) < now.getTime();
         const revoked = !!certificate?.revocationDate;
