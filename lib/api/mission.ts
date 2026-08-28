@@ -317,9 +317,9 @@ export default class MissionCommands extends Commands {
         query: Static<typeof MissionChangesInput>,
         opts?: Static<typeof MissionOptions>
     ): Promise<Static<typeof TAKList_MissionChange>> {
-        if (this.#isGUID(name)) name = (await this.getGuid(name, {}, opts)).name;
-
-        const url = new URL(`/Marti/api/missions/${this.#encodeName(name)}/changes`, this.api.url);
+        const url = this.#isGUID(name)
+            ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/changes`, this.api.url)
+            : new URL(`/Marti/api/missions/${this.#encodeName(name)}/changes`, this.api.url);
 
         let q: keyof Static<typeof MissionChangesInput>;
         for (q in query) {

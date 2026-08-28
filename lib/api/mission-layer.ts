@@ -150,11 +150,9 @@ export default class MissionLayerCommands extends Commands {
         name: string,
         opts?: Static<typeof MissionOptions>
     ): Promise<Static<typeof TAKList_MissionLayer>> {
-        // TODO: This is an issue due to: https://issues.tak.gov/browse/TKS-1023
-        if (this.#isGUID(name)) name = (await this.api.Mission.getGuid(name, {}, opts)).name;
-        //const url = new URL(`/Marti/api/missions/guid/${this.#encodeName(name)}/layers`, this.api.url);
-
-        const url = new URL(`/Marti/api/missions/${this.#encodeName(name)}/layers`, this.api.url);
+        const url = this.#isGUID(name)
+            ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/layers`, this.api.url)
+            : new URL(`/Marti/api/missions/${this.#encodeName(name)}/layers`, this.api.url);
 
         const res = await this.api.fetch(url, {
             method: 'GET',
@@ -201,21 +199,22 @@ export default class MissionLayerCommands extends Commands {
         layerUid: string, // Layer UID
         opts?: Static<typeof MissionOptions>
     ): Promise<Static<typeof TAKItem_MissionLayer>> {
-        const layers = await this.list(name, opts);
+        const url = this.#isGUID(name)
+            ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/layers/${encodeURIComponent(layerUid)}`, this.api.url)
+            : new URL(`/Marti/api/missions/${this.#encodeName(name)}/layers/${encodeURIComponent(layerUid)}`, this.api.url);
 
-        // TODO this will only return top level layers - need to recurse to lower level layers
-        for (const layer of layers.data) {
-            if (layer.uid === layerUid) {
-                return {
-                    version: layers.version,
-                    type: layers.type,
-                    data: layer,
-                    nodeId: layers.nodeId
-                }
-            }
+        const res = await this.api.fetch(url, {
+            method: 'GET',
+            headers: this.#headers(opts),
+        });
+
+        if (!res.data) throw new Err(404, null, `Layer ${layerUid} not found`);
+
+        if (res.data.type === MissionLayerType.UID && !res.data.uids) {
+            res.data.uids = [];
         }
 
-        throw new Err(404, null, `Layer ${layerUid} not found - only top level layers will be returned`);
+        return res;
     }
 
     async create(

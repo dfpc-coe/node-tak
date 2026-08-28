@@ -135,3 +135,61 @@ test('MissionLayer.setParent omits parentUid to move a layer to the mission root
         Client.prototype.request = originalRequest;
     }
 });
+
+test('MissionLayer.list uses the guid layers endpoint for GUID missions', async () => {
+    const originalRequest = Client.prototype.request;
+
+    let captured: RequestArgs | undefined;
+
+    Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
+        captured = opts;
+        return mockResponse(200, 'application/json', JSON.stringify({
+            version: '3', type: 'MissionLayer', nodeId: 'n',
+            data: [{ uid: 'layer-1', name: 'Layer 1', type: 'UID' }]
+        }));
+    };
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+
+        const res = await api.MissionLayer.list('11111111-2222-3333-4444-555555555555');
+
+        assert.ok(captured);
+        assert.equal(captured.method, 'GET');
+        assert.equal(captured.path, '/Marti/api/missions/guid/11111111-2222-3333-4444-555555555555/layers');
+        assert.deepEqual(res.data[0].uids, []);
+    } finally {
+        Client.prototype.request = originalRequest;
+    }
+});
+
+test('MissionLayer.get fetches a single layer by uid', async () => {
+    const originalRequest = Client.prototype.request;
+
+    const paths: string[] = [];
+
+    Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
+        paths.push(String(opts.path));
+        return mockResponse(200, 'application/json', JSON.stringify({
+            version: '3', type: 'MissionLayer', nodeId: 'n',
+            data: { uid: 'layer-1', name: 'Layer 1', type: 'UID' }
+        }));
+    };
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+
+        const byGuid = await api.MissionLayer.get('11111111-2222-3333-4444-555555555555', 'layer-1');
+        const byName = await api.MissionLayer.get('Mission 1', 'layer-1');
+
+        assert.deepEqual(paths, [
+            '/Marti/api/missions/guid/11111111-2222-3333-4444-555555555555/layers/layer-1',
+            '/Marti/api/missions/Mission%201/layers/layer-1'
+        ]);
+        assert.equal(byGuid.data.uid, 'layer-1');
+        assert.deepEqual(byGuid.data.uids, []);
+        assert.equal(byName.data.uid, 'layer-1');
+    } finally {
+        Client.prototype.request = originalRequest;
+    }
+});

@@ -171,3 +171,28 @@ test('Mission.latestFeats returns empty results for an empty document', async ()
         Client.prototype.request = originalRequest;
     }
 });
+
+test('Mission.changes uses the guid changes endpoint for GUID missions', async () => {
+    const originalRequest = Client.prototype.request;
+
+    let captured: RequestArgs | undefined;
+
+    Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
+        captured = opts;
+        return mockResponse(200, 'application/json', JSON.stringify({
+            version: '3', type: 'MissionChange', nodeId: 'n', data: []
+        }));
+    };
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+
+        await api.Mission.changes('11111111-2222-3333-4444-555555555555', { secago: 60 });
+
+        assert.ok(captured);
+        assert.equal(captured.method, 'GET');
+        assert.equal(captured.path, '/Marti/api/missions/guid/11111111-2222-3333-4444-555555555555/changes?secago=60');
+    } finally {
+        Client.prototype.request = originalRequest;
+    }
+});

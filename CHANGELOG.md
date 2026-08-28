@@ -12,6 +12,12 @@
 
 ### Pending
 
+### v12.27.0 - 2026-08-28
+
+- :rocket: `Mission.changes()` now calls `GET /Marti/api/missions/guid/{guid}/changes` directly (TAK Server >= 5.6) instead of resolving the GUID to a name first
+- :rocket: `MissionLayer.list()` restored to `GET /Marti/api/missions/guid/{guid}/layers` now that https://issues.tak.gov/browse/TKS-1023 is resolved
+- :rocket: `MissionLayer.get()` now calls `GET /Marti/api/missions[/guid]/{mission}/layers/{layerUid}` instead of listing all layers & filtering client side - this also returns nested layers, not just top level ones
+
 ### v12.26.1 - 2026-08-24
 
 - :bug: `APIAuthCertificate.fetch()` now defaults the request method to `GET` - undici's `Client.request` requires one, so every call that omitted it (`Certificate.list*()`, `Certificate.get()`, `Certificate.probe()`, `MissionLog` list) failed with `UND_ERR_INVALID_ARG: method must be a string` under certificate auth
