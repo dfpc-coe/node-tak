@@ -183,7 +183,23 @@ export const SetRoleInput = Type.Object({
 export const MissionListInput = Type.Object({
     passwordProtected: Type.Optional(Type.Boolean()),
     defaultRole: Type.Optional(Type.Boolean()),
-    tool: Type.Optional(Type.String())
+    tool: Type.Optional(Type.String()),
+
+    /**
+     * When true, use `GET /Marti/api/pagedmissions` instead of `GET /Marti/api/missions`.
+     * Requires the TAK Server connector to have `enableNonAdminUI` (default true) - the
+     * remaining fields below are only honoured by the paged endpoint.
+     *
+     * Note: the paged endpoint defaults `passwordProtected` & `defaultRole` to `true`
+     * server-side, whereas the unpaged endpoint defaults them to `false`.
+     */
+    paged: Type.Optional(Type.Boolean()),
+    page: Type.Optional(Type.Integer({ minimum: 0, description: 'Zero-indexed page number (default 0)' })),
+    pagesize: Type.Optional(Type.Integer({ minimum: 1, description: 'Missions per page (default 10)' })),
+    sort: Type.Optional(Type.String({ description: 'Mission column to sort by' })),
+    ascending: Type.Optional(Type.Boolean({ description: 'Sort direction (default true)' })),
+    nameFilter: Type.Optional(Type.String({ description: 'Filter by mission name' })),
+    uidFilter: Type.Optional(Type.String({ description: 'Filter by mission uid' })),
 });
 
 export const MissionCreateInput = Type.Object({
@@ -698,15 +714,22 @@ export default class MissionCommands extends Commands {
     /**
      * List missions in currently active channels
      *
+     * Pass `paged: true` to use the paged endpoint (`GET /Marti/api/pagedmissions`) which
+     * additionally supports `page`, `pagesize`, `sort`, `ascending`, `nameFilter` & `uidFilter`.
+     *
      * {@link https://docs.tak.gov/api/takserver/redoc#tag/mission-api/operation/getAllMissions_1 TAK Server Docs}.
      */
     async list(query: Static<typeof MissionListInput>): Promise<Static<typeof TAKList_Mission>> {
-        const url = new URL('/Marti/api/missions', this.api.url);
+        const { paged, ...params } = query;
 
-        let q: keyof Static<typeof MissionListInput>;
-        for (q in query) {
-            if (query[q] !== undefined) {
-                url.searchParams.append(q, String(query[q]));
+        const url = paged
+            ? new URL('/Marti/api/pagedmissions', this.api.url)
+            : new URL('/Marti/api/missions', this.api.url);
+
+        let q: keyof typeof params;
+        for (q in params) {
+            if (params[q] !== undefined) {
+                url.searchParams.append(q, String(params[q]));
             }
         }
 

@@ -196,3 +196,66 @@ test('Mission.changes uses the guid changes endpoint for GUID missions', async (
         Client.prototype.request = originalRequest;
     }
 });
+
+test('Mission.list uses the unpaged missions endpoint by default', async () => {
+    const originalRequest = Client.prototype.request;
+
+    let captured: RequestArgs | undefined;
+
+    Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
+        captured = opts;
+        return mockResponse(200, 'application/json', JSON.stringify({
+            version: '3', type: 'Mission', data: []
+        }));
+    };
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+
+        const res = await api.Mission.list({ passwordProtected: true, tool: 'public' });
+
+        assert.deepEqual(res.data, []);
+        assert.ok(captured);
+        assert.equal(captured.method, 'GET');
+        assert.equal(captured.path, '/Marti/api/missions?passwordProtected=true&tool=public');
+    } finally {
+        Client.prototype.request = originalRequest;
+    }
+});
+
+test('Mission.list with paged: true uses the pagedmissions endpoint', async () => {
+    const originalRequest = Client.prototype.request;
+
+    let captured: RequestArgs | undefined;
+
+    Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
+        captured = opts;
+        return mockResponse(200, 'application/json', JSON.stringify({
+            version: '3', type: 'Mission', data: [{ name: 'alpha', guid: '11111111-2222-3333-4444-555555555555' }]
+        }));
+    };
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+
+        const res = await api.Mission.list({
+            paged: true,
+            page: 2,
+            pagesize: 25,
+            sort: 'name',
+            ascending: false,
+            nameFilter: 'alp'
+        });
+
+        assert.equal(res.data.length, 1);
+        assert.equal(res.data[0].name, 'alpha');
+        assert.ok(captured);
+        assert.equal(captured.method, 'GET');
+        assert.equal(
+            captured.path,
+            '/Marti/api/pagedmissions?page=2&pagesize=25&sort=name&ascending=false&nameFilter=alp'
+        );
+    } finally {
+        Client.prototype.request = originalRequest;
+    }
+});

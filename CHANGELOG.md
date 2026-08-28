@@ -12,6 +12,10 @@
 
 ### Pending
 
+### v12.28.0 - 2026-08-28
+
+- :tada: `Mission.list()` now accepts `paged: true` to call `GET /Marti/api/pagedmissions` with `page`, `pagesize`, `sort`, `ascending`, `nameFilter` & `uidFilter` params
+
 ### v12.27.0 - 2026-08-28
 
 - :rocket: `Mission.changes()` now calls `GET /Marti/api/missions/guid/{guid}/changes` directly (TAK Server >= 5.6) instead of resolving the GUID to a name first
