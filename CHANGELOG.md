@@ -14,7 +14,7 @@
 
 ### v12.29.0 - 2026-09-03
 
-- :tada: `Files.upload()` accepts an optional `uid` to set the UID metadata of the uploaded file, which TAK clients use to associate a Mission file with the map item of the same UID
+- :tada: `Files.upload()` accepts an optional `uid` to set the UID metadata of the uploaded file
 
 ### v12.28.0 - 2026-08-28
 
