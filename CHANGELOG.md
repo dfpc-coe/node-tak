@@ -12,6 +12,10 @@
 
 ### Pending
 
+### v12.29.0 - 2026-09-03
+
+- :tada: `Files.upload()` accepts an optional `uid` to set the UID metadata of the uploaded file, which TAK clients use to associate a Mission file with the map item of the same UID
+
 ### v12.28.0 - 2026-08-28
 
 - :tada: `Mission.list()` now accepts `paged: true` to call `GET /Marti/api/pagedmissions` with `page`, `pagesize`, `sort`, `ascending`, `nameFilter` & `uidFilter` params

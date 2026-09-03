@@ -116,6 +116,53 @@ test('Files.upload falls back to application/octet-stream when name has no exten
     }
 });
 
+test('Files.upload passes uid metadata for map item attachments', async () => {
+    const originalRequest = Client.prototype.request;
+
+    let captured: RequestArgs | undefined;
+
+    Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
+        captured = opts;
+
+        return {
+            statusCode: 200,
+            headers: {
+                'content-type': 'text/plain'
+            },
+            body: Readable.from([Buffer.from(JSON.stringify({
+                UID: 'marker-1',
+                SubmissionDateTime: '2026-01-01T00:00:00.000Z',
+                Keywords: [],
+                MIMEType: 'image/jpeg',
+                SubmissionUser: 'user-1',
+                PrimaryKey: '2',
+                Hash: 'hash-2',
+                CreatorUid: 'user-1',
+                Name: 'photo.jpg'
+            }))]),
+            trailers: {}
+        } as unknown as Dispatcher.ResponseData;
+    };
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+
+        const res = await api.Files.upload({
+            name: 'photo.jpg',
+            contentLength: 9,
+            keywords: [],
+            creatorUid: 'user-1',
+            uid: 'marker-1'
+        }, Buffer.from('jpg-bytes'));
+
+        assert.equal(res.UID, 'marker-1');
+        assert.ok(captured);
+        assert.equal(captured.path, '/Marti/sync/upload?name=photo.jpg&keywords=&creatorUid=user-1&uid=marker-1');
+    } finally {
+        Client.prototype.request = originalRequest;
+    }
+});
+
 test('APIAuthPassword surfaces transport causes during login', async () => {
     const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthPassword('alice', 'secret'));
     const originalFetch = api.auth.fetch;

@@ -200,6 +200,8 @@ export const MissionListInput = Type.Object({
     ascending: Type.Optional(Type.Boolean({ description: 'Sort direction (default true)' })),
     nameFilter: Type.Optional(Type.String({ description: 'Filter by mission name' })),
     uidFilter: Type.Optional(Type.String({ description: 'Filter by mission uid' })),
+    keywordFilter: Type.Optional(Type.Union([Type.Array(Type.String()), Type.String()], { description: 'Filter by one or more mission keywords' })),
+    groupFilter: Type.Optional(Type.Union([Type.Array(Type.String()), Type.String()], { description: 'Filter by one or more mission groups' })),
 });
 
 export const MissionCreateInput = Type.Object({
@@ -715,7 +717,8 @@ export default class MissionCommands extends Commands {
      * List missions in currently active channels
      *
      * Pass `paged: true` to use the paged endpoint (`GET /Marti/api/pagedmissions`) which
-     * additionally supports `page`, `pagesize`, `sort`, `ascending`, `nameFilter` & `uidFilter`.
+     * additionally supports `page`, `pagesize`, `sort`, `ascending`, `nameFilter`, `uidFilter`,
+     * `keywordFilter` & `groupFilter`.
      *
      * {@link https://docs.tak.gov/api/takserver/redoc#tag/mission-api/operation/getAllMissions_1 TAK Server Docs}.
      */
@@ -728,8 +731,18 @@ export default class MissionCommands extends Commands {
 
         let q: keyof typeof params;
         for (q in params) {
-            if (params[q] !== undefined) {
-                url.searchParams.append(q, String(params[q]));
+            const value = params[q];
+
+            if (value === undefined) continue;
+
+            if (Array.isArray(value)) {
+                // `keywordFilter` & `groupFilter` are repeatable
+                // (eg `?keywordFilter=a&keywordFilter=b`).
+                for (const v of value) {
+                    url.searchParams.append(q, String(v));
+                }
+            } else {
+                url.searchParams.append(q, String(value));
             }
         }
 

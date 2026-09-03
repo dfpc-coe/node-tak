@@ -175,6 +175,8 @@ export default class FileCommands extends Commands {
         contentType?: string;
         keywords: string[];
         creatorUid: string;
+        /** UID metadata - TAK clients treat a Mission file whose UID matches a map item as an attachment of that item */
+        uid?: string;
         latitude?: string;
         longitude?: string;
         altitude?: string;
@@ -183,6 +185,7 @@ export default class FileCommands extends Commands {
         url.searchParams.append('name', opts.name)
         url.searchParams.append('keywords', opts.keywords.join(','))
         url.searchParams.append('creatorUid', opts.creatorUid)
+        if (opts.uid) url.searchParams.append('uid', opts.uid);
         if (opts.altitude) url.searchParams.append('altitude', opts.altitude);
         if (opts.longitude) url.searchParams.append('longitude', opts.longitude);
         if (opts.latitude) url.searchParams.append('latitude', opts.latitude);

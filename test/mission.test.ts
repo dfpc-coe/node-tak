@@ -259,3 +259,35 @@ test('Mission.list with paged: true uses the pagedmissions endpoint', async () =
         Client.prototype.request = originalRequest;
     }
 });
+
+test('Mission.list serializes keywordFilter & groupFilter as repeated params', async () => {
+    const originalRequest = Client.prototype.request;
+
+    let captured: RequestArgs | undefined;
+
+    Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
+        captured = opts;
+        return mockResponse(200, 'application/json', JSON.stringify({
+            version: '3', type: 'Mission', data: []
+        }));
+    };
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+
+        await api.Mission.list({
+            paged: true,
+            keywordFilter: ['fire', 'flood'],
+            groupFilter: '__ANON__'
+        });
+
+        assert.ok(captured);
+        assert.equal(captured.method, 'GET');
+        assert.equal(
+            captured.path,
+            '/Marti/api/pagedmissions?keywordFilter=fire&keywordFilter=flood&groupFilter=__ANON__'
+        );
+    } finally {
+        Client.prototype.request = originalRequest;
+    }
+});
