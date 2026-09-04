@@ -12,6 +12,10 @@
 
 ### Pending
 
+### v12.30.0 - 2026-09-04
+
+- :tada: Add `UserManagement` API module & `tak user-management` CLI command implementing the File User Account Management API (`createUser`, `createUsers`, `listUsers`, `userGroups`, `changePassword`, `updateUserGroups`, `updateGroupUsers`, `deleteUser`, `listGroups`, `groupUsers`)
+
 ### v12.29.0 - 2026-09-03
 
 - :tada: `Files.upload()` accepts an optional `uid` to set the UID metadata of the uploaded file

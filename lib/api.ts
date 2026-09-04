@@ -20,6 +20,7 @@ import Group from './api/groups.js';
 import Subscription from './api/subscriptions.js';
 import Video from './api/video.js';
 import Export from './api/export.js';
+import UserManagement from './api/user-management.js';
 import Err from '@openaddresses/batch-error';
 import { TAKServerError, isHTML } from './utils/html-error.js';
 import * as auth from './auth.js';
@@ -88,7 +89,8 @@ export const CommandList: Record<string, keyof TAKAPI> = {
     video: 'Video',
     export: 'Export',
     query: 'Query',
-    file: 'Files'
+    file: 'Files',
+    'user-management': 'UserManagement'
 }
 
 /**
@@ -120,6 +122,7 @@ export default class TAKAPI {
     Export: Export;
     Query: Query;
     Files: Files;
+    UserManagement: UserManagement;
 
     constructor(url: URL, auth: auth.APIAuth) {
         this.url = url;
@@ -147,6 +150,7 @@ export default class TAKAPI {
         this.Injectors = new Injectors(this);
         this.Repeater = new Repeater(this);
         this.Files = new Files(this);
+        this.UserManagement = new UserManagement(this);
     }
 
     static async init(url: URL, auth: auth.APIAuth): Promise<TAKAPI> {
@@ -256,6 +260,7 @@ export {
     Subscription,
     Video,
     Export,
+    UserManagement,
     MissionSubscriberRole,
     MissionLayerType,
     MissionInviteType
