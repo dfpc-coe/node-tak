@@ -12,6 +12,8 @@
 
 ### Pending
 
+- :tada: Add `MissionProperty` API module for TAK Server 5.9+ Mission key/value properties (`list` with optional `prefix`, `get`, `set` (upsert), `delete`, `deleteAll`)
+
 ### v12.30.0 - 2026-09-04
 
 - :tada: Add `UserManagement` API module & `tak user-management` CLI command implementing the File User Account Management API (`createUser`, `createUsers`, `listUsers`, `userGroups`, `changePassword`, `updateUserGroups`, `updateGroupUsers`, `deleteUser`, `listGroups`, `groupUsers`)
