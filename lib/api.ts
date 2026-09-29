@@ -6,6 +6,7 @@ import Locate from './api/locate.js';
 import Mission, { MissionSubscriberRole } from './api/mission.js';
 import MissionInvite, { MissionInviteType } from './api/mission-invite.js';
 import MissionLog from './api/mission-log.js';
+import MissionProperty from './api/mission-property.js';
 import MissionLayer, { MissionLayerType } from './api/mission-layer.js';
 import Credentials from './api/credentials.js';
 import Security from './api/security.js';
@@ -76,6 +77,7 @@ export const CommandList: Record<string, keyof TAKAPI> = {
     mission: 'Mission',
     'mission-invite': 'MissionInvite',
     'mission-log': 'MissionLog',
+    'mission-property': 'MissionProperty',
     'mission-layer': 'MissionLayer',
     credential: 'Credentials',
     certificate: 'Certificate',
@@ -107,6 +109,7 @@ export default class TAKAPI {
     Iconsets: Iconsets;
     Mission: Mission;
     MissionLog: MissionLog;
+    MissionProperty: MissionProperty;
     MissionInvite: MissionInvite;
     MissionLayer: MissionLayer;
     Credentials: Credentials;
@@ -139,6 +142,7 @@ export default class TAKAPI {
         this.Iconsets = new Iconsets(this);
         this.Mission = new Mission(this);
         this.MissionLog = new MissionLog(this);
+        this.MissionProperty = new MissionProperty(this);
         this.MissionInvite = new MissionInvite(this);
         this.MissionLayer = new MissionLayer(this);
         this.Client = new Client(this);
@@ -246,6 +250,7 @@ export {
     Mission,
     MissionInvite,
     MissionLog,
+    MissionProperty,
     MissionLayer,
     Client,
     Credentials,
