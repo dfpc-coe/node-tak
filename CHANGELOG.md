@@ -12,6 +12,10 @@
 
 ### Pending
 
+### v12.31.1 - 2026-10-05
+
+- :arrow_up: Update core deps
+
 ### v12.31.0 - 2026-09-29
 
 - :tada: Add `MissionProperty` API module for TAK Server 5.9+ Mission key/value properties (`list` with optional `prefix`, `get`, `set` (upsert), `delete`, `deleteAll`)
