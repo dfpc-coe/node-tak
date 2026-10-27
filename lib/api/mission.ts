@@ -315,12 +315,19 @@ export default class MissionCommands extends Commands {
         name: string,
         opts?: Static<typeof MissionOptions>
     ): Promise<Readable> {
+        if (this.#isGUID(name)) name = (await this.getGuid(name, {}, opts)).name;
+
         const url = new URL(`/Marti/api/missions/${this.#encodeName(name)}/archive`, this.api.url);
 
         const res = await this.api.fetch(url, {
             method: 'GET',
             headers: this.#headers(opts),
         }, true);
+
+        if (res.status < 200 || res.status >= 400) {
+            const body = await res.text().catch(() => '');
+            throw new Err(res.status, null, body || `Status Code: ${res.status}`);
+        }
 
         return res.body;
     }

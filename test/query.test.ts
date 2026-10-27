@@ -95,6 +95,11 @@ test('Query.sa resolves secago to an explicit window and rejects what TAK Server
         await assert.rejects(api.Query.sa({ start: '2026-10-25T11:59:59.000Z', end: '2026-10-26T12:00:00.000Z' }), /24 hours or less/);
         await assert.rejects(api.Query.sa({ start: 'yesterday' }), /ISO 8601/);
         await assert.rejects(api.Query.sa({ secago: 0 }), /positive integer/);
+
+        Client.prototype.request = async function(): Promise<Dispatcher.ResponseData> {
+            return mockResponse(500, 'text/html', '<html>boom</html>');
+        };
+        await assert.rejects(api.Query.saFeats({ secago: 60 }), /failed: 500/);
     } finally {
         Client.prototype.request = originalRequest;
     }

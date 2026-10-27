@@ -291,3 +291,81 @@ test('Mission.list serializes keywordFilter & groupFilter as repeated params', a
         Client.prototype.request = originalRequest;
     }
 });
+
+function mockRoutes(routes: Record<string, () => Dispatcher.ResponseData>): { paths: string[]; restore: () => void } {
+    const originalRequest = Client.prototype.request;
+    const paths: string[] = [];
+
+    Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
+        const path = String(opts.path);
+        paths.push(path);
+        const route = routes[path];
+        if (!route) throw new Error(`Unexpected request: ${opts.method ?? 'GET'} ${path}`);
+        return route();
+    };
+
+    return { paths, restore: () => { Client.prototype.request = originalRequest; } };
+}
+
+async function collect(stream: Readable): Promise<Buffer> {
+    const chunks: Buffer[] = [];
+    for await (const chunk of stream) chunks.push(Buffer.from(chunk));
+    return Buffer.concat(chunks);
+}
+
+const ARCHIVE_GUID = '3f1b2c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d';
+
+test('Mission.getArchive streams the ZIP for a mission name', async () => {
+    const mock = mockRoutes({
+        '/Marti/api/missions/Fire%20Sync/archive': () => mockResponse(200, 'application/zip', 'zip-bytes')
+    });
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+        const body = await collect(await api.Mission.getArchive('Fire Sync'));
+
+        assert.deepEqual(mock.paths, ['/Marti/api/missions/Fire%20Sync/archive']);
+        assert.equal(body.toString(), 'zip-bytes');
+    } finally {
+        mock.restore();
+    }
+});
+
+test('Mission.getArchive resolves a GUID to the mission name before requesting the archive', async () => {
+    const mock = mockRoutes({
+        [`/Marti/api/missions/guid/${ARCHIVE_GUID}`]: () => mockResponse(200, 'application/json', JSON.stringify({
+            version: '3', type: 'Mission', nodeId: 'n', data: [{ name: 'Fire Sync', guid: ARCHIVE_GUID }]
+        })),
+        '/Marti/api/missions/Fire%20Sync/archive': () => mockResponse(200, 'application/zip', 'zip-bytes')
+    });
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+        const body = await collect(await api.Mission.getArchive(ARCHIVE_GUID));
+
+        assert.deepEqual(mock.paths, [
+            `/Marti/api/missions/guid/${ARCHIVE_GUID}`,
+            '/Marti/api/missions/Fire%20Sync/archive'
+        ]);
+        assert.equal(body.toString(), 'zip-bytes');
+    } finally {
+        mock.restore();
+    }
+});
+
+test('Mission.getArchive throws on a TAK Server error instead of streaming an empty body', async () => {
+    const mock = mockRoutes({
+        '/Marti/api/missions/Missing/archive': () => mockResponse(404, 'text/plain', '')
+    });
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+
+        await assert.rejects(() => api.Mission.getArchive('Missing'), (err: unknown) => {
+            assert.equal((err as { status?: number }).status, 404);
+            return true;
+        });
+    } finally {
+        mock.restore();
+    }
+});

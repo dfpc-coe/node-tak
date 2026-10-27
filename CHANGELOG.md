@@ -12,6 +12,10 @@
 
 ### Pending
 
+### v12.33.0 - 2026-10-27
+
+- :rocket: Allow the Mission Archive API to accept a GUID in addition to a name, matching other Mission APIs
+
 ### v12.32.0 - 2026-10-26
 
 - :tada: Add `Query.sa` & `Query.saFeats` for the TAK Server `/Marti/api/cot/sa` Situational Awareness query - every CoT visible to the caller within a time window given as `start`/`end` or `secago` (max 24 hours, validated client-side), optionally restricted to a bounding box

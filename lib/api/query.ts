@@ -147,6 +147,12 @@ export default class QueryCommands extends Commands {
             method: 'GET'
         }, true);
 
+        // No matching events is a bare 404; anything else failing is a real error
+        if (res.status === 404) return '';
+        if (res.status < 200 || res.status >= 400) {
+            throw new Err(res.status, null, `TAK Server Situational Awareness query failed: ${res.status}`);
+        }
+
         return await res.text();
     }
 
