@@ -12,6 +12,11 @@
 
 ### Pending
 
+### v12.32.0 - 2026-10-26
+
+- :tada: Add `Query.sa` & `Query.saFeats` for the TAK Server `/Marti/api/cot/sa` Situational Awareness query - every CoT visible to the caller within a time window given as `start`/`end` or `secago` (max 24 hours, validated client-side), optionally restricted to a bounding box
+- :rocket: `Query.historyFeats` tolerates an empty / missing `<events>` body instead of throwing
+
 ### v12.31.1 - 2026-10-05
 
 - :arrow_up: Update core deps
