@@ -12,6 +12,10 @@
 
 ### Pending
 
+### v12.34.0 - 2026-11-04
+
+- :tada: Add `Mission.removeUser()` for removing another subscriber via a role-less `PUT .../role`; `SetRoleInput.username` & `role` are now optional
+
 ### v12.33.0 - 2026-10-27
 
 - :rocket: Allow the Mission Archive API to accept a GUID in addition to a name, matching other Mission APIs

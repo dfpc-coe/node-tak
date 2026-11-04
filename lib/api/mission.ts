@@ -176,8 +176,13 @@ export const GetInput = Type.Object({
 
 export const SetRoleInput = Type.Object({
     clientUid: Type.String(),
-    username: Type.String(),
-    role: Type.Enum(MissionSubscriberRole)
+    username: Type.Optional(Type.String()),
+    role: Type.Optional(Type.Enum(MissionSubscriberRole))
+});
+
+export const RemoveUserInput = Type.Object({
+    clientUid: Type.String(),
+    username: Type.Optional(Type.String())
 });
 
 export const MissionListInput = Type.Object({
@@ -592,6 +597,8 @@ export default class MissionCommands extends Commands {
     /**
      * Set the Role of a given user on a Mission
      *
+     * Omitting `role` removes the subscriber instead (see `removeUser`)
+     *
      * {@link https://docs.tak.gov/api/takserver/redoc#tag/mission-api/operation/setMissionRole TAK Server Docs}.
      */
     async setRole(
@@ -614,6 +621,25 @@ export default class MissionCommands extends Commands {
             method: 'PUT',
             headers: this.#headers(opts),
         });
+    }
+
+    /**
+     * Remove another subscriber from a Mission
+     *
+     * Uses `PUT .../role` without a `role` parameter, which TAK Server treats as an
+     * unsubscribe of the target user; requires `MISSION_SET_ROLE`. The
+     * `DELETE .../subscription` endpoint only ever removes the caller's own subscription.
+     * When `username` is omitted the subscription is matched by `clientUid` alone.
+     */
+    async removeUser(
+        name: string,
+        query: Static<typeof RemoveUserInput>,
+        opts?: Static<typeof MissionOptions>
+    ): Promise<void> {
+        await this.setRole(name, {
+            clientUid: query.clientUid,
+            username: query.username
+        }, opts);
     }
 
     /**
