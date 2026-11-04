@@ -54,6 +54,12 @@ export const MissionChange = Type.Object({
     contentResource: Type.Optional(MissionContent)
 });
 
+export const MissionRole = Type.Object({
+    permissions: Type.Array(Type.String()),
+    hibernateLazyInitializer: Type.Optional(Type.Any()),
+    type: Type.Enum(MissionSubscriberRole)
+})
+
 export const Mission = Type.Object({
     name: Type.String(),
     description: Type.String(),
@@ -84,16 +90,11 @@ export const Mission = Type.Object({
         data: MissionContent
     })),
     passwordProtected: Type.Boolean(),
+    defaultRole: Type.Optional(MissionRole),
     token: Type.Optional(Type.String()),                        // Only present when mission created
     groups: Type.Optional(Type.Union([Type.String(), Type.Array(Type.String())])),           // Only present on Mission.get()
     missionChanges: Type.Optional(Type.Array(MissionChange))   // Only present on Mission.get()
 });
-
-export const MissionRole = Type.Object({
-    permissions: Type.Array(Type.String()),
-    hibernateLazyInitializer: Type.Optional(Type.Any()),
-    type: Type.Enum(MissionSubscriberRole)
-})
 
 export const MissionSubscriber = Type.Object({
     token: Type.Optional(Type.String()),
@@ -243,6 +244,7 @@ export const MissionUpdateInput = Type.Object({
     tool: Type.Optional(Type.String()),
     expiration: Type.Optional(Type.Integer()),
     inviteOnly: Type.Optional(Type.Boolean()),
+    defaultRole: Type.Optional(Type.Enum(MissionSubscriberRole)),
 });
 
 export const GUIDMatch = new RegExp(/^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$/);
@@ -526,6 +528,54 @@ export default class MissionCommands extends Commands {
         const url = this.#isGUID(child)
             ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(child)}/parent`, this.api.url)
             : new URL(`/Marti/api/missions/${this.#encodeName(child)}/parent`, this.api.url);
+
+        await this.api.fetch(url, {
+            method: 'DELETE',
+            headers: this.#headers(opts)
+        });
+    }
+
+    /**
+     * Set or replace the password on a mission
+     *
+     * {@link https://docs.tak.gov/api/takserver/redoc#tag/mission-api/operation/setPassword TAK Server Docs}.
+     */
+    async setPassword(
+        name: string,
+        password: string,
+        opts?: Static<typeof MissionOptions>,
+        creatorUid?: string
+    ): Promise<void> {
+        if (!password.length) throw new Err(400, null, 'Mission Password cannot be empty');
+
+        const url = this.#isGUID(name)
+            ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/password`, this.api.url)
+            : new URL(`/Marti/api/missions/${this.#encodeName(name)}/password`, this.api.url);
+
+        url.searchParams.append('password', password);
+        if (creatorUid !== undefined) url.searchParams.append('creatorUid', creatorUid);
+
+        await this.api.fetch(url, {
+            method: 'PUT',
+            headers: this.#headers(opts)
+        });
+    }
+
+    /**
+     * Remove the password from a mission
+     *
+     * {@link https://docs.tak.gov/api/takserver/redoc#tag/mission-api/operation/removePassword TAK Server Docs}.
+     */
+    async removePassword(
+        name: string,
+        opts?: Static<typeof MissionOptions>,
+        creatorUid?: string
+    ): Promise<void> {
+        const url = this.#isGUID(name)
+            ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/password`, this.api.url)
+            : new URL(`/Marti/api/missions/${this.#encodeName(name)}/password`, this.api.url);
+
+        if (creatorUid !== undefined) url.searchParams.append('creatorUid', creatorUid);
 
         await this.api.fetch(url, {
             method: 'DELETE',
@@ -907,7 +957,8 @@ export default class MissionCommands extends Commands {
             classification: body.classification ?? mission.classification,
             tool: body.tool ?? mission.tool,
             expiration: body.expiration ?? mission.expiration,
-            inviteOnly: body.inviteOnly ?? mission.inviteOnly
+            inviteOnly: body.inviteOnly ?? mission.inviteOnly,
+            defaultRole: body.defaultRole
         };
 
         // Group changes by non-admin Mission Owners require `allowGroupChange=true`

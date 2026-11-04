@@ -454,3 +454,177 @@ test('Mission.clearParent issues a DELETE on the guid parent endpoint', async ()
         Client.prototype.request = originalRequest;
     }
 });
+
+test('Mission.update sends defaultRole alongside the current mission values', async () => {
+    const originalRequest = Client.prototype.request;
+
+    const captured: RequestArgs[] = [];
+
+    Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
+        captured.push(opts);
+        return mockResponse(200, 'application/json', JSON.stringify({
+            version: '3',
+            type: 'Mission',
+            data: [{
+                name: 'mission-1',
+                guid: '9d2b7a6e-3c4f-4e8a-9b1d-2f6a8c0e4b71',
+                createTime: '2024-01-01T00:00:00Z',
+                description: 'desc',
+                tool: 'public',
+                keywords: [],
+                externalData: [],
+                feeds: [],
+                mapLayers: [],
+                inviteOnly: false,
+                expiration: -1,
+                uids: [],
+                contents: [],
+                passwordProtected: false,
+                defaultRole: { type: 'MISSION_SUBSCRIBER', permissions: ['MISSION_READ', 'MISSION_WRITE'] },
+                groups: ['__ANON__']
+            }],
+            nodeId: 'node'
+        }));
+    };
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+
+        const mission = await api.Mission.update('mission-1', {
+            defaultRole: MissionSubscriberRole.MISSION_READONLY_SUBSCRIBER
+        });
+
+        assert.equal(mission.defaultRole?.type, 'MISSION_SUBSCRIBER');
+        assert.equal(captured.length, 2);
+        assert.equal(captured[1].method, 'POST');
+
+        const url = new URL(String(captured[1].path), 'https://tak.example.com');
+        assert.equal(url.pathname, '/Marti/api/missions/mission-1');
+        assert.equal(url.searchParams.get('defaultRole'), 'MISSION_READONLY_SUBSCRIBER');
+        assert.equal(url.searchParams.get('description'), 'desc');
+        assert.equal(url.searchParams.get('group'), '__ANON__');
+        assert.equal(url.searchParams.get('allowDupe'), 'false');
+    } finally {
+        Client.prototype.request = originalRequest;
+    }
+});
+
+test('Mission.update omits defaultRole when it is not provided', async () => {
+    const originalRequest = Client.prototype.request;
+
+    const captured: RequestArgs[] = [];
+
+    Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
+        captured.push(opts);
+        return mockResponse(200, 'application/json', JSON.stringify({
+            version: '3',
+            type: 'Mission',
+            data: [{
+                name: 'mission-1',
+                guid: '9d2b7a6e-3c4f-4e8a-9b1d-2f6a8c0e4b71',
+                createTime: '2024-01-01T00:00:00Z',
+                description: 'desc',
+                tool: 'public',
+                keywords: [],
+                externalData: [],
+                feeds: [],
+                mapLayers: [],
+                inviteOnly: false,
+                expiration: -1,
+                uids: [],
+                contents: [],
+                passwordProtected: false,
+                defaultRole: { type: 'MISSION_SUBSCRIBER', permissions: [] }
+            }],
+            nodeId: 'node'
+        }));
+    };
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+
+        await api.Mission.update('mission-1', { description: 'next' });
+
+        const url = new URL(String(captured[1].path), 'https://tak.example.com');
+        assert.equal(url.searchParams.has('defaultRole'), false);
+        assert.equal(url.searchParams.get('description'), 'next');
+    } finally {
+        Client.prototype.request = originalRequest;
+    }
+});
+
+test('Mission.setPassword issues a PUT on the guid password endpoint', async () => {
+    const originalRequest = Client.prototype.request;
+
+    let captured: RequestArgs | undefined;
+
+    Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
+        captured = opts;
+        return mockResponse(200, 'text/plain', '');
+    };
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+
+        await api.Mission.setPassword('9d2b7a6e-3c4f-4e8a-9b1d-2f6a8c0e4b71', 'p%ss?w"rd', {
+            token: 'mission-token'
+        });
+
+        assert.ok(captured);
+        assert.equal(captured.method, 'PUT');
+
+        const url = new URL(String(captured.path), 'https://tak.example.com');
+        assert.equal(url.pathname, '/Marti/api/missions/guid/9d2b7a6e-3c4f-4e8a-9b1d-2f6a8c0e4b71/password');
+        assert.equal(url.searchParams.get('password'), 'p%ss?w"rd');
+        assert.equal((captured.headers as Record<string, string>).MissionAuthorization, 'Bearer mission-token');
+    } finally {
+        Client.prototype.request = originalRequest;
+    }
+});
+
+test('Mission.setPassword rejects an empty password without calling TAK Server', async () => {
+    const originalRequest = Client.prototype.request;
+
+    let called = false;
+
+    Client.prototype.request = async function(): Promise<Dispatcher.ResponseData> {
+        called = true;
+        return mockResponse(200, 'text/plain', '');
+    };
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+
+        await assert.rejects(
+            api.Mission.setPassword('mission-1', ''),
+            { status: 400, message: 'Mission Password cannot be empty' }
+        );
+
+        assert.equal(called, false);
+    } finally {
+        Client.prototype.request = originalRequest;
+    }
+});
+
+test('Mission.removePassword issues a DELETE on the name password endpoint', async () => {
+    const originalRequest = Client.prototype.request;
+
+    let captured: RequestArgs | undefined;
+
+    Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
+        captured = opts;
+        return mockResponse(200, 'text/plain', '');
+    };
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+
+        await api.Mission.removePassword('Test Mission', undefined, 'creator-1');
+
+        assert.ok(captured);
+        assert.equal(captured.method, 'DELETE');
+        assert.equal(captured.path, '/Marti/api/missions/Test%20Mission/password?creatorUid=creator-1');
+    } finally {
+        Client.prototype.request = originalRequest;
+    }
+});

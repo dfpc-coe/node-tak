@@ -12,6 +12,11 @@
 
 ### Pending
 
+### v12.36.0 - 2026-11-04
+
+- :tada: Add `defaultRole` to the `Mission` schema & `MissionUpdateInput` so the default subscriber role of an existing mission can be read & changed
+- :tada: Add `Mission.setPassword()` & `Mission.removePassword()`
+
 ### v12.35.0 - 2026-11-04
 
 - :tada: Add `Mission.parent()` & `Mission.clearParent()` for reading and clearing a child mission's parent
