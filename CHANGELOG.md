@@ -12,6 +12,10 @@
 
 ### Pending
 
+### v12.35.0 - 2026-11-04
+
+- :tada: Add `Mission.parent()` & `Mission.clearParent()` for reading and clearing a child mission's parent
+
 ### v12.34.0 - 2026-11-04
 
 - :tada: Add `Mission.removeUser()` for removing another subscriber via a role-less `PUT .../role`; `SetRoleInput.username` & `role` are now optional

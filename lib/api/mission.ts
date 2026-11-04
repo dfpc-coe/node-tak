@@ -248,6 +248,7 @@ export const MissionUpdateInput = Type.Object({
 export const GUIDMatch = new RegExp(/^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$/);
 
 export const TAKList_Mission = TAKList(Mission);
+export const TAKItem_Mission = TAKItem(Mission);
 export const TAKList_MissionInvites = TAKList(Type.String());
 export const TAKList_MissionChange = TAKList(MissionChange);
 export const TAKList_MissionSubscriber = TAKList(MissionSubscriber);
@@ -485,6 +486,49 @@ export default class MissionCommands extends Commands {
 
         return await this.api.fetch(url, {
             method: 'PUT',
+            headers: this.#headers(opts)
+        });
+    }
+
+    /**
+     * Return the parent mission of a child mission
+     *
+     * TAK Server only exposes this by name, so a GUID is resolved to a name first.
+     * Throws a 404 when the mission has no parent.
+     *
+     * {@link https://docs.tak.gov/api/takserver/redoc#tag/mission-api/operation/getParent TAK Server Docs}.
+     */
+    async parent(
+        name: string,
+        opts?: Static<typeof MissionOptions>
+    ): Promise<Static<typeof Mission>> {
+        const missionName = this.#isGUID(name) ? (await this.get(name, {}, opts)).name : name;
+
+        const url = new URL(`/Marti/api/missions/${this.#encodeName(missionName)}/parent`, this.api.url);
+
+        const res: Static<typeof TAKItem_Mission> = await this.api.fetch(url, {
+            method: 'GET',
+            headers: this.#headers(opts)
+        });
+
+        return this.#stdMission(res.data);
+    }
+
+    /**
+     * Clear the parent mission of a child mission
+     *
+     * {@link https://docs.tak.gov/api/takserver/redoc#tag/mission-api/operation/clearParent TAK Server Docs}.
+     */
+    async clearParent(
+        child: string,
+        opts?: Static<typeof MissionOptions>
+    ): Promise<void> {
+        const url = this.#isGUID(child)
+            ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(child)}/parent`, this.api.url)
+            : new URL(`/Marti/api/missions/${this.#encodeName(child)}/parent`, this.api.url);
+
+        await this.api.fetch(url, {
+            method: 'DELETE',
             headers: this.#headers(opts)
         });
     }

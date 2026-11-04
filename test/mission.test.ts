@@ -369,3 +369,88 @@ test('Mission.getArchive throws on a TAK Server error instead of streaming an em
         mock.restore();
     }
 });
+
+test('Mission.parent uses the name parent endpoint and unwraps the mission', async () => {
+    const originalRequest = Client.prototype.request;
+
+    let captured: RequestArgs | undefined;
+
+    Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
+        captured = opts;
+        return mockResponse(200, 'application/json', JSON.stringify({
+            version: '3', type: 'Mission', nodeId: 'n', data: { name: 'parent-1', guid: '11111111-2222-3333-4444-555555555555' }
+        }));
+    };
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+
+        const parent = await api.Mission.parent('child 1');
+
+        assert.ok(captured);
+        assert.equal(captured.method, 'GET');
+        assert.equal(captured.path, '/Marti/api/missions/child%201/parent');
+        assert.equal(parent.name, 'parent-1');
+        assert.equal(parent.description, '');
+    } finally {
+        Client.prototype.request = originalRequest;
+    }
+});
+
+test('Mission.parent resolves a GUID to a name first', async () => {
+    const originalRequest = Client.prototype.request;
+
+    const paths: string[] = [];
+
+    Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
+        paths.push(String(opts.path));
+
+        if (paths.length === 1) {
+            return mockResponse(200, 'application/json', JSON.stringify({
+                version: '3', type: 'Mission', nodeId: 'n', data: [{ name: 'child-1', guid: '11111111-2222-3333-4444-555555555555' }]
+            }));
+        }
+
+        return mockResponse(200, 'application/json', JSON.stringify({
+            version: '3', type: 'Mission', nodeId: 'n', data: { name: 'parent-1', guid: '22222222-2222-3333-4444-555555555555' }
+        }));
+    };
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+
+        const parent = await api.Mission.parent('11111111-2222-3333-4444-555555555555');
+
+        assert.deepEqual(paths, [
+            '/Marti/api/missions/guid/11111111-2222-3333-4444-555555555555',
+            '/Marti/api/missions/child-1/parent'
+        ]);
+        assert.equal(parent.name, 'parent-1');
+    } finally {
+        Client.prototype.request = originalRequest;
+    }
+});
+
+test('Mission.clearParent issues a DELETE on the guid parent endpoint', async () => {
+    const originalRequest = Client.prototype.request;
+
+    let captured: RequestArgs | undefined;
+
+    Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
+        captured = opts;
+        return mockResponse(200, 'text/plain', '');
+    };
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+
+        const res = await api.Mission.clearParent('11111111-2222-3333-4444-555555555555');
+
+        assert.equal(res, undefined);
+        assert.ok(captured);
+        assert.equal(captured.method, 'DELETE');
+        assert.equal(captured.path, '/Marti/api/missions/guid/11111111-2222-3333-4444-555555555555/parent');
+    } finally {
+        Client.prototype.request = originalRequest;
+    }
+});
