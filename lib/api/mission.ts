@@ -90,7 +90,7 @@ export const Mission = Type.Object({
         data: MissionContent
     })),
     passwordProtected: Type.Boolean(),
-    defaultRole: Type.Optional(MissionRole),
+    defaultRole: MissionRole,
     token: Type.Optional(Type.String()),                        // Only present when mission created
     groups: Type.Optional(Type.Union([Type.String(), Type.Array(Type.String())])),           // Only present on Mission.get()
     missionChanges: Type.Optional(Type.Array(MissionChange))   // Only present on Mission.get()
@@ -300,6 +300,14 @@ export default class MissionCommands extends Commands {
      */
     #stdMission(mission: Static<typeof Mission>): Static<typeof Mission> {
         if (mission.description === undefined) mission.description = '';
+
+        // TAK Server omits defaultRole when none was set & treats the mission as MISSION_SUBSCRIBER
+        if (mission.defaultRole === undefined) {
+            mission.defaultRole = {
+                type: MissionSubscriberRole.MISSION_SUBSCRIBER,
+                permissions: ['MISSION_READ', 'MISSION_WRITE']
+            };
+        }
 
         return mission;
     }
@@ -873,9 +881,13 @@ export default class MissionCommands extends Commands {
             }
         }
 
-        return await this.api.fetch(url, {
+        const missions: Static<typeof TAKList_Mission> = await this.api.fetch(url, {
             method: 'GET'
         });
+
+        missions.data = missions.data.map((mission) => this.#stdMission(mission));
+
+        return missions;
     }
 
     /**

@@ -628,3 +628,79 @@ test('Mission.removePassword issues a DELETE on the name password endpoint', asy
         Client.prototype.request = originalRequest;
     }
 });
+
+test('Mission.get fills in defaultRole as MISSION_SUBSCRIBER when TAK Server omits it', async () => {
+    const originalRequest = Client.prototype.request;
+
+    Client.prototype.request = async function(): Promise<Dispatcher.ResponseData> {
+        return mockResponse(200, 'application/json', JSON.stringify({
+            version: '3', type: 'Mission', nodeId: 'n', data: [{ name: 'mission-1', guid: '11111111-2222-3333-4444-555555555555' }]
+        }));
+    };
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+
+        const mission = await api.Mission.get('mission-1', {});
+
+        assert.deepEqual(mission.defaultRole, {
+            type: MissionSubscriberRole.MISSION_SUBSCRIBER,
+            permissions: ['MISSION_READ', 'MISSION_WRITE']
+        });
+    } finally {
+        Client.prototype.request = originalRequest;
+    }
+});
+
+test('Mission.get keeps an explicit defaultRole from TAK Server', async () => {
+    const originalRequest = Client.prototype.request;
+
+    Client.prototype.request = async function(): Promise<Dispatcher.ResponseData> {
+        return mockResponse(200, 'application/json', JSON.stringify({
+            version: '3', type: 'Mission', nodeId: 'n', data: [{
+                name: 'mission-1',
+                guid: '11111111-2222-3333-4444-555555555555',
+                defaultRole: { type: 'MISSION_READONLY_SUBSCRIBER', permissions: ['MISSION_READ'] }
+            }]
+        }));
+    };
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+
+        const mission = await api.Mission.get('mission-1', {});
+
+        assert.deepEqual(mission.defaultRole, {
+            type: MissionSubscriberRole.MISSION_READONLY_SUBSCRIBER,
+            permissions: ['MISSION_READ']
+        });
+    } finally {
+        Client.prototype.request = originalRequest;
+    }
+});
+
+test('Mission.list fills in defaultRole & description on each mission', async () => {
+    const originalRequest = Client.prototype.request;
+
+    Client.prototype.request = async function(): Promise<Dispatcher.ResponseData> {
+        return mockResponse(200, 'application/json', JSON.stringify({
+            version: '3', type: 'Mission', data: [
+                { name: 'mission-1', guid: '11111111-2222-3333-4444-555555555555' },
+                { name: 'mission-2', guid: '66666666-7777-8888-9999-000000000000', description: 'set', defaultRole: { type: 'MISSION_OWNER', permissions: ['MISSION_READ'] } }
+            ]
+        }));
+    };
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+
+        const res = await api.Mission.list({});
+
+        assert.equal(res.data[0].description, '');
+        assert.equal(res.data[0].defaultRole.type, MissionSubscriberRole.MISSION_SUBSCRIBER);
+        assert.equal(res.data[1].description, 'set');
+        assert.equal(res.data[1].defaultRole.type, MissionSubscriberRole.MISSION_OWNER);
+    } finally {
+        Client.prototype.request = originalRequest;
+    }
+});

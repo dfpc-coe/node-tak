@@ -12,6 +12,10 @@
 
 ### Pending
 
+### v12.36.1 - 2026-11-04
+
+- :bug: Fill in `Mission.defaultRole` as `MISSION_SUBSCRIBER` when TAK Server omits it, matching the role the server applies to new subscribers
+
 ### v12.36.0 - 2026-11-04
 
 - :tada: Add `defaultRole` to the `Mission` schema & `MissionUpdateInput` so the default subscriber role of an existing mission can be read & changed
