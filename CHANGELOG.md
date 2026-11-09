@@ -12,6 +12,10 @@
 
 ### Pending
 
+### v12.36.3 - 2026-11-09
+
+- :arrow_up: Update core deps
+
 ### v12.36.2 - 2026-11-09
 
 - :bug: `Mission.create` trims the mission name before validation and submission - TAK Server trims names on creation, so the returned `Mission.name` now matches what the caller keeps
