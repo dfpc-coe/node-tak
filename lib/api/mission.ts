@@ -1058,6 +1058,8 @@ export default class MissionCommands extends Commands {
     async create(
         body: Static<typeof MissionCreateInput>
     ): Promise<Static<typeof Mission>> {
+        body.name = body.name.trim();
+
         const url = new URL(`/Marti/api/missions/${this.#encodeName(body.name)}`, this.api.url);
 
         // I want to keep this 1:1 with the TAK Server Source Code

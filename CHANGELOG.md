@@ -12,6 +12,10 @@
 
 ### Pending
 
+### v12.36.2 - 2026-11-09
+
+- :bug: `Mission.create` trims the mission name before validation and submission - TAK Server trims names on creation, so the returned `Mission.name` now matches what the caller keeps
+
 ### v12.36.1 - 2026-11-04
 
 - :bug: Fill in `Mission.defaultRole` as `MISSION_SUBSCRIBER` when TAK Server omits it, matching the role the server applies to new subscribers

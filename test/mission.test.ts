@@ -704,3 +704,60 @@ test('Mission.list fills in defaultRole & description on each mission', async ()
         Client.prototype.request = originalRequest;
     }
 });
+
+test('Mission.create trims the mission name before submitting it', async () => {
+    const originalRequest = Client.prototype.request;
+
+    let captured: RequestArgs | undefined;
+
+    Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
+        captured = opts;
+        return mockResponse(201, 'application/json', JSON.stringify({
+            version: '3',
+            type: 'Mission',
+            data: [{
+                name: 'CAIC Avalanche Forecast',
+                description: '',
+                chatRoom: '',
+                baseLayer: '',
+                bbox: '',
+                path: '',
+                classification: '',
+                tool: 'public',
+                keywords: [],
+                creatorUid: 'creator-1',
+                createTime: '2026-11-05T21:54:52.177Z',
+                externalData: [],
+                feeds: [],
+                mapLayers: [],
+                defaultRole: { type: 'MISSION_SUBSCRIBER', permissions: ['MISSION_READ', 'MISSION_WRITE'] },
+                inviteOnly: false,
+                expiration: -1,
+                guid: '6840f919-76f1-4f46-a61c-46055ff0ed30',
+                uids: [],
+                contents: [],
+                passwordProtected: false
+            }],
+            nodeId: 'node-1'
+        }));
+    };
+
+    try {
+        const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
+
+        const mission = await api.Mission.create({
+            name: ' CAIC Avalanche Forecast ',
+            creatorUid: 'creator-1'
+        });
+
+        assert.equal(mission.name, 'CAIC Avalanche Forecast');
+        assert.ok(captured);
+        assert.equal(captured.method, 'POST');
+        assert.ok(
+            String(captured.path).startsWith('/Marti/api/missions/CAIC%20Avalanche%20Forecast?'),
+            `mission name must be trimmed in the request path, got: ${captured.path}`
+        );
+    } finally {
+        Client.prototype.request = originalRequest;
+    }
+});
