@@ -16,16 +16,70 @@ export enum MissionSubscriberRole {
 // These properties are optional as a REMOVE_CONTENT will
 // only have "hash"
 export const MissionContent = Type.Object({
+    filename: Type.Optional(Type.String()),
     keywords: Type.Optional(Type.Array(Type.String())),
+    mimeType: Type.Optional(Type.String()),
+    contentType: Type.Optional(Type.String()),
     name: Type.Optional(Type.String()),
-    hash: Type.String(),
     submissionTime: Type.Optional(Type.String()),
+    submitter: Type.Optional(Type.String()),
     uid: Type.Optional(Type.String()),
+    hash: Type.String(),
     size: Type.Optional(Type.Integer()),
     creatorUid: Type.Optional(Type.String()),
-    mimeType: Type.Optional(Type.String()),
-    submitter: Type.Optional(Type.String()),
-    expiration: Type.Optional(Type.Integer())
+    tool: Type.Optional(Type.String()),
+    latitude: Type.Optional(Type.Number()),
+    longitude: Type.Optional(Type.Number()),
+    altitude: Type.Optional(Type.Number()),
+    expiration: Type.Optional(Type.Integer()),
+    groups: Type.Optional(Type.Array(Type.String()))
+});
+
+export const MissionUidDetails = Type.Object({
+    type: Type.String(),
+    callsign: Type.Optional(Type.String()),
+    title: Type.Optional(Type.String()),
+    iconsetPath: Type.Optional(Type.String()),
+    color: Type.Optional(Type.String()),
+    attachments: Type.Optional(Type.Array(Type.String())),
+    name: Type.Optional(Type.String()),
+    category: Type.Optional(Type.String()),
+    location: Type.Optional(Type.Object({
+        lat: Type.Number(),
+        lon: Type.Number()
+    }))
+});
+
+export const MissionMapLayer = Type.Object({
+    uid: Type.String(),
+    name: Type.String(),
+    type: Type.String(),
+    url: Type.String(),
+    description: Type.Optional(Type.String()),
+    creatorUid: Type.Optional(Type.String()),
+    createTime: Type.Optional(Type.String()),
+    modifiedTime: Type.Optional(Type.String()),
+    enabled: Type.Boolean(),
+    defaultLayer: Type.Boolean(),
+    ignoreErrors: Type.Boolean(),
+    invertYCoordinate: Type.Boolean(),
+    minZoom: Type.Optional(Type.Integer()),
+    maxZoom: Type.Optional(Type.Integer()),
+    tileType: Type.Optional(Type.String()),
+    serverParts: Type.Optional(Type.String()),
+    backgroundColor: Type.Optional(Type.String()),
+    tileUpdate: Type.Optional(Type.String()),
+    north: Type.Optional(Type.Number()),
+    south: Type.Optional(Type.Number()),
+    east: Type.Optional(Type.Number()),
+    west: Type.Optional(Type.Number()),
+    additionalParameters: Type.Optional(Type.String()),
+    coordinateSystem: Type.Optional(Type.String()),
+    layers: Type.Optional(Type.String()),
+    version: Type.Optional(Type.String()),
+    opacity: Type.Optional(Type.Integer()),
+    path: Type.Optional(Type.String()),
+    after: Type.Optional(Type.String())
 });
 
 export const MissionChange = Type.Object({
@@ -37,20 +91,7 @@ export const MissionChange = Type.Object({
     serverTime: Type.String(),
     creatorUid: Type.Optional(Type.String()),
     contentUid: Type.Optional(Type.String()),
-    details: Type.Optional(Type.Object({
-        type: Type.String(),
-        callsign: Type.Optional(Type.String()),
-        title: Type.Optional(Type.String()),
-        iconsetPath: Type.Optional(Type.String()),
-        color: Type.Optional(Type.String()),
-        attachments: Type.Optional(Type.Array(Type.String())),
-        name: Type.Optional(Type.String()),
-        category: Type.Optional(Type.String()),
-        location: Type.Optional(Type.Object({
-            lat: Type.Number(),
-            lon: Type.Number()
-        }))
-    })),
+    details: Type.Optional(MissionUidDetails),
     contentResource: Type.Optional(MissionContent)
 });
 

@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 import { Readable } from 'node:stream';
 import { Client } from 'undici';
 import type { Dispatcher } from 'undici';
+import { Value } from '@sinclair/typebox/value';
 import TAKAPI from '../lib/api.js';
+import { TAKList_MissionLayer } from '../lib/api/mission-layer.js';
 import { APIAuthCertificate } from '../lib/auth.js';
 
 type RequestArgs = Parameters<Client['request']>[0];
@@ -192,4 +194,115 @@ test('MissionLayer.get fetches a single layer by uid', async () => {
     } finally {
         Client.prototype.request = originalRequest;
     }
+});
+
+test('MissionLayer schema accepts UIDs without a location (e.g. routes)', () => {
+    const res = {
+        version: '3',
+        type: 'MissionLayer',
+        nodeId: 'node-1',
+        data: [{
+            name: 'Routes',
+            type: 'UID',
+            uid: 'layer-1',
+            uids: [{
+                data: 'route-1',
+                timestamp: '2026-11-11T18:31:52.328Z',
+                creatorUid: 'alice',
+                details: {
+                    type: 'b-m-r',
+                    callsign: 'Schultz Tank To Inner Basin',
+                    color: '-16711681'
+                }
+            }, {
+                data: 'marker-1',
+                timestamp: '2026-11-11T18:31:31.905Z',
+                creatorUid: 'alice',
+                details: {
+                    type: 'a-n-G',
+                    callsign: 'M4',
+                    iconsetPath: 'ad78aafb-83a6-4c07-b2b9-a897a8b6a38f/NumPins/04 Pin Invert.png',
+                    location: { lat: 35.33, lon: -111.69 }
+                }
+            }]
+        }]
+    };
+
+    assert.equal(Value.Check(TAKList_MissionLayer, res), true, JSON.stringify([...Value.Errors(TAKList_MissionLayer, res)]));
+});
+
+test('MissionLayer schema accepts hydrated contents and maplayers', () => {
+    const res = {
+        version: '3',
+        type: 'MissionLayer',
+        nodeId: 'node-1',
+        data: [{
+            name: 'Models',
+            type: 'UID',
+            uid: 'layer-1',
+            uids: [{
+                data: 'model-1',
+                timestamp: '2026-11-11T18:31:52.328Z',
+                details: {
+                    type: 'u-d-v-m',
+                    callsign: 'Model',
+                    title: 'Model',
+                    name: 'Truck',
+                    category: 'Vehicles',
+                    attachments: ['abc123'],
+                    location: { lat: 35.33, lon: -111.69 }
+                }
+            }]
+        }, {
+            name: 'Files',
+            type: 'CONTENTS',
+            uid: 'layer-2',
+            contents: [{
+                data: {
+                    filename: 'plan.pdf',
+                    keywords: [],
+                    mimeType: 'application/pdf',
+                    name: 'plan.pdf',
+                    submissionTime: '2026-11-11T18:31:52.328Z',
+                    submitter: 'alice',
+                    uid: 'file-1',
+                    hash: 'abc123',
+                    size: 1024,
+                    creatorUid: 'alice',
+                    tool: 'public',
+                    latitude: 35.33,
+                    longitude: -111.69,
+                    expiration: -1
+                },
+                timestamp: '2026-11-11T18:31:52.328Z',
+                creatorUid: 'alice'
+            }]
+        }, {
+            name: 'Maps',
+            type: 'MAPLAYER',
+            uid: 'layer-3',
+            maplayers: [{
+                data: {
+                    uid: 'map-1',
+                    name: 'Imagery',
+                    type: 'XYZ',
+                    url: 'https://example.com/{z}/{x}/{y}.png',
+                    creatorUid: 'alice',
+                    createTime: '2026-11-11T18:31:52.328Z',
+                    modifiedTime: '2026-11-11T18:31:52.328Z',
+                    enabled: true,
+                    defaultLayer: false,
+                    ignoreErrors: false,
+                    invertYCoordinate: false,
+                    minZoom: 0,
+                    maxZoom: 18,
+                    opacity: 100,
+                    path: '/Maps',
+                    after: ''
+                }
+            }]
+        }]
+    };
+
+    assert.equal(Value.Check(TAKList_MissionLayer, res), true, JSON.stringify([...Value.Errors(TAKList_MissionLayer, res)]));
 });

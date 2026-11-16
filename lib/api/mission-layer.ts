@@ -1,7 +1,7 @@
 import { TAKList, TAKItem } from './types.js';
 import { Type, Static } from '@sinclair/typebox';
 import type { MissionOptions, MissionLatestFeats } from './mission.js';
-import { GUIDMatch } from './mission.js';
+import { GUIDMatch, MissionContent, MissionMapLayer, MissionUidDetails } from './mission.js';
 import Err from '@openaddresses/batch-error';
 import Commands, { CommandOutputFormat } from '../commands.js';
 
@@ -25,20 +25,22 @@ export const MissionLayer = Type.Object({
             description: 'The UID of the COT'
         }),
         timestamp: Type.String(),
-        creatorUid: Type.String(),
+        creatorUid: Type.Optional(Type.String()),
         keywords: Type.Optional(Type.Array(Type.String())),
-        details: Type.Optional(Type.Object({
-            type: Type.String(),
-            callsign: Type.String(),
-            color: Type.Optional(Type.String()),
-            location: Type.Object({
-                lat: Type.Number(),
-                lon: Type.Number()
-            })
-        }))
+        details: Type.Optional(MissionUidDetails)
     }))),
-    contents: Type.Optional(Type.Array(Type.Any())),
-    maplayers: Type.Optional(Type.Array(Type.Any()))
+    contents: Type.Optional(Type.Array(Type.Object({
+        data: MissionContent,
+        timestamp: Type.String(),
+        creatorUid: Type.Optional(Type.String()),
+        keywords: Type.Optional(Type.Array(Type.String()))
+    }))),
+    maplayers: Type.Optional(Type.Array(Type.Object({
+        data: MissionMapLayer,
+        timestamp: Type.Optional(Type.String()),
+        creatorUid: Type.Optional(Type.String()),
+        keywords: Type.Optional(Type.Array(Type.String()))
+    })))
 });
 
 export const DeleteInput = Type.Object({

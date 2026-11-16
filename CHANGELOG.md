@@ -12,6 +12,10 @@
 
 ### Pending
 
+- :bug: `MissionLayer` UID `details.location`, `details.callsign` & `creatorUid` are now optional - TAK Server omits `location` when a CoT has a zero lat or lon, as routes (`b-m-r`) do, which caused layer list responses containing a route to fail schema validation
+- :rocket: Add `MissionUidDetails` & `MissionMapLayer` and type `MissionLayer` `contents` & `maplayers`, matching the TAK Server `UidDetails`, `Resource` & `MapLayer` models
+- :rocket: `MissionContent` gains `filename`, `contentType`, `tool`, `latitude`, `longitude`, `altitude` & `groups`
+
 ### v12.36.3 - 2026-11-09
 
 - :arrow_up: Update core deps
