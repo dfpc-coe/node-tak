@@ -193,3 +193,41 @@ test('MissionLayer.get fetches a single layer by uid', async () => {
         Client.prototype.request = originalRequest;
     }
 });
+
+test('MissionLayer schema accepts UIDs without a location (e.g. routes)', async () => {
+    const { Value } = await import('@sinclair/typebox/value');
+    const { TAKList_MissionLayer } = await import('../lib/api/mission-layer.js');
+
+    const res = {
+        version: '3',
+        type: 'MissionLayer',
+        nodeId: 'node-1',
+        data: [{
+            name: 'Routes',
+            type: 'UID',
+            uid: 'layer-1',
+            uids: [{
+                data: 'route-1',
+                timestamp: '2026-11-11T18:31:52.328Z',
+                creatorUid: 'alice',
+                details: {
+                    type: 'b-m-r',
+                    callsign: 'Schultz Tank To Inner Basin',
+                    color: '-16711681'
+                }
+            }, {
+                data: 'marker-1',
+                timestamp: '2026-11-11T18:31:31.905Z',
+                creatorUid: 'alice',
+                details: {
+                    type: 'a-n-G',
+                    callsign: 'M4',
+                    iconsetPath: 'ad78aafb-83a6-4c07-b2b9-a897a8b6a38f/NumPins/04 Pin Invert.png',
+                    location: { lat: 35.33, lon: -111.69 }
+                }
+            }]
+        }]
+    };
+
+    assert.equal(Value.Check(TAKList_MissionLayer, res), true, JSON.stringify([...Value.Errors(TAKList_MissionLayer, res)]));
+});

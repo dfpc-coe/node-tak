@@ -12,6 +12,8 @@
 
 ### Pending
 
+- :bug: `MissionLayer` UID `details.location` & `details.callsign` are now optional - TAK Server omits `location` for non-point content such as routes (`b-m-r`), which caused layer list responses containing a route to fail schema validation
+
 ### v12.36.3 - 2026-11-09
 
 - :arrow_up: Update core deps

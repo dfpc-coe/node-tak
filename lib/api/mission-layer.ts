@@ -29,12 +29,15 @@ export const MissionLayer = Type.Object({
         keywords: Type.Optional(Type.Array(Type.String())),
         details: Type.Optional(Type.Object({
             type: Type.String(),
-            callsign: Type.String(),
+            callsign: Type.Optional(Type.String()),
+            title: Type.Optional(Type.String()),
+            iconsetPath: Type.Optional(Type.String()),
             color: Type.Optional(Type.String()),
-            location: Type.Object({
+            // TAK Server omits location for non-point content such as routes (b-m-r)
+            location: Type.Optional(Type.Object({
                 lat: Type.Number(),
                 lon: Type.Number()
-            })
+            }))
         }))
     }))),
     contents: Type.Optional(Type.Array(Type.Any())),
