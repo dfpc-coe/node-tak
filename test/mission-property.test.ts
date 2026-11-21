@@ -8,6 +8,9 @@ import { APIAuthCertificate } from '../lib/auth.js';
 
 type RequestArgs = Parameters<Client['request']>[0];
 
+// oxlint-disable-next-line typescript/unbound-method
+const originalRequest = Client.prototype.request;
+
 const GUID = '9ba05e1d-970f-49e1-a153-7216fecf5279';
 
 function mockResponse(statusCode: number, contentType: string, body: string): Dispatcher.ResponseData {
@@ -23,7 +26,6 @@ async function capture(
     response: string,
     fn: (api: TAKAPI) => Promise<unknown>
 ): Promise<{ requests: RequestArgs[], result: unknown }> {
-    const originalRequest = Client.prototype.request;
     const requests: RequestArgs[] = [];
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -68,7 +70,7 @@ test('MissionProperty.set PUTs key/value with creatorUid as a query param', asyn
 
     assert.equal(requests[0].method, 'PUT');
     assert.equal(requests[0].path, `/Marti/api/missions/guid/${GUID}/properties?creatorUid=alice`);
-    assert.deepEqual(JSON.parse(String(requests[0].body)), { key: 'test.hello', value: 'world' });
+    assert.deepEqual(JSON.parse(requests[0].body as string), { key: 'test.hello', value: 'world' });
 });
 
 test('MissionProperty.delete removes a single key', async () => {

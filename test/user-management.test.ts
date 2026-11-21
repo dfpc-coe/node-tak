@@ -8,6 +8,9 @@ import { APIAuthCertificate } from '../lib/auth.js';
 
 type RequestArgs = Parameters<Client['request']>[0];
 
+// oxlint-disable-next-line typescript/unbound-method
+const originalRequest = Client.prototype.request;
+
 function mockResponse(statusCode: number, contentType: string, body: string): Dispatcher.ResponseData {
     return {
         statusCode,
@@ -21,8 +24,6 @@ async function capture(
     fn: (api: TAKAPI) => Promise<unknown>,
     response: Dispatcher.ResponseData = mockResponse(200, 'text/plain', '')
 ): Promise<{ captured: RequestArgs, result: unknown }> {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -49,7 +50,7 @@ test('UserManagement.createUser posts a NewUserModel with defaulted group lists'
 
     assert.equal(captured.method, 'POST');
     assert.equal(captured.path, '/Marti/api/user-management/api/new-user');
-    assert.deepEqual(JSON.parse(String(captured.body)), {
+    assert.deepEqual(JSON.parse(captured.body as string), {
         username: 'alice',
         password: 'Sup3rSecret!',
         groupList: [],
@@ -74,7 +75,7 @@ test('UserManagement.createUsers posts a UserGenerationInBulkModel and returns g
 
     assert.equal(captured.method, 'POST');
     assert.equal(captured.path, '/Marti/api/user-management/api/new-users');
-    assert.deepEqual(JSON.parse(String(captured.body)), {
+    assert.deepEqual(JSON.parse(captured.body as string), {
         usernameExpression: 'team-[N]',
         startN: 1,
         endN: 2,
@@ -119,7 +120,7 @@ test('UserManagement.changePassword puts a UserPasswordModel', async () => {
 
     assert.equal(captured.method, 'PUT');
     assert.equal(captured.path, '/Marti/api/user-management/api/change-user-password');
-    assert.deepEqual(JSON.parse(String(captured.body)), {
+    assert.deepEqual(JSON.parse(captured.body as string), {
         username: 'alice',
         password: 'N3wSecret!'
     });
@@ -134,7 +135,7 @@ test('UserManagement.updateUserGroups puts a SimpleUserGroupModel', async () => 
 
     assert.equal(captured.method, 'PUT');
     assert.equal(captured.path, '/Marti/api/user-management/api/update-groups');
-    assert.deepEqual(JSON.parse(String(captured.body)), {
+    assert.deepEqual(JSON.parse(captured.body as string), {
         username: 'alice',
         groupList: ['Blue'],
         groupListIN: [],
@@ -150,7 +151,7 @@ test('UserManagement.updateGroupUsers puts a SimpleGroupWithUsersModel', async (
 
     assert.equal(captured.method, 'PUT');
     assert.equal(captured.path, '/Marti/api/user-management/api/update-group-users');
-    assert.deepEqual(JSON.parse(String(captured.body)), {
+    assert.deepEqual(JSON.parse(captured.body as string), {
         groupname: 'Blue',
         usersInGroupList: [],
         usersInGroupListIN: ['alice', 'bob'],

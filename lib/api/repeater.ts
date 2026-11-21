@@ -1,6 +1,7 @@
 import { TAKList } from './types.js';
 import { Type, Static } from '@sinclair/typebox';
 import Commands from '../commands.js';
+import { typed } from '../utils/typed.js';
 
 export const Repeater = Type.Object({
     uid: Type.String(),
@@ -29,17 +30,17 @@ export default class RepeaterCommands extends Commands {
     async period(period?: number): Promise<number> {
         const url = new URL('/Marti/api/repeater/period', this.api.url);
         if (period === undefined) {
-            return await this.api.fetch(url, {
+            return typed<number>(await this.api.fetch(url, {
                 method: 'GET'
-            });
-        } else {
-            await this.api.fetch(url, {
-                method: 'POST',
-                body: period
-            });
-
-            return period;
+            }));
         }
+
+        await this.api.fetch(url, {
+            method: 'POST',
+            body: period
+        });
+
+        return period;
     }
 
     /**
@@ -50,9 +51,9 @@ export default class RepeaterCommands extends Commands {
     async list(): Promise<Static<typeof TAKList_Repeater>> {
         const url = new URL('/Marti/api/repeater/list', this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed<Static<typeof TAKList_Repeater>>(await this.api.fetch(url, {
             method: 'GET'
-        });
+        }));
     }
 
     /**

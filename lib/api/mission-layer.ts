@@ -4,6 +4,7 @@ import type { MissionOptions, MissionLatestFeats } from './mission.js';
 import { GUIDMatch, MissionContent, MissionMapLayer, MissionUidDetails } from './mission.js';
 import Err from '@openaddresses/batch-error';
 import Commands, { CommandOutputFormat } from '../commands.js';
+import { typed } from '../utils/typed.js';
 
 export enum MissionLayerType {
     GROUP = 'GROUP',
@@ -104,16 +105,16 @@ export default class MissionLayerCommands extends Commands {
             return {
                 MissionAuthorization: `Bearer ${opts.token}`
             }
-        } else {
-            return {};
         }
+
+        return {};
     }
 
     isEmpty(layer: Static<typeof MissionLayer>): boolean {
-        if (layer.mission_layers && layer.mission_layers.length) return false;
-        if (layer.uids && layer.uids.length) return false;
-        if (layer.contents && layer.contents.length) return false;
-        if (layer.maplayers && layer.maplayers.length) return false;
+        if (layer.mission_layers && layer.mission_layers.length > 0) return false;
+        if (layer.uids && layer.uids.length > 0) return false;
+        if (layer.contents && layer.contents.length > 0) return false;
+        if (layer.maplayers && layer.maplayers.length > 0) return false;
         return true;
     }
 
@@ -143,7 +144,7 @@ export default class MissionLayerCommands extends Commands {
         pathCurrent = `${pathCurrent}/${encodeURIComponent(layer.name)}`;
         pathMap.set(`${pathCurrent}/`, layer);
 
-        for (const l of (layer.mission_layers || []) as Array<Static<typeof MissionLayer>>) {
+        for (const l of (layer.mission_layers ?? []) as Array<Static<typeof MissionLayer>>) {
             this.#listAsPathMapRecurse(pathMap, pathCurrent, l);
         }
     }
@@ -156,12 +157,12 @@ export default class MissionLayerCommands extends Commands {
             ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/layers`, this.api.url)
             : new URL(`/Marti/api/missions/${this.#encodeName(name)}/layers`, this.api.url);
 
-        const res = await this.api.fetch(url, {
+        const res: Static<typeof TAKList_MissionLayer> = typed(await this.api.fetch(url, {
             method: 'GET',
             headers: this.#headers(opts),
-        });
+        }));
 
-        res.data.map((l: Static<typeof MissionLayer>) => {
+        res.data.map((l) => {
             if (l.type === MissionLayerType.UID && !l.uids) {
                 l.uids = [];
             }
@@ -177,13 +178,14 @@ export default class MissionLayerCommands extends Commands {
      */
     async latestFeats(
         name: string,
-        layerUid: string, // Layer UID
+        // Layer UID
+        layerUid: string,
         opts?: Static<typeof MissionOptions>
     ): Promise<Static<typeof MissionLatestFeats>> {
         const layer = (await this.get(name, layerUid, opts)).data;
         const res = await this.api.Mission.latestFeats(name, opts);
 
-        const layerUids = new Set((layer.uids || []).map((u) => {
+        const layerUids = new Set((layer.uids ?? []).map((u) => {
             return u.data
         }));
 
@@ -198,17 +200,18 @@ export default class MissionLayerCommands extends Commands {
 
     async get(
         name: string,
-        layerUid: string, // Layer UID
+        // Layer UID
+        layerUid: string,
         opts?: Static<typeof MissionOptions>
     ): Promise<Static<typeof TAKItem_MissionLayer>> {
         const url = this.#isGUID(name)
             ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/layers/${encodeURIComponent(layerUid)}`, this.api.url)
             : new URL(`/Marti/api/missions/${this.#encodeName(name)}/layers/${encodeURIComponent(layerUid)}`, this.api.url);
 
-        const res = await this.api.fetch(url, {
+        const res: Partial<Static<typeof TAKItem_MissionLayer>> = typed(await this.api.fetch(url, {
             method: 'GET',
             headers: this.#headers(opts),
-        });
+        }));
 
         if (!res.data) throw new Err(404, null, `Layer ${layerUid} not found`);
 
@@ -216,7 +219,7 @@ export default class MissionLayerCommands extends Commands {
             res.data.uids = [];
         }
 
-        return res;
+        return typed(res);
     }
 
     async create(
@@ -224,35 +227,21 @@ export default class MissionLayerCommands extends Commands {
         query: Static<typeof CreateInput>,
         opts?: Static<typeof MissionOptions>
     ): Promise<Static<typeof TAKItem_MissionLayer>> {
-        if (this.#isGUID(name)) {
-            const url = new URL(`/Marti/api/missions/guid/${this.#encodeName(name)}/layers`, this.api.url);
+        const url = this.#isGUID(name)
+            ? new URL(`/Marti/api/missions/guid/${this.#encodeName(name)}/layers`, this.api.url)
+            : new URL(`/Marti/api/missions/${this.#encodeName(name)}/layers`, this.api.url);
 
-            let q: keyof Static<typeof CreateInput>;
-            for (q in query) {
-                if (query[q] !== undefined) {
-                    url.searchParams.append(q, String(query[q]));
-                }
+        let q: keyof Static<typeof CreateInput>;
+        for (q in query) {
+            if (query[q] !== undefined) {
+                url.searchParams.append(q, String(query[q]));
             }
-
-            return await this.api.fetch(url, {
-                method: 'PUT',
-                headers: this.#headers(opts),
-            });
-        } else {
-            const url = new URL(`/Marti/api/missions/${this.#encodeName(name)}/layers`, this.api.url);
-
-            let q: keyof Static<typeof CreateInput>;
-            for (q in query) {
-                if (query[q] !== undefined) {
-                    url.searchParams.append(q, String(query[q]));
-                }
-            }
-
-            return await this.api.fetch(url, {
-                method: 'PUT',
-                headers: this.#headers(opts),
-            });
         }
+
+        return typed(await this.api.fetch(url, {
+            method: 'PUT',
+            headers: this.#headers(opts),
+        }));
     }
 
     /**
@@ -267,14 +256,15 @@ export default class MissionLayerCommands extends Commands {
         layerUid: string,
         query: Static<typeof AttachUidsInput>,
         opts?: Static<typeof MissionOptions>
-    ) {
+        // oxlint-disable-next-line typescript/no-explicit-any
+    ): Promise<any> {
         const url = this.#isGUID(name)
             ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/contents`, this.api.url)
             : new URL(`/Marti/api/missions/${this.#encodeName(name)}/contents`, this.api.url);
 
         url.searchParams.append('creatorUid', query.creatorUid);
 
-        return await this.api.fetch(url, {
+        return this.api.fetch(url, {
             method: 'PUT',
             headers: this.#headers(opts),
             body: {
@@ -296,7 +286,8 @@ export default class MissionLayerCommands extends Commands {
         name: string,
         query: Static<typeof SetParentInput>,
         opts?: Static<typeof MissionOptions>
-    ) {
+        // oxlint-disable-next-line typescript/no-explicit-any
+    ): Promise<any> {
         const url = this.#isGUID(name)
             ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/layers/parent`, this.api.url)
             : new URL(`/Marti/api/missions/${this.#encodeName(name)}/layers/parent`, this.api.url);
@@ -309,7 +300,7 @@ export default class MissionLayerCommands extends Commands {
         if (query.afterUid !== undefined) url.searchParams.append('afterUid', query.afterUid);
         url.searchParams.append('creatorUid', query.creatorUid);
 
-        return await this.api.fetch(url, {
+        return this.api.fetch(url, {
             method: 'PUT',
             headers: this.#headers(opts),
         });
@@ -320,71 +311,46 @@ export default class MissionLayerCommands extends Commands {
         layer: string,
         query: Static<typeof RenameInput>,
         opts?: Static<typeof MissionOptions>
-    ) {
-        if (this.#isGUID(name)) {
-            const url = new URL(`/Marti/api/missions/guid/${this.#encodeName(name)}/layers/${layer}/name`, this.api.url);
+        // oxlint-disable-next-line typescript/no-explicit-any
+    ): Promise<any> {
+        const url = this.#isGUID(name)
+            ? new URL(`/Marti/api/missions/guid/${this.#encodeName(name)}/layers/${layer}/name`, this.api.url)
+            : new URL(`/Marti/api/missions/${this.#encodeName(name)}/layers/${layer}/name`, this.api.url);
 
-            let q: keyof Static<typeof RenameInput>;
-            for (q in query) {
-                if (query[q] !== undefined) {
-                    url.searchParams.append(q, String(query[q]));
-                }
+        let q: keyof Static<typeof RenameInput>;
+        for (q in query) {
+            const value = query[q];
+            if (value !== undefined) {
+                url.searchParams.append(q, value);
             }
-
-            return await this.api.fetch(url, {
-                method: 'PUT',
-                headers: this.#headers(opts),
-            });
-        } else {
-            const url = new URL(`/Marti/api/missions/${this.#encodeName(name)}/layers/${layer}/name`, this.api.url);
-
-            let q: keyof Static<typeof RenameInput>;
-            for (q in query) {
-                if (query[q] !== undefined) {
-                    url.searchParams.append(q, String(query[q]));
-                }
-            }
-
-            return await this.api.fetch(url, {
-                method: 'PUT',
-                headers: this.#headers(opts),
-            });
         }
+
+        return this.api.fetch(url, {
+            method: 'PUT',
+            headers: this.#headers(opts),
+        });
     }
 
     async delete(
         name: string,
         query: Static<typeof DeleteInput>,
         opts?: Static<typeof MissionOptions>
-    ) {
-        if (this.#isGUID(name)) {
-            const url = new URL(`/Marti/api/missions/guid/${this.#encodeName(name)}/layers`, this.api.url);
+        // oxlint-disable-next-line typescript/no-explicit-any
+    ): Promise<any> {
+        const url = this.#isGUID(name)
+            ? new URL(`/Marti/api/missions/guid/${this.#encodeName(name)}/layers`, this.api.url)
+            : new URL(`/Marti/api/missions/${this.#encodeName(name)}/layers`, this.api.url);
 
-            let q: keyof Static<typeof DeleteInput>;
-            for (q in query) {
-                if (query[q] !== undefined) {
-                    url.searchParams.append(q, String(query[q]));
-                }
+        let q: keyof Static<typeof DeleteInput>;
+        for (q in query) {
+            if (query[q] !== undefined) {
+                url.searchParams.append(q, String(query[q]));
             }
-
-            return await this.api.fetch(url, {
-                method: 'DELETE',
-                headers: this.#headers(opts),
-            });
-        } else {
-            const url = new URL(`/Marti/api/missions/${this.#encodeName(name)}/layers`, this.api.url);
-
-            let q: keyof Static<typeof DeleteInput>;
-            for (q in query) {
-                if (query[q] !== undefined) {
-                    url.searchParams.append(q, String(query[q]));
-                }
-            }
-
-            return await this.api.fetch(url, {
-                method: 'DELETE',
-                headers: this.#headers(opts),
-            });
         }
+
+        return this.api.fetch(url, {
+            method: 'DELETE',
+            headers: this.#headers(opts),
+        });
     }
 }

@@ -1,6 +1,7 @@
 import Err from '@openaddresses/batch-error';
 import { Type, Static } from '@sinclair/typebox';
 import Commands from '../commands.js';
+import { typed, type RawResponse } from '../utils/typed.js';
 
 export const LoginInput = Type.Object({
     username: Type.String(),
@@ -25,7 +26,7 @@ export default class OAuthCommands extends Commands {
     parse(jwt: string): Static<typeof TokenContents>{
         const split = Buffer.from(jwt, 'base64').toString().split('}').map((ext) => { return ext + '}'});
         if (split.length < 2) throw new Err(500, null, 'Unexpected TAK JWT Format');
-        const contents: { sub: string; aud: string; nbf: number; exp: number; iat: number; } = JSON.parse(split[1]);
+        const contents: Static<typeof TokenContents> = typed(JSON.parse(split[1]));
 
         return contents;
     }
@@ -41,10 +42,10 @@ export default class OAuthCommands extends Commands {
         params.append('username', query.username);
         params.append('password', query.password);
 
-        const authres = await this.api.fetch(url, {
+        const authres: RawResponse = typed(await this.api.fetch(url, {
             method: 'POST',
             body: params
-        }, true);
+        }, true));
 
         const text = await authres.text();
 
@@ -54,9 +55,13 @@ export default class OAuthCommands extends Commands {
             throw new Err(400, new Error(`Status: ${authres.status}: ${text}`), 'Non-200 Response from Auth Server - Token');
         }
 
-        const body: any = JSON.parse(text);
+        const body: {
+            error?: string;
+            error_description?: string;
+            access_token?: string;
+        } = typed(JSON.parse(text));
 
-        if (body.error === 'invalid_grant' && body.error_description.startsWith('Bad credentials')) {
+        if (body.error === 'invalid_grant' && body.error_description?.startsWith('Bad credentials')) {
             throw new Err(400, null, 'Invalid Username or Password');
         } else if (body.error || !body.access_token) {
             throw new Err(500, new Error(body.error_description), 'Unknown Login Error');

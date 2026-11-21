@@ -2,6 +2,7 @@ import { Type, Static } from '@sinclair/typebox';
 import { Group } from './groups.js';
 import { TAKList } from './types.js';
 import Commands from '../commands.js';
+import { typed } from '../utils/typed.js';
 
 export const Subscription = Type.Object({
     dn: Type.Union([Type.String(), Type.Null()]),
@@ -77,8 +78,8 @@ export default class SubscriptionCommands extends Commands {
             }
         }
 
-        return await this.api.fetch(url, {
+        return typed<Static<typeof TAKList_Subscription>>(await this.api.fetch(url, {
             method: 'GET'
-        });
+        }));
     }
 }

@@ -9,6 +9,9 @@ import { MissionSubscriberRole } from '../lib/api/mission.js';
 
 type RequestArgs = Parameters<Client['request']>[0];
 
+// oxlint-disable-next-line typescript/unbound-method
+const originalRequest = Client.prototype.request;
+
 function mockResponse(statusCode: number, contentType: string, body: string): Dispatcher.ResponseData {
     return {
         statusCode,
@@ -19,8 +22,6 @@ function mockResponse(statusCode: number, contentType: string, body: string): Di
 }
 
 test('Mission.setRole sends role as a bare query param and returns void', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -31,6 +32,7 @@ test('Mission.setRole sends role as a bare query param and returns void', async 
     try {
         const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
 
+        // oxlint-disable-next-line typescript/no-confusing-void-expression
         const res = await api.Mission.setRole('mission-1', {
             clientUid: 'client-1',
             username: 'alice',
@@ -50,8 +52,6 @@ test('Mission.setRole sends role as a bare query param and returns void', async 
 });
 
 test('Mission.subscriptionRoles parses a list of subscribers with roles', async () => {
-    const originalRequest = Client.prototype.request;
-
     Client.prototype.request = async function(): Promise<Dispatcher.ResponseData> {
         return mockResponse(200, 'application/json', JSON.stringify({
             data: [{
@@ -80,8 +80,6 @@ test('Mission.subscriptionRoles parses a list of subscribers with roles', async 
 });
 
 test('Mission.unsubscribe issues a DELETE with uid query param', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -103,8 +101,6 @@ test('Mission.unsubscribe issues a DELETE with uid query param', async () => {
 });
 
 test('Mission.latestFeats parses each CoT individually and isolates invalid CoTs', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -155,8 +151,6 @@ test('Mission.latestFeats parses each CoT individually and isolates invalid CoTs
 });
 
 test('Mission.latestFeats returns empty results for an empty document', async () => {
-    const originalRequest = Client.prototype.request;
-
     Client.prototype.request = async function(): Promise<Dispatcher.ResponseData> {
         return mockResponse(200, 'application/xml', '<events></events>');
     };
@@ -173,8 +167,6 @@ test('Mission.latestFeats returns empty results for an empty document', async ()
 });
 
 test('Mission.changes uses the guid changes endpoint for GUID missions', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -198,8 +190,6 @@ test('Mission.changes uses the guid changes endpoint for GUID missions', async (
 });
 
 test('Mission.list uses the unpaged missions endpoint by default', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -224,8 +214,6 @@ test('Mission.list uses the unpaged missions endpoint by default', async () => {
 });
 
 test('Mission.list with paged: true uses the pagedmissions endpoint', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -261,8 +249,6 @@ test('Mission.list with paged: true uses the pagedmissions endpoint', async () =
 });
 
 test('Mission.list serializes keywordFilter & groupFilter as repeated params', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -293,14 +279,13 @@ test('Mission.list serializes keywordFilter & groupFilter as repeated params', a
 });
 
 function mockRoutes(routes: Record<string, () => Dispatcher.ResponseData>): { paths: string[]; restore: () => void } {
-    const originalRequest = Client.prototype.request;
     const paths: string[] = [];
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
-        const path = String(opts.path);
+        const path = opts.path;
         paths.push(path);
         const route = routes[path];
-        if (!route) throw new Error(`Unexpected request: ${opts.method ?? 'GET'} ${path}`);
+        if (route === undefined) throw new Error(`Unexpected request: ${opts.method ?? 'GET'} ${path}`);
         return route();
     };
 
@@ -309,7 +294,7 @@ function mockRoutes(routes: Record<string, () => Dispatcher.ResponseData>): { pa
 
 async function collect(stream: Readable): Promise<Buffer> {
     const chunks: Buffer[] = [];
-    for await (const chunk of stream) chunks.push(Buffer.from(chunk));
+    for await (const chunk of stream) chunks.push(Buffer.from(chunk as Buffer));
     return Buffer.concat(chunks);
 }
 
@@ -371,8 +356,6 @@ test('Mission.getArchive throws on a TAK Server error instead of streaming an em
 });
 
 test('Mission.parent uses the name parent endpoint and unwraps the mission', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -398,12 +381,10 @@ test('Mission.parent uses the name parent endpoint and unwraps the mission', asy
 });
 
 test('Mission.parent resolves a GUID to a name first', async () => {
-    const originalRequest = Client.prototype.request;
-
     const paths: string[] = [];
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
-        paths.push(String(opts.path));
+        paths.push(opts.path);
 
         if (paths.length === 1) {
             return mockResponse(200, 'application/json', JSON.stringify({
@@ -432,8 +413,6 @@ test('Mission.parent resolves a GUID to a name first', async () => {
 });
 
 test('Mission.clearParent issues a DELETE on the guid parent endpoint', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -444,6 +423,7 @@ test('Mission.clearParent issues a DELETE on the guid parent endpoint', async ()
     try {
         const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthCertificate('cert', 'key'));
 
+        // oxlint-disable-next-line typescript/no-confusing-void-expression
         const res = await api.Mission.clearParent('11111111-2222-3333-4444-555555555555');
 
         assert.equal(res, undefined);
@@ -456,8 +436,6 @@ test('Mission.clearParent issues a DELETE on the guid parent endpoint', async ()
 });
 
 test('Mission.update sends defaultRole alongside the current mission values', async () => {
-    const originalRequest = Client.prototype.request;
-
     const captured: RequestArgs[] = [];
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -498,7 +476,7 @@ test('Mission.update sends defaultRole alongside the current mission values', as
         assert.equal(captured.length, 2);
         assert.equal(captured[1].method, 'POST');
 
-        const url = new URL(String(captured[1].path), 'https://tak.example.com');
+        const url = new URL(captured[1].path, 'https://tak.example.com');
         assert.equal(url.pathname, '/Marti/api/missions/mission-1');
         assert.equal(url.searchParams.get('defaultRole'), 'MISSION_READONLY_SUBSCRIBER');
         assert.equal(url.searchParams.get('description'), 'desc');
@@ -510,8 +488,6 @@ test('Mission.update sends defaultRole alongside the current mission values', as
 });
 
 test('Mission.update omits defaultRole when it is not provided', async () => {
-    const originalRequest = Client.prototype.request;
-
     const captured: RequestArgs[] = [];
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -545,7 +521,7 @@ test('Mission.update omits defaultRole when it is not provided', async () => {
 
         await api.Mission.update('mission-1', { description: 'next' });
 
-        const url = new URL(String(captured[1].path), 'https://tak.example.com');
+        const url = new URL(captured[1].path, 'https://tak.example.com');
         assert.equal(url.searchParams.has('defaultRole'), false);
         assert.equal(url.searchParams.get('description'), 'next');
     } finally {
@@ -554,8 +530,6 @@ test('Mission.update omits defaultRole when it is not provided', async () => {
 });
 
 test('Mission.setPassword issues a PUT on the guid password endpoint', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -573,7 +547,7 @@ test('Mission.setPassword issues a PUT on the guid password endpoint', async () 
         assert.ok(captured);
         assert.equal(captured.method, 'PUT');
 
-        const url = new URL(String(captured.path), 'https://tak.example.com');
+        const url = new URL(captured.path, 'https://tak.example.com');
         assert.equal(url.pathname, '/Marti/api/missions/guid/9d2b7a6e-3c4f-4e8a-9b1d-2f6a8c0e4b71/password');
         assert.equal(url.searchParams.get('password'), 'p%ss?w"rd');
         assert.equal((captured.headers as Record<string, string>).MissionAuthorization, 'Bearer mission-token');
@@ -583,8 +557,6 @@ test('Mission.setPassword issues a PUT on the guid password endpoint', async () 
 });
 
 test('Mission.setPassword rejects an empty password without calling TAK Server', async () => {
-    const originalRequest = Client.prototype.request;
-
     let called = false;
 
     Client.prototype.request = async function(): Promise<Dispatcher.ResponseData> {
@@ -607,8 +579,6 @@ test('Mission.setPassword rejects an empty password without calling TAK Server',
 });
 
 test('Mission.removePassword issues a DELETE on the name password endpoint', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -630,8 +600,6 @@ test('Mission.removePassword issues a DELETE on the name password endpoint', asy
 });
 
 test('Mission.get fills in defaultRole as MISSION_SUBSCRIBER when TAK Server omits it', async () => {
-    const originalRequest = Client.prototype.request;
-
     Client.prototype.request = async function(): Promise<Dispatcher.ResponseData> {
         return mockResponse(200, 'application/json', JSON.stringify({
             version: '3', type: 'Mission', nodeId: 'n', data: [{ name: 'mission-1', guid: '11111111-2222-3333-4444-555555555555' }]
@@ -653,8 +621,6 @@ test('Mission.get fills in defaultRole as MISSION_SUBSCRIBER when TAK Server omi
 });
 
 test('Mission.get keeps an explicit defaultRole from TAK Server', async () => {
-    const originalRequest = Client.prototype.request;
-
     Client.prototype.request = async function(): Promise<Dispatcher.ResponseData> {
         return mockResponse(200, 'application/json', JSON.stringify({
             version: '3', type: 'Mission', nodeId: 'n', data: [{
@@ -680,8 +646,6 @@ test('Mission.get keeps an explicit defaultRole from TAK Server', async () => {
 });
 
 test('Mission.list fills in defaultRole & description on each mission', async () => {
-    const originalRequest = Client.prototype.request;
-
     Client.prototype.request = async function(): Promise<Dispatcher.ResponseData> {
         return mockResponse(200, 'application/json', JSON.stringify({
             version: '3', type: 'Mission', data: [
@@ -706,8 +670,6 @@ test('Mission.list fills in defaultRole & description on each mission', async ()
 });
 
 test('Mission.create trims the mission name before submitting it', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -754,7 +716,7 @@ test('Mission.create trims the mission name before submitting it', async () => {
         assert.ok(captured);
         assert.equal(captured.method, 'POST');
         assert.ok(
-            String(captured.path).startsWith('/Marti/api/missions/CAIC%20Avalanche%20Forecast?'),
+            captured.path.startsWith('/Marti/api/missions/CAIC%20Avalanche%20Forecast?'),
             `mission name must be trimmed in the request path, got: ${captured.path}`
         );
     } finally {

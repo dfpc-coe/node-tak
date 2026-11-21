@@ -20,7 +20,7 @@ type MultipartFilePart = {
 type MultipartPart = MultipartBufferPart | MultipartFilePart;
 
 function escapeQuoted(value: string): string {
-    return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    return value.replaceAll('\\', '\\\\').replaceAll('"', '\\"');
 }
 
 export async function encodeMultipartFormData(form: FormData): Promise<{

@@ -12,6 +12,10 @@
 
 ### Pending
 
+### v12.38.0 - 2026-11-21
+
+- :arrow_up: Migrate to OXLint from ESLint and fix surfaced errors
+
 ### v12.37.0 - 2026-11-16
 
 - :bug: `MissionLayer` UID `details.location`, `details.callsign` & `creatorUid` are now optional - TAK Server omits `location` when a CoT has a zero lat or lon, as routes (`b-m-r`) do, which caused layer list responses containing a route to fail schema validation

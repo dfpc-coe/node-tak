@@ -2,6 +2,7 @@ import { Type, Static } from '@sinclair/typebox';
 import { TAKList } from './types.js';
 import { GUIDMatch, MissionOptions } from './mission.js';
 import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
+import { typed } from '../utils/typed.js';
 
 export enum MissionSubscriberRole {
     MISSION_OWNER = 'MISSION_OWNER',
@@ -90,7 +91,7 @@ export default class MissionInviteCommands extends Commands {
             typeof args.creatorUid === 'string' ? args.creatorUid : undefined;
         const role =
             typeof args.role === 'string'
-                ? (args.role as MissionSubscriberRole)
+                ? typed<MissionSubscriberRole>(args.role)
                 : undefined;
 
         if (args._[3] === 'list') {
@@ -100,13 +101,11 @@ export default class MissionInviteCommands extends Commands {
                 token
             });
 
-            if (args.format === 'json') {
-                return list;
-            } else {
-                return list.data.map((invite) => {
-                    return `${invite.missionName}: ${invite.invitee} (${invite.role?.name || 'Unknown Role'})`;
-                }).join('\n');
-            }
+            if (args.format === 'json') return list;
+
+            return list.data.map((invite) => {
+                return `${invite.missionName}: ${invite.invitee} (${invite.role?.name || 'Unknown Role'})`;
+            }).join('\n');
         } else if (args._[3] === 'get') {
             const name = args._[4];
 
@@ -116,16 +115,14 @@ export default class MissionInviteCommands extends Commands {
                 token
             });
 
-            if (args.format === 'json') {
-                return list;
-            } else {
-                return list.data.map((invite) => {
-                    return JSON.stringify(invite);
-                }).join('\n');
-            }
+            if (args.format === 'json') return list;
+
+            return list.data.map((invite) => {
+                return JSON.stringify(invite);
+            }).join('\n');
         } else if (args._[3] === 'invite') {
             const name = args._[4];
-            const type = args._[5] as MissionInviteType;
+            const type = typed<MissionInviteType>(args._[5]);
             const invitee = args._[6];
 
             if (!name || !type || !invitee) throw new Error('Usage: invite <name> <type> <invitee>');
@@ -140,7 +137,7 @@ export default class MissionInviteCommands extends Commands {
             return { message: 'OK' };
         } else if (args._[3] === 'uninvite') {
             const name = args._[4];
-            const type = args._[5] as MissionInviteType;
+            const type = typed<MissionInviteType>(args._[5]);
             const invitee = args._[6];
 
             if (!name || !type || !invitee) throw new Error('Usage: uninvite <name> <type> <invitee>');
@@ -152,9 +149,9 @@ export default class MissionInviteCommands extends Commands {
                 token
             });
             return { message: 'OK' };
-        } else {
-            throw new Error('Unsupported Subcommand');
         }
+
+        throw new Error('Unsupported Subcommand');
     }
 
     #headers(opts?: Static<typeof MissionOptions>): object {
@@ -162,9 +159,9 @@ export default class MissionInviteCommands extends Commands {
             return {
                 MissionAuthorization: `Bearer ${opts.token}`
             }
-        } else {
-            return {};
         }
+
+        return {};
     }
 
     /**
@@ -180,12 +177,10 @@ export default class MissionInviteCommands extends Commands {
 
         url.searchParams.append('clientUid', clientUid);
 
-        const invites = await this.api.fetch(url, {
+        return typed(await this.api.fetch(url, {
             method: 'GET',
             headers: this.#headers(opts)
-        });
-
-        return invites;
+        }));
     }
 
     /**
@@ -204,10 +199,10 @@ export default class MissionInviteCommands extends Commands {
             url = new URL(`/Marti/api/missions/${encodeURIComponent(missionName)}/invitations`, this.api.url);
         }
 
-        return await this.api.fetch(url, {
+        return typed(await this.api.fetch(url, {
             method: 'GET',
             headers: this.#headers(opts)
-        });
+        }));
     }
 
     /**
@@ -232,7 +227,7 @@ export default class MissionInviteCommands extends Commands {
             url = new URL(`/Marti/api/missions/${encodeURIComponent(missionName)}/invite/${encodeURIComponent(type)}/${encodeURIComponent(invitee)}`, this.api.url);
         }
 
-        for (const q in query) url.searchParams.append(q, String(query[q as keyof typeof query]));
+        for (const [q, value] of Object.entries(query)) url.searchParams.append(q, value);
 
         await this.api.fetch(url, {
             method: 'PUT',
@@ -261,7 +256,7 @@ export default class MissionInviteCommands extends Commands {
             url = new URL(`/Marti/api/missions/${encodeURIComponent(missionName)}/invite/${encodeURIComponent(type)}/${encodeURIComponent(invitee)}`, this.api.url);
         }
 
-        for (const q in query) url.searchParams.append(q, String(query[q as keyof typeof query]));
+        for (const [q, value] of Object.entries(query)) url.searchParams.append(q, value);
 
         await this.api.fetch(url, {
             method: 'DELETE',

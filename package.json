@@ -22,34 +22,34 @@
     },
     "scripts": {
         "test": "c8 --reporter=lcov --reporter html tsx --test test/*.ts",
-        "lint": "eslint *.ts test/ lib/",
+        "lint": "oxlint --type-aware --deny-warnings --report-unused-disable-directives",
         "doc": "typedoc index.ts",
-        "build": "tsc --build",
+        "build": "node node_modules/typescript7/bin/tsc --build",
         "pretest": "npm run lint"
     },
     "dependencies": {
         "@openaddresses/batch-error": "^2.12.0",
         "@sinclair/typebox": "^0.34.41",
         "@tak-ps/node-p12": "^1.0.1",
+        "@tak-ps/xml-js": "^2.0.3",
         "mime": "^4.0.7",
         "pem": "^1.14.8",
-        "undici": "^8.0.0",
-        "@tak-ps/xml-js": "^2.0.3"
+        "undici": "^8.0.0"
     },
     "peerDependencies": {
         "@tak-ps/node-cot": "^14.52.0"
     },
     "devDependencies": {
-        "@eslint/js": "^10.0.1",
         "@inquirer/prompts": "^8.0.1",
         "@types/node": "^26.0.0",
         "@types/pem": "^1.14.4",
         "c8": "^12.0.0",
-        "eslint": "^10.0.0",
+        "oxlint": "^1.94.0",
+        "oxlint-tsgolint": "^7.0.2007",
         "tsx": "^4.19.4",
         "typedoc": "^0.28.1",
-        "typescript": "^6.0.0",
-        "typescript-eslint": "^8.0.0"
+        "typescript": "npm:@typescript/typescript6@^6.0.2",
+        "typescript7": "npm:typescript@^7.0.2"
     },
     "repository": {
         "type": "git",

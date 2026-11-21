@@ -8,6 +8,9 @@ import { APIAuthCertificate } from '../lib/auth.js';
 
 type RequestArgs = Parameters<Client['request']>[0];
 
+// oxlint-disable-next-line typescript/unbound-method
+const originalRequest = Client.prototype.request;
+
 function mockResponse(statusCode: number, contentType: string, body: string): Dispatcher.ResponseData {
     return {
         statusCode,
@@ -30,8 +33,6 @@ const EVENTS = `<?xml version="1.0" encoding="UTF-8"?>
 </events>`;
 
 test('Query.saFeats builds the cot/sa request and parses every event', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -68,8 +69,6 @@ test('Query.saFeats builds the cot/sa request and parses every event', async () 
 });
 
 test('Query.sa resolves secago to an explicit window and rejects what TAK Server would refuse', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -85,7 +84,7 @@ test('Query.sa resolves secago to an explicit window and rejects what TAK Server
 
         const before = Date.now();
         await api.Query.sa();
-        const params = new URL(String(captured?.path), 'https://tak.example.com').searchParams;
+        const params = new URL(captured?.path, 'https://tak.example.com').searchParams;
         const start = Date.parse(String(params.get('start')));
         const end = Date.parse(String(params.get('end')));
         assert.equal(end - start, 3600 * 1000);
@@ -106,8 +105,6 @@ test('Query.sa resolves secago to an explicit window and rejects what TAK Server
 });
 
 test('Query.saFeats omits optional params and returns [] for an empty 404 body', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -132,8 +129,6 @@ test('Query.saFeats omits optional params and returns [] for an empty 404 body',
 });
 
 test('Query.historyFeats returns [] for an empty body and parses a single event', async () => {
-    const originalRequest = Client.prototype.request;
-
     let body = '';
 
     Client.prototype.request = async function(): Promise<Dispatcher.ResponseData> {

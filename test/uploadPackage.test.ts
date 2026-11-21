@@ -9,11 +9,12 @@ import { APIAuthCertificate, APIAuthPassword } from '../lib/auth.js';
 import stream2buffer from '../lib/stream.js';
 
 type RequestArgs = Parameters<Client['request']>[0];
+
+// oxlint-disable-next-line typescript/unbound-method
+const originalRequest = Client.prototype.request;
 type ErrorWithCode = Error & { code?: string };
 
 test('Files.uploadPackage serializes multipart for certificate auth', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -63,8 +64,6 @@ test('Files.uploadPackage serializes multipart for certificate auth', async () =
 });
 
 test('Files.upload falls back to application/octet-stream when name has no extension', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -117,8 +116,6 @@ test('Files.upload falls back to application/octet-stream when name has no exten
 });
 
 test('Files.upload passes uid metadata for map item attachments', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -165,6 +162,7 @@ test('Files.upload passes uid metadata for map item attachments', async () => {
 
 test('APIAuthPassword surfaces transport causes during login', async () => {
     const api = new TAKAPI(new URL('https://tak.example.com'), new APIAuthPassword('alice', 'secret'));
+    // oxlint-disable-next-line typescript/unbound-method
     const originalFetch = api.auth.fetch;
 
     api.auth.fetch = async () => {

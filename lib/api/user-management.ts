@@ -1,5 +1,6 @@
 import { Type, Static } from '@sinclair/typebox';
 import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
+import { typed } from '../utils/typed.js';
 
 const GroupLists = {
     groupList: Type.Optional(Type.Array(Type.String())),
@@ -108,17 +109,17 @@ export default class UserManagementCommands extends Commands {
 
             if (args.format === 'json') {
                 return list;
-            } else {
-                return list.map((user) => user.username).join('\n');
             }
+
+            return list.map((user) => user.username).join('\n');
         } else if (args._[3] === 'list-groups') {
             const list = await this.listGroups();
 
             if (args.format === 'json') {
                 return list;
-            } else {
-                return list.map((group) => group.groupname).join('\n');
             }
+
+            return list.map((group) => group.groupname).join('\n');
         } else if (args._[3] === 'user-groups') {
             if (!args._[4]) throw new Error('username must be provided');
 
@@ -126,14 +127,14 @@ export default class UserManagementCommands extends Commands {
 
             if (args.format === 'json') {
                 return user;
-            } else {
-                return [
-                    `${user.username}`,
-                    `  BOTH: ${user.groupList.join(', ')}`,
-                    `  IN:   ${user.groupListIN.join(', ')}`,
-                    `  OUT:  ${user.groupListOUT.join(', ')}`
-                ].join('\n');
             }
+
+            return [
+                user.username,
+                `  BOTH: ${user.groupList.join(', ')}`,
+                `  IN:   ${user.groupListIN.join(', ')}`,
+                `  OUT:  ${user.groupListOUT.join(', ')}`
+            ].join('\n');
         } else if (args._[3] === 'group-users') {
             if (!args._[4]) throw new Error('group must be provided');
 
@@ -141,23 +142,23 @@ export default class UserManagementCommands extends Commands {
 
             if (args.format === 'json') {
                 return group;
-            } else {
-                return [
-                    `${group.groupname}`,
-                    `  BOTH: ${group.usersInGroupList.join(', ')}`,
-                    `  IN:   ${group.usersInGroupListIN.join(', ')}`,
-                    `  OUT:  ${group.usersInGroupListOUT.join(', ')}`
-                ].join('\n');
             }
+
+            return [
+                group.groupname,
+                `  BOTH: ${group.usersInGroupList.join(', ')}`,
+                `  IN:   ${group.usersInGroupListIN.join(', ')}`,
+                `  OUT:  ${group.usersInGroupListOUT.join(', ')}`
+            ].join('\n');
         } else if (args._[3] === 'delete-user') {
             if (!args._[4]) throw new Error('username must be provided');
 
             await this.deleteUser(args._[4]);
 
             return `Deleted ${args._[4]}`;
-        } else {
-            throw new Error('Unsupported Subcommand');
         }
+
+        throw new Error('Unsupported Subcommand');
     }
 
     /**
@@ -191,7 +192,7 @@ export default class UserManagementCommands extends Commands {
     ): Promise<Static<typeof UserManagementList_UserPassword>> {
         const url = new URL('/Marti/api/user-management/api/new-users', this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed<Static<typeof UserManagementList_UserPassword>>(await this.api.fetch(url, {
             method: 'POST',
             body: {
                 usernameExpression: bulk.usernameExpression,
@@ -201,7 +202,7 @@ export default class UserManagementCommands extends Commands {
                 groupListIN: bulk.groupListIN ?? [],
                 groupListOUT: bulk.groupListOUT ?? []
             }
-        });
+        }));
     }
 
     /**
@@ -212,9 +213,9 @@ export default class UserManagementCommands extends Commands {
     async listUsers(): Promise<Static<typeof UserManagementList_Username>> {
         const url = new URL('/Marti/api/user-management/api/list-users', this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed<Static<typeof UserManagementList_Username>>(await this.api.fetch(url, {
             method: 'GET'
-        });
+        }));
     }
 
     /**
@@ -225,9 +226,9 @@ export default class UserManagementCommands extends Commands {
     async userGroups(username: string): Promise<Static<typeof UserManagementUserGroupsResponse>> {
         const url = new URL(`/Marti/api/user-management/api/get-groups-for-user/${encodeURIComponent(username)}`, this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed<Static<typeof UserManagementUserGroupsResponse>>(await this.api.fetch(url, {
             method: 'GET'
-        });
+        }));
     }
 
     /**
@@ -306,9 +307,9 @@ export default class UserManagementCommands extends Commands {
     async listGroups(): Promise<Static<typeof UserManagementList_GroupName>> {
         const url = new URL('/Marti/api/user-management/api/list-groupnames', this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed<Static<typeof UserManagementList_GroupName>>(await this.api.fetch(url, {
             method: 'GET'
-        });
+        }));
     }
 
     /**
@@ -319,8 +320,8 @@ export default class UserManagementCommands extends Commands {
     async groupUsers(group: string): Promise<Static<typeof UserManagementGroupUsersResponse>> {
         const url = new URL(`/Marti/api/user-management/api/users-in-group/${encodeURIComponent(group)}`, this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed<Static<typeof UserManagementGroupUsersResponse>>(await this.api.fetch(url, {
             method: 'GET'
-        });
+        }));
     }
 }

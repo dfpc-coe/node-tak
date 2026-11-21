@@ -1,9 +1,18 @@
 import fetch from './fetch.js';
 import { Type } from '@sinclair/typebox';
 import { Client } from 'undici';
+import type { Dispatcher, RequestInit } from 'undici';
 import TAKAPI from './api.js';
 import stream2buffer  from './stream.js';
 import { encodeMultipartFormData } from './multipart.js';
+import { typed } from './utils/typed.js';
+
+type AuthFetchOptions = {
+    headers?: Record<string, string | undefined>;
+    credentials?: string;
+    body?: unknown;
+};
+
 
 /**
  * Store the TAK Client Certificate for a connection
@@ -17,12 +26,14 @@ export const TAKAuth = Type.Object({
 })
 
 export class APIAuth {
-    async init(api: TAKAPI) { // eslint-disable-line @typescript-eslint/no-unused-vars
+    // oxlint-disable-next-line eslint/no-unused-vars
+    async init(api: TAKAPI) {
 
     }
 
+    // oxlint-disable-next-line typescript/no-explicit-any
     async fetch(api: TAKAPI, url: URL, opts: any): Promise<any> {
-        return await fetch(url, opts);
+        return fetch(url, typed<RequestInit>(opts));
     }
 }
 
@@ -47,15 +58,18 @@ export class APIAuthPassword extends APIAuth {
         this.jwt = token;
     }
 
+    // oxlint-disable-next-line typescript/no-explicit-any
     async fetch(api: TAKAPI, url: URL, opts: any): Promise<any> {
-        opts.headers = opts.headers || {}
-        opts.credentials = 'include';
+        const req = typed<AuthFetchOptions>(opts);
 
-        if (!opts.headers.Authorization && this.jwt) {
-            opts.headers.Authorization = `Bearer ${this.jwt}`;
+        req.headers ??= {};
+        req.credentials = 'include';
+
+        if (!req.headers.Authorization && this.jwt) {
+            req.headers.Authorization = `Bearer ${this.jwt}`;
         }
 
-        return await fetch(url, opts);
+        return fetch(url, typed<RequestInit>(req));
     }
 }
 
@@ -67,15 +81,18 @@ export class APIAuthToken extends APIAuth {
         this.jwt = jwt;
     }
 
+    // oxlint-disable-next-line typescript/no-explicit-any
     async fetch(api: TAKAPI, url: URL, opts: any): Promise<any> {
-        opts.headers = opts.headers || {}
-        opts.credentials = 'include';
+        const req = typed<AuthFetchOptions>(opts);
 
-        if (!opts.headers.Authorization && this.jwt) {
-            opts.headers.Authorization = `Bearer ${this.jwt}`;
+        req.headers ??= {};
+        req.credentials = 'include';
+
+        if (!req.headers.Authorization && this.jwt) {
+            req.headers.Authorization = `Bearer ${this.jwt}`;
         }
 
-        return await fetch(url, opts);
+        return fetch(url, typed<RequestInit>(req));
     }
 }
 
@@ -89,7 +106,10 @@ export class APIAuthCertificate extends APIAuth {
         this.key = key;
     }
 
+    // oxlint-disable-next-line typescript/no-explicit-any
     async fetch(api: TAKAPI, url: URL, opts: any): Promise<any> {
+        let req = typed<AuthFetchOptions>(opts);
+
         const client = new Client(api.url.origin, {
             connect: {
                 key: this.key,
@@ -98,12 +118,12 @@ export class APIAuthCertificate extends APIAuth {
             }
         });
 
-        if (typeof FormData !== 'undefined' && opts.body instanceof FormData) {
-            const multipart = await encodeMultipartFormData(opts.body);
-            opts = {
-                ...opts,
+        if (typeof FormData !== 'undefined' && req.body instanceof FormData) {
+            const multipart = await encodeMultipartFormData(req.body);
+            req = {
+                ...req,
                 headers: {
-                    ...(opts.headers || {}),
+                    ...req.headers,
                     ...multipart.headers
                 },
                 body: multipart.body
@@ -114,7 +134,7 @@ export class APIAuthCertificate extends APIAuth {
             // undici's Client.request requires a method - default to GET like fetch()
             method: 'GET',
             path: String(url).replace(api.url.origin, ''),
-            ...opts
+            ...typed<Partial<Dispatcher.RequestOptions>>(req)
         });
 
         return {
@@ -125,7 +145,7 @@ export class APIAuthCertificate extends APIAuth {
             text: async () => {
                 return String(await stream2buffer(res.body));
             },
-            json: async () => {
+            json: async (): Promise<unknown> => {
                 return JSON.parse(String(await stream2buffer(res.body)));
             },
         };

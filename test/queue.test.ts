@@ -4,9 +4,7 @@ import { Queue } from '../lib/utils/queue.js';
 
 test('Queue - push/pop FIFO order', () => {
     const q = new Queue<number>(4);
-    q.push(1);
-    q.push(2);
-    q.push(3);
+    for (const item of [1, 2, 3]) q.push(item);
     assert.equal(q.pop(), 1);
     assert.equal(q.pop(), 2);
     assert.equal(q.pop(), 3);
@@ -29,15 +27,12 @@ test('Queue - pop from empty', () => {
 
 test('Queue - ring buffer wraparound', () => {
     const q = new Queue<number>(3);
-    q.push(1);
-    q.push(2);
-    q.push(3);
+    for (const item of [1, 2, 3]) q.push(item);
     // Pop two — head advances past midpoint
     assert.equal(q.pop(), 1);
     assert.equal(q.pop(), 2);
     // Push two more — tail wraps around
-    q.push(4);
-    q.push(5);
+    for (const item of [4, 5]) q.push(item);
     // Remaining items come out in FIFO order
     assert.equal(q.pop(), 3);
     assert.equal(q.pop(), 4);

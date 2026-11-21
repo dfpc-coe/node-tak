@@ -6,6 +6,7 @@ import { TAKItem, TAKList } from './types.js';
 import { MissionLog } from './mission-log.js';
 import { Feature } from '@tak-ps/node-cot';
 import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
+import { typed, type RawResponse } from '../utils/typed.js';
 
 export enum MissionSubscriberRole {
     MISSION_OWNER = 'MISSION_OWNER',
@@ -124,7 +125,8 @@ export const Mission = Type.Object({
     expiration: Type.Number(),
     guid: Type.String(),
     uids: Type.Array(Type.Unknown()),
-    logs: Type.Optional(Type.Array(MissionLog)),                // Only present if ?logs=true
+    // Only present if ?logs=true
+    logs: Type.Optional(Type.Array(MissionLog)),
     contents: Type.Array(Type.Object({
         timestamp: Type.String(),
         creatorUid: Type.Optional(Type.String()),
@@ -132,9 +134,12 @@ export const Mission = Type.Object({
     })),
     passwordProtected: Type.Boolean(),
     defaultRole: MissionRole,
-    token: Type.Optional(Type.String()),                        // Only present when mission created
-    groups: Type.Optional(Type.Union([Type.String(), Type.Array(Type.String())])),           // Only present on Mission.get()
-    missionChanges: Type.Optional(Type.Array(MissionChange))   // Only present on Mission.get()
+    // Only present when mission created
+    token: Type.Optional(Type.String()),
+    // Only present on Mission.get()
+    groups: Type.Optional(Type.Union([Type.String(), Type.Array(Type.String())])),
+    // Only present on Mission.get()
+    missionChanges: Type.Optional(Type.Array(MissionChange))
 });
 
 export const MissionSubscriber = Type.Object({
@@ -314,16 +319,14 @@ export default class MissionCommands extends Commands {
         if (args._[3] === 'list') {
             const list = await this.list({});
 
-            if (args.format === 'json') {
-                return list;
-            } else {
-                return list.data.map((mission) => {
-                    return `${mission.name} (${mission.guid}) - ${mission.description}`;
-                }).join('\n');
-            }
-        } else {
-            throw new Error('Unsupported Subcommand');
+            if (args.format === 'json') return list;
+
+            return list.data.map((mission) => {
+                return `${mission.name} (${mission.guid}) - ${mission.description}`;
+            }).join('\n');
         }
+
+        throw new Error('Unsupported Subcommand');
     }
 
     #isGUID(id: string): boolean {
@@ -340,15 +343,13 @@ export default class MissionCommands extends Commands {
      * we make for better usability.
      */
     #stdMission(mission: Static<typeof Mission>): Static<typeof Mission> {
-        if (mission.description === undefined) mission.description = '';
+        mission.description ??= '';
 
         // TAK Server omits defaultRole when none was set & treats the mission as MISSION_SUBSCRIBER
-        if (mission.defaultRole === undefined) {
-            mission.defaultRole = {
-                type: MissionSubscriberRole.MISSION_SUBSCRIBER,
-                permissions: ['MISSION_READ', 'MISSION_WRITE']
-            };
-        }
+        mission.defaultRole ??= {
+            type: MissionSubscriberRole.MISSION_SUBSCRIBER,
+            permissions: ['MISSION_READ', 'MISSION_WRITE']
+        };
 
         return mission;
     }
@@ -358,9 +359,9 @@ export default class MissionCommands extends Commands {
             return {
                 MissionAuthorization: `Bearer ${opts.token}`
             }
-        } else {
-            return {};
         }
+
+        return {};
     }
 
     /**
@@ -376,17 +377,17 @@ export default class MissionCommands extends Commands {
 
         const url = new URL(`/Marti/api/missions/${this.#encodeName(name)}/archive`, this.api.url);
 
-        const res = await this.api.fetch(url, {
+        const res: RawResponse = typed(await this.api.fetch(url, {
             method: 'GET',
             headers: this.#headers(opts),
-        }, true);
+        }, true));
 
         if (res.status < 200 || res.status >= 400) {
             const body = await res.text().catch(() => '');
             throw new Err(res.status, null, body || `Status Code: ${res.status}`);
         }
 
-        return res.body;
+        return typed(res.body);
     }
 
     /**
@@ -410,12 +411,10 @@ export default class MissionCommands extends Commands {
             }
         }
 
-        const changes = await this.api.fetch(url, {
+        return typed(await this.api.fetch(url, {
             method: 'GET',
             headers: this.#headers(opts),
-        });
-
-        return changes;
+        }));
     }
 
     /**
@@ -467,10 +466,10 @@ export default class MissionCommands extends Commands {
             ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/cot`, this.api.url)
             : new URL(`/Marti/api/missions/${this.#encodeName(name)}/cot`, this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed(await this.api.fetch(url, {
             method: 'GET',
             headers: this.#headers(opts)
-        });
+        }));
     }
 
     /**
@@ -481,12 +480,13 @@ export default class MissionCommands extends Commands {
     async contacts(
         name: string,
         opts?: Static<typeof MissionOptions>
-    ) {
+        // oxlint-disable-next-line typescript/no-explicit-any
+    ): Promise<any> {
         const url = this.#isGUID(name)
             ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/contacts`, this.api.url)
             : new URL(`/Marti/api/missions/${this.#encodeName(name)}/contacts`, this.api.url);
 
-        return await this.api.fetch(url, {
+        return this.api.fetch(url, {
             method: 'GET',
             headers: this.#headers(opts)
         });
@@ -505,10 +505,10 @@ export default class MissionCommands extends Commands {
             ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/children`, this.api.url)
             : new URL(`/Marti/api/missions/${this.#encodeName(name)}/children`, this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed(await this.api.fetch(url, {
             method: 'GET',
             headers: this.#headers(opts)
-        });
+        }));
     }
 
     /**
@@ -520,14 +520,15 @@ export default class MissionCommands extends Commands {
         child: string,
         parent: string,
         opts?: Static<typeof MissionOptions>
-    ) {
+        // oxlint-disable-next-line typescript/no-explicit-any
+    ): Promise<any> {
         if (this.#isGUID(child) || this.#isGUID(parent)) {
             const childGuid = this.#isGUID(child) ? child : (await this.get(child, {}, opts)).guid;
             const parentGuid = this.#isGUID(parent) ? parent : (await this.get(parent, {}, opts)).guid;
 
             const url = new URL(`/Marti/api/missions/guid/${encodeURIComponent(childGuid)}/parent/guid/${encodeURIComponent(parentGuid)}`, this.api.url);
 
-            return await this.api.fetch(url, {
+            return this.api.fetch(url, {
                 method: 'PUT',
                 headers: this.#headers(opts)
             });
@@ -535,7 +536,7 @@ export default class MissionCommands extends Commands {
 
         const url = new URL(`/Marti/api/missions/${this.#encodeName(child)}/parent/${this.#encodeName(parent)}`, this.api.url);
 
-        return await this.api.fetch(url, {
+        return this.api.fetch(url, {
             method: 'PUT',
             headers: this.#headers(opts)
         });
@@ -557,10 +558,10 @@ export default class MissionCommands extends Commands {
 
         const url = new URL(`/Marti/api/missions/${this.#encodeName(missionName)}/parent`, this.api.url);
 
-        const res: Static<typeof TAKItem_Mission> = await this.api.fetch(url, {
+        const res: Static<typeof TAKItem_Mission> = typed(await this.api.fetch(url, {
             method: 'GET',
             headers: this.#headers(opts)
-        });
+        }));
 
         return this.#stdMission(res.data);
     }
@@ -595,7 +596,7 @@ export default class MissionCommands extends Commands {
         opts?: Static<typeof MissionOptions>,
         creatorUid?: string
     ): Promise<void> {
-        if (!password.length) throw new Err(400, null, 'Mission Password cannot be empty');
+        if (password.length === 0) throw new Err(400, null, 'Mission Password cannot be empty');
 
         const url = this.#isGUID(name)
             ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/password`, this.api.url)
@@ -641,7 +642,8 @@ export default class MissionCommands extends Commands {
         name: string,
         body: Static<typeof DetachContentsInput>,
         opts?: Static<typeof MissionOptions>
-    ) {
+        // oxlint-disable-next-line typescript/no-explicit-any
+    ): Promise<any> {
         const url = this.#isGUID(name)
             ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/contents`, this.api.url)
             : new URL(`/Marti/api/missions/${this.#encodeName(name)}/contents`, this.api.url);
@@ -649,7 +651,7 @@ export default class MissionCommands extends Commands {
         if (body.hash) url.searchParams.append('hash', body.hash);
         if (body.uid) url.searchParams.append('uid', body.uid);
 
-        return await this.api.fetch(url, {
+        return this.api.fetch(url, {
             method: 'DELETE',
             headers: this.#headers(opts),
         });
@@ -664,12 +666,13 @@ export default class MissionCommands extends Commands {
         name: string,
         body: Static<typeof AttachContentsInput>,
         opts?: Static<typeof MissionOptions>
-    ) {
+        // oxlint-disable-next-line typescript/no-explicit-any
+    ): Promise<any> {
         const url = this.#isGUID(name)
             ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/contents`, this.api.url)
             : new URL(`/Marti/api/missions/${this.#encodeName(name)}/contents`, this.api.url);
 
-        return await this.api.fetch(url, {
+        return this.api.fetch(url, {
             method: 'PUT',
             headers: this.#headers(opts),
             body
@@ -686,13 +689,14 @@ export default class MissionCommands extends Commands {
         creatorUid: string,
         body: Readable,
         opts?: Static<typeof MissionOptions>
-    ) {
+        // oxlint-disable-next-line typescript/no-explicit-any
+    ): Promise<any> {
         if (this.#isGUID(name)) name = (await this.getGuid(name, {}, opts)).name;
 
         const url = new URL(`/Marti/api/missions/${this.#encodeName(name)}/contents/missionpackage`, this.api.url);
         url.searchParams.append('creatorUid', creatorUid);
 
-        return await this.api.fetch(url, {
+        return this.api.fetch(url, {
             method: 'PUT',
             headers: this.#headers(opts),
             body
@@ -712,10 +716,10 @@ export default class MissionCommands extends Commands {
             ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/subscriptions`, this.api.url)
             : new URL(`/Marti/api/missions/${this.#encodeName(name)}/subscriptions`, this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed(await this.api.fetch(url, {
             method: 'GET',
             headers: this.#headers(opts),
-        });
+        }));
     }
 
     /**
@@ -731,10 +735,10 @@ export default class MissionCommands extends Commands {
             ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/subscriptions/roles`, this.api.url)
             : new URL(`/Marti/api/missions/${this.#encodeName(name)}/subscriptions/roles`, this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed(await this.api.fetch(url, {
             method: 'GET',
             headers: this.#headers(opts),
-        });
+        }));
     }
 
     /**
@@ -798,10 +802,10 @@ export default class MissionCommands extends Commands {
             ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/role`, this.api.url)
             : new URL(`/Marti/api/missions/${this.#encodeName(name)}/role`, this.api.url);
 
-        const res = await this.api.fetch(url, {
+        const res: { data: Static<typeof MissionRole> } = typed(await this.api.fetch(url, {
             method: 'GET',
             headers: this.#headers(opts),
-        });
+        }));
 
         return res.data;
     }
@@ -822,15 +826,16 @@ export default class MissionCommands extends Commands {
 
         let q: keyof Static<typeof SubscriptionInput>;
         for (q in query) {
-            if (query[q] !== undefined) {
-                url.searchParams.append(q, String(query[q]));
+            const value = query[q];
+            if (value !== undefined) {
+                url.searchParams.append(q, value);
             }
         }
 
-        const res = await this.api.fetch(url, {
+        const res: Static<typeof TAKItem_MissionSubscriber> = typed(await this.api.fetch(url, {
             method: 'GET',
             headers: this.#headers(opts),
-        });
+        }));
 
         return res.data;
     }
@@ -856,10 +861,10 @@ export default class MissionCommands extends Commands {
             }
         }
 
-        return await this.api.fetch(url, {
+        return typed(await this.api.fetch(url, {
             method: 'PUT',
             headers: this.#headers(opts),
-        });
+        }));
     }
 
     /**
@@ -871,7 +876,8 @@ export default class MissionCommands extends Commands {
         name: string,
         query: Static<typeof UnsubscribeInput>,
         opts?: Static<typeof MissionOptions>
-    ) {
+        // oxlint-disable-next-line typescript/no-explicit-any
+    ): Promise<any> {
         const url = this.#isGUID(name)
             ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}/subscription`, this.api.url)
             : new URL(`/Marti/api/missions/${this.#encodeName(name)}/subscription`, this.api.url);
@@ -883,7 +889,7 @@ export default class MissionCommands extends Commands {
             }
         }
 
-        return await this.api.fetch(url, {
+        return this.api.fetch(url, {
             method: 'DELETE',
             headers: this.#headers(opts),
         });
@@ -915,16 +921,16 @@ export default class MissionCommands extends Commands {
                 // `keywordFilter` & `groupFilter` are repeatable
                 // (eg `?keywordFilter=a&keywordFilter=b`).
                 for (const v of value) {
-                    url.searchParams.append(q, String(v));
+                    url.searchParams.append(q, v);
                 }
             } else {
                 url.searchParams.append(q, String(value));
             }
         }
 
-        const missions: Static<typeof TAKList_Mission> = await this.api.fetch(url, {
+        const missions: Static<typeof TAKList_Mission> = typed(await this.api.fetch(url, {
             method: 'GET'
-        });
+        }));
 
         missions.data = missions.data.map((mission) => this.#stdMission(mission));
 
@@ -950,12 +956,12 @@ export default class MissionCommands extends Commands {
             }
         }
 
-        const missions: Static<typeof TAKList_Mission> = await this.api.fetch(url, {
+        const missions: Static<typeof TAKList_Mission> = typed(await this.api.fetch(url, {
             method: 'GET',
             headers: this.#headers(opts),
-        });
+        }));
 
-        if (!missions.data.length) throw new Err(404, null, `No Mission for GUID: ${guid}`);
+        if (missions.data.length === 0) throw new Err(404, null, `No Mission for GUID: ${guid}`);
 
         return this.#stdMission(missions.data[0]);
     }
@@ -972,12 +978,12 @@ export default class MissionCommands extends Commands {
                 ? new URL(`/Marti/api/missions/guid/${encodeURIComponent(name)}`, this.api.url)
                 : new URL(`/Marti/api/missions/${this.#encodeName(name)}`, this.api.url);
 
-            const missions: Static<typeof TAKList_Mission> = await this.api.fetch(url, {
+            const missions: Static<typeof TAKList_Mission> = typed(await this.api.fetch(url, {
                 method: 'GET',
                 headers: this.#headers(opts),
-            });
+            }));
 
-            if (!missions.data.length) return false;
+            if (missions.data.length === 0) return false;
             return true;
         } catch (err) {
             console.error(err);
@@ -1031,7 +1037,7 @@ export default class MissionCommands extends Commands {
                 // The TAK Server `group` query parameter is repeatable
                 // (eg `?group=a&group=b`).
                 for (const g of value) {
-                    url.searchParams.append('group', String(g));
+                    url.searchParams.append('group', g);
                 }
             } else {
                 url.searchParams.append(q, String(value));
@@ -1044,12 +1050,12 @@ export default class MissionCommands extends Commands {
 
         url.searchParams.append('allowDupe', 'false');
 
-        const missions = await this.api.fetch(url, {
+        const missions: Static<typeof TAKList_Mission> = typed(await this.api.fetch(url, {
             method: 'POST',
             headers: this.#headers(opts),
-        });
+        }));
 
-        if (!missions.data.length) throw new Error('Create Mission didn\'t return a mission or an error');
+        if (missions.data.length === 0) throw new Error('Create Mission didn\'t return a mission or an error');
 
         mission = missions.data[0];
 
@@ -1081,12 +1087,12 @@ export default class MissionCommands extends Commands {
             }
         }
 
-        const missions: Static<typeof TAKList_Mission> = await this.api.fetch(url, {
+        const missions: Static<typeof TAKList_Mission> = typed(await this.api.fetch(url, {
             method: 'GET',
             headers: this.#headers(opts),
-        });
+        }));
 
-        if (!missions.data.length) throw new Err(404, null, `No Mission for Name: ${name}`);
+        if (missions.data.length === 0) throw new Err(404, null, `No Mission for Name: ${name}`);
 
         return this.#stdMission(missions.data[0]);
     }
@@ -1105,7 +1111,7 @@ export default class MissionCommands extends Commands {
 
         // I want to keep this 1:1 with the TAK Server Source Code
         // eslint-disable-next-line no-useless-escape
-        if (!body.name.match(/^[\p{L}\p{N}\w\d\s\.\(\)!=@#$&^*_\-\+\[\]\{\}:,\.\/\|\\]*$/u)) {
+        if (!/^[\p{L}\p{N}\w\d\s\.\(\)!=@#$&^*_\-\+\[\]\{\}:,\.\/\|\\]*$/u.test(body.name)) {
             throw new Err(400, null, 'Mission Name contains an invalid Character');
         } else if (body.name.length === 0) {
             throw new Err(400, null, 'Mission Name must have a length > 0');
@@ -1115,9 +1121,9 @@ export default class MissionCommands extends Commands {
             throw new Err(400, null, 'Mission Name cannot contain forward slashes');
         }
 
-        if (body.description === undefined) body.description = '';
+        body.description ??= '';
 
-        if (body.group && Array.isArray(body.group)) body.group = body.group.join(',');
+        if (Array.isArray(body.group)) body.group = body.group.join(',');
 
         let q: keyof Static<typeof MissionCreateInput>;
         for (q in body) {
@@ -1126,11 +1132,11 @@ export default class MissionCommands extends Commands {
             }
         }
 
-        const missions = await this.api.fetch(url, {
+        const missions: Static<typeof TAKList_Mission> = typed(await this.api.fetch(url, {
             method: 'POST'
-        });
+        }));
 
-        if (!missions.data.length) throw new Error('Create Mission didn\'t return a mission or an error');
+        if (missions.data.length === 0) throw new Error('Create Mission didn\'t return a mission or an error');
 
         let mission = missions.data[0];
 
@@ -1160,13 +1166,13 @@ export default class MissionCommands extends Commands {
             url.searchParams.append('creatorUid', creatorUid);
         }
 
-        const missions = await this.api.fetch(url, {
+        const missions: Static<typeof TAKList_Mission> = typed(await this.api.fetch(url, {
             method: 'PUT',
             headers: this.#headers(opts),
             body: keywords
-        });
+        }));
 
-        if (!missions.data.length) throw new Error('Set Mission Keywords didn\'t return a mission or an error');
+        if (missions.data.length === 0) throw new Error('Set Mission Keywords didn\'t return a mission or an error');
 
         const mission = missions.data[0];
 
@@ -1190,12 +1196,12 @@ export default class MissionCommands extends Commands {
             url.searchParams.append('creatorUid', creatorUid);
         }
 
-        const missions = await this.api.fetch(url, {
+        const missions: Static<typeof TAKList_Mission> = typed(await this.api.fetch(url, {
             method: 'DELETE',
             headers: this.#headers(opts),
-        });
+        }));
 
-        if (!missions.data.length) throw new Error('Delete Mission Keyword didn\'t return a mission or an error');
+        if (missions.data.length === 0) throw new Error('Delete Mission Keyword didn\'t return a mission or an error');
 
         const mission = missions.data[0];
 
@@ -1211,37 +1217,26 @@ export default class MissionCommands extends Commands {
         name: string,
         query: Static<typeof MissionDeleteInput>,
         opts?: Static<typeof MissionOptions>
-    ) {
+        // oxlint-disable-next-line typescript/no-explicit-any
+    ): Promise<any> {
+        let url: URL;
         if (this.#isGUID(name)) {
-            const url = new URL('/Marti/api/missions', this.api.url);
-
+            url = new URL('/Marti/api/missions', this.api.url);
             url.searchParams.append('guid', name);
-
-            let q: keyof Static<typeof MissionDeleteInput>;
-            for (q in query) {
-                if (query[q] !== undefined) {
-                    url.searchParams.append(q, String(query[q]));
-                }
-            }
-
-            return await this.api.fetch(url, {
-                method: 'DELETE',
-                headers: this.#headers(opts),
-            });
         } else {
-            const url = new URL(`/Marti/api/missions/${this.#encodeName(name)}`, this.api.url);
-
-            let q: keyof Static<typeof MissionDeleteInput>;
-            for (q in query) {
-                if (query[q] !== undefined) {
-                    url.searchParams.append(q, String(query[q]));
-                }
-            }
-
-            return await this.api.fetch(url, {
-                method: 'DELETE',
-                headers: this.#headers(opts),
-            });
+            url = new URL(`/Marti/api/missions/${this.#encodeName(name)}`, this.api.url);
         }
+
+        let q: keyof Static<typeof MissionDeleteInput>;
+        for (q in query) {
+            if (query[q] !== undefined) {
+                url.searchParams.append(q, String(query[q]));
+            }
+        }
+
+        return this.api.fetch(url, {
+            method: 'DELETE',
+            headers: this.#headers(opts),
+        });
     }
 }

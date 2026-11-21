@@ -1,6 +1,7 @@
 import { TAKItem } from './types.js';
 import { Type, Static } from '@sinclair/typebox';
 import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
+import { typed } from '../utils/typed.js';
 
 export const IsSecure = TAKItem(Type.String())
 export const IsValid = TAKItem(Type.String())
@@ -65,16 +66,16 @@ export default class SecurityAuthenticationCommands extends Commands {
 
     async cli(args: ParsedArgs): Promise<object | string> {
         if (args._[3] === 'security-config') {
-            return await this.securityConfig();
+            return this.securityConfig();
         } else if (args._[3] === 'auth-config') {
-            return  await this.authConfig();
+            return this.authConfig();
         } else if (args._[3] === 'verify-config') {
-            return  await this.verifyConfig();
+            return this.verifyConfig();
         } else if (args._[3] === 'is-secure') {
-            return  await this.isSecure();
-        } else {
-            throw new Error('Unsupported Subcommand');
+            return this.isSecure();
         }
+
+        throw new Error('Unsupported Subcommand');
     }
 
     /**
@@ -85,9 +86,9 @@ export default class SecurityAuthenticationCommands extends Commands {
     async securityConfig(): Promise<Static<typeof SecurityConfig>> {
         const url = new URL('/Marti/api/security/config', this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed<Static<typeof SecurityConfig>>(await this.api.fetch(url, {
             method: 'GET'
-        });
+        }));
     }
 
     /**
@@ -98,9 +99,9 @@ export default class SecurityAuthenticationCommands extends Commands {
     async authConfig(): Promise<Static<typeof AuthConfig>> {
         const url = new URL('/Marti/api/authentication/config', this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed<Static<typeof AuthConfig>>(await this.api.fetch(url, {
             method: 'GET'
-        });
+        }));
     }
 
     /**
@@ -111,9 +112,9 @@ export default class SecurityAuthenticationCommands extends Commands {
     async verifyConfig(): Promise<Static<typeof IsValid>> {
         const url = new URL('/Marti/api/security/verifyConfig', this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed<Static<typeof IsValid>>(await this.api.fetch(url, {
             method: 'GET'
-        });
+        }));
     }
 
     /**
@@ -124,8 +125,8 @@ export default class SecurityAuthenticationCommands extends Commands {
     async isSecure(): Promise<Static<typeof IsSecure>> {
         const url = new URL('/Marti/api/security/isSecure', this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed<Static<typeof IsSecure>>(await this.api.fetch(url, {
             method: 'GET'
-        });
+        }));
     }
 }

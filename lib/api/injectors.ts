@@ -1,6 +1,7 @@
 import { TAKList } from './types.js';
 import { Type, Static } from '@sinclair/typebox';
 import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
+import { typed } from '../utils/typed.js';
 
 export const Injector = Type.Object({
     uid: Type.String(),
@@ -25,14 +26,14 @@ export default class InjectorCommands extends Commands {
 
             if (args.format === 'json') {
                 return list;
-            } else {
-                return list.data.map((injector) => {
-                    return `${injector.uid} - ${injector.toInject}`;
-                }).join('\n');
             }
-        } else {
-            throw new Error('Unsupported Subcommand');
+
+            return list.data.map((injector) => {
+                return `${injector.uid} - ${injector.toInject}`;
+            }).join('\n');
         }
+
+        throw new Error('Unsupported Subcommand');
     }
 
     /**
@@ -43,9 +44,9 @@ export default class InjectorCommands extends Commands {
     async list(): Promise<Static<typeof TAKList_Injector>> {
         const url = new URL('/Marti/api/injectors/cot/uid', this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed<Static<typeof TAKList_Injector>>(await this.api.fetch(url, {
             method: 'GET'
-        });
+        }));
     }
 
     /**
@@ -56,9 +57,9 @@ export default class InjectorCommands extends Commands {
     async get(uid: string): Promise<Static<typeof TAKList_Injector>> {
         const url = new URL(`/Marti/api/injectors/cot/uid/${encodeURIComponent(uid)}`, this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed<Static<typeof TAKList_Injector>>(await this.api.fetch(url, {
             method: 'GET'
-        });
+        }));
     }
 
     /**
@@ -69,10 +70,10 @@ export default class InjectorCommands extends Commands {
     async create(injector: Static<typeof Injector>): Promise<Static<typeof TAKList_Injector>> {
         const url = new URL('/Marti/api/injectors/cot/uid', this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed<Static<typeof TAKList_Injector>>(await this.api.fetch(url, {
             method: 'POST',
             body: injector
-        });
+        }));
     }
 
     /**
@@ -86,8 +87,8 @@ export default class InjectorCommands extends Commands {
         url.searchParams.append('uid', injector.uid);
         url.searchParams.append('toInject', injector.toInject);
 
-        return await this.api.fetch(url, {
+        return typed<Static<typeof TAKList_Injector>>(await this.api.fetch(url, {
             method: 'DELETE'
-        });
+        }));
     }
 }

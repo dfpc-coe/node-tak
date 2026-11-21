@@ -8,7 +8,7 @@ export class Queue<T> {
 
     constructor(capacity: number = 10000) {
         this.capacity = capacity;
-        this.buffer = new Array(capacity);
+        this.buffer = Array.from<T | undefined>({ length: capacity });
         this.head = 0;
         this.tail = 0;
         this._length = 0;
@@ -36,7 +36,8 @@ export class Queue<T> {
         if (this._length === 0) return undefined;
 
         const item = this.buffer[this.head];
-        this.buffer[this.head] = undefined; // Clear reference for GC
+        // Clear reference for GC
+        this.buffer[this.head] = undefined;
         this.head = (this.head + 1) % this.capacity;
         this._length--;
 

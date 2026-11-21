@@ -1,6 +1,7 @@
 import { Type, Static } from '@sinclair/typebox';
 import { Readable } from 'node:stream';
 import Commands from '../commands.js';
+import { typed } from '../utils/typed.js';
 
 export const ExportInput = Type.Object({
     startTime: Type.String(),
@@ -34,10 +35,10 @@ export default class ExportCommands extends Commands {
             }
         }
 
-        const res = await this.api.fetch(url, {
+        const res = typed<{ body: Readable }>(await this.api.fetch(url, {
             method: 'POST',
             body: params
-        }, true);
+        }, true));
 
         return res.body;
     }

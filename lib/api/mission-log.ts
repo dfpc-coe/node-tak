@@ -3,6 +3,7 @@ import { TAKItem } from './types.js';
 import type { MissionOptions } from './mission.js';
 import Commands from '../commands.js';
 import { GUIDMatch } from './mission.js';
+import { typed } from '../utils/typed.js';
 
 export const MissionLog = Type.Object({
     id: Type.String(),
@@ -52,9 +53,9 @@ export default class MissionLogCommands extends Commands {
             return {
                 MissionAuthorization: `Bearer ${opts.token}`
             }
-        } else {
-            return {};
         }
+
+        return {};
     }
 
     #isGUID(id: string): boolean {
@@ -76,8 +77,6 @@ export default class MissionLogCommands extends Commands {
             method: 'DELETE',
             headers: this.#headers(opts),
         });
-
-        return;
     }
 
     /**
@@ -90,7 +89,7 @@ export default class MissionLogCommands extends Commands {
     ): Promise<Static<typeof TAKItem_MissionLog>> {
         const url = new URL(`/Marti/api/missions/logs/entries/${encodeURIComponent(id)}`, this.api.url);
 
-        return await this.api.fetch(url);
+        return typed(await this.api.fetch(url));
     }
 
     /**
@@ -109,7 +108,7 @@ export default class MissionLogCommands extends Commands {
             mission = (await this.api.Mission.get(mission, {}, opts)).name;
         }
 
-        return await this.api.fetch(url, {
+        return typed(await this.api.fetch(url, {
             method: 'POST',
             headers: this.#headers(opts),
             body: {
@@ -121,7 +120,7 @@ export default class MissionLogCommands extends Commands {
                 keywords: body.keywords,
                 missionNames: [ mission ],
             }
-        });
+        }));
     }
 
     /**
@@ -140,7 +139,7 @@ export default class MissionLogCommands extends Commands {
             mission = (await this.api.Mission.get(mission, {}, opts)).name;
         }
 
-        return await this.api.fetch(url, {
+        return typed(await this.api.fetch(url, {
             method: 'PUT',
             headers: this.#headers(opts),
             body: {
@@ -153,6 +152,6 @@ export default class MissionLogCommands extends Commands {
                 keywords: body.keywords,
                 missionNames: [ mission ],
             }
-        });
+        }));
     }
 }

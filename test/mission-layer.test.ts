@@ -10,6 +10,9 @@ import { APIAuthCertificate } from '../lib/auth.js';
 
 type RequestArgs = Parameters<Client['request']>[0];
 
+// oxlint-disable-next-line typescript/unbound-method
+const originalRequest = Client.prototype.request;
+
 function mockResponse(statusCode: number, contentType: string, body: string): Dispatcher.ResponseData {
     return {
         statusCode,
@@ -20,8 +23,6 @@ function mockResponse(statusCode: number, contentType: string, body: string): Di
 }
 
 test('MissionLayer.attachUids files UIDs under a layer via the contents paths body', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -40,7 +41,7 @@ test('MissionLayer.attachUids files UIDs under a layer via the contents paths bo
         assert.ok(captured);
         assert.equal(captured.method, 'PUT');
         assert.equal(captured.path, '/Marti/api/missions/mission-1/contents?creatorUid=alice');
-        assert.deepEqual(JSON.parse(String(captured.body)), {
+        assert.deepEqual(JSON.parse(captured.body as string), {
             paths: {
                 'layer-1': [{ uids: ['uid-1', 'uid-2'] }]
             }
@@ -51,8 +52,6 @@ test('MissionLayer.attachUids files UIDs under a layer via the contents paths bo
 });
 
 test('MissionLayer.attachUids uses the guid contents endpoint for GUID missions', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -80,8 +79,6 @@ test('MissionLayer.attachUids uses the guid contents endpoint for GUID missions'
 });
 
 test('MissionLayer.setParent re-parents layers via query params', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -110,8 +107,6 @@ test('MissionLayer.setParent re-parents layers via query params', async () => {
 });
 
 test('MissionLayer.setParent omits parentUid to move a layer to the mission root', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -139,8 +134,6 @@ test('MissionLayer.setParent omits parentUid to move a layer to the mission root
 });
 
 test('MissionLayer.list uses the guid layers endpoint for GUID missions', async () => {
-    const originalRequest = Client.prototype.request;
-
     let captured: RequestArgs | undefined;
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
@@ -166,12 +159,10 @@ test('MissionLayer.list uses the guid layers endpoint for GUID missions', async 
 });
 
 test('MissionLayer.get fetches a single layer by uid', async () => {
-    const originalRequest = Client.prototype.request;
-
     const paths: string[] = [];
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
-        paths.push(String(opts.path));
+        paths.push(opts.path);
         return mockResponse(200, 'application/json', JSON.stringify({
             version: '3', type: 'MissionLayer', nodeId: 'n',
             data: { uid: 'layer-1', name: 'Layer 1', type: 'UID' }

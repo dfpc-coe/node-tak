@@ -2,6 +2,7 @@ import Err from '@openaddresses/batch-error';
 import { Static, Type } from '@sinclair/typebox';
 import { randomUUID } from 'node:crypto';
 import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
+import { typed } from '../utils/typed.js';
 
 export const FeedInput = Type.Object({
     uuid: Type.Optional(Type.String()),
@@ -84,10 +85,10 @@ export default class VideoCommands extends Commands {
 
     async cli(args: ParsedArgs): Promise<object | string> {
         if (args._[3] === 'list') {
-            return await this.list()
-        } else {
-            throw new Error('Unsupported Subcommand');
+            return this.list()
         }
+
+        throw new Error('Unsupported Subcommand');
     }
 
     async list(
@@ -102,9 +103,9 @@ export default class VideoCommands extends Commands {
             }
         }
 
-        return await this.api.fetch(url, {
+        return typed<Static<typeof VideoConnectionList>>(await this.api.fetch(url, {
             method: 'GET'
-        });
+        }));
     }
 
     async update(
@@ -125,7 +126,7 @@ export default class VideoCommands extends Commands {
             }
         });
 
-        return await this.get(connection.uuid);
+        return this.get(connection.uuid);
     }
 
     async create(
@@ -159,7 +160,7 @@ export default class VideoCommands extends Commands {
             }
         });
 
-        return await this.get(uuid);
+        return this.get(uuid);
     }
 
     async get(
@@ -167,9 +168,9 @@ export default class VideoCommands extends Commands {
     ): Promise<Static<typeof VideoConnection>> {
         const url = new URL(`/Marti/api/video/${encodeURIComponent(uid)}`, this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed<Static<typeof VideoConnection>>(await this.api.fetch(url, {
             method: 'GET'
-        });
+        }));
     }
 
     async delete(

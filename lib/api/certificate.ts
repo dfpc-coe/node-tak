@@ -6,6 +6,7 @@ import { TAKServerError } from '../utils/html-error.js';
 import { Type } from '@sinclair/typebox';
 import type { Static } from '@sinclair/typebox';
 import { TAKItem, TAKList } from './types.js';
+import { typed, type RawResponse } from '../utils/typed.js';
 
 export const Certificate = Type.Object({
     id: Type.Integer(),
@@ -85,7 +86,7 @@ export default class CertificateCommands extends Commands {
             url.searchParams.append('username', username);
         }
 
-        return await this.api.fetch(url) as Static<typeof TAKList_Certificate>;
+        return typed(await this.api.fetch(url));
     }
 
     /**
@@ -98,7 +99,7 @@ export default class CertificateCommands extends Commands {
     async listActive(): Promise<Static<typeof TAKList_Certificate>> {
         const url = new URL('/Marti/api/certadmin/cert/active', this.api.url);
 
-        return await this.api.fetch(url) as Static<typeof TAKList_Certificate>;
+        return typed(await this.api.fetch(url));
     }
 
     /**
@@ -109,7 +110,7 @@ export default class CertificateCommands extends Commands {
     async listRevoked(): Promise<Static<typeof TAKList_Certificate>> {
         const url = new URL('/Marti/api/certadmin/cert/revoked', this.api.url);
 
-        return await this.api.fetch(url) as Static<typeof TAKList_Certificate>;
+        return typed(await this.api.fetch(url));
     }
 
     /**
@@ -120,7 +121,7 @@ export default class CertificateCommands extends Commands {
     async listReplaced(): Promise<Static<typeof TAKList_Certificate>> {
         const url = new URL('/Marti/api/certadmin/cert/replaced', this.api.url);
 
-        return await this.api.fetch(url) as Static<typeof TAKList_Certificate>;
+        return typed(await this.api.fetch(url));
     }
 
     /**
@@ -131,7 +132,7 @@ export default class CertificateCommands extends Commands {
     async listExpired(): Promise<Static<typeof TAKList_Certificate>> {
         const url = new URL('/Marti/api/certadmin/cert/expired', this.api.url);
 
-        return await this.api.fetch(url) as Static<typeof TAKList_Certificate>;
+        return typed(await this.api.fetch(url));
     }
 
     /**
@@ -243,7 +244,7 @@ export default class CertificateCommands extends Commands {
     ): Promise<Static<typeof TAKItem_Certificate>> {
         const url = new URL(`/Marti/api/certadmin/cert/${hash}`, this.api.url);
 
-        return await this.api.fetch(url) as Static<typeof TAKItem_Certificate>;
+        return typed(await this.api.fetch(url));
     }
 
     /**
@@ -256,9 +257,9 @@ export default class CertificateCommands extends Commands {
     ): Promise<string> {
         const url = new URL(`/Marti/api/certadmin/cert/${hash}/download`, this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed(await this.api.fetch(url, {
             method: 'GET',
-        }) as string;
+        }));
     }
 
     /**
@@ -277,9 +278,9 @@ export default class CertificateCommands extends Commands {
 
         const url = new URL(`/Marti/api/certadmin/cert/download/${ids.map((id) => encodeURIComponent(String(id))).join(',')}`, this.api.url);
 
-        const res = await this.api.fetch(url, {
+        const res: RawResponse = typed(await this.api.fetch(url, {
             method: 'GET'
-        }, true);
+        }, true));
 
         // The raw fetch path skips status validation - without this check a
         // TAK Server error page would be streamed as if it were the ZIP archive
@@ -288,7 +289,7 @@ export default class CertificateCommands extends Commands {
             throw new Err(res.status, null, body || `Status Code: ${res.status}`);
         }
 
-        return res.body;
+        return typed(res.body);
     }
 
     /**
@@ -301,9 +302,9 @@ export default class CertificateCommands extends Commands {
     ): Promise<Static<typeof TAKItem_Certificate>> {
         const url = new URL(`/Marti/api/certadmin/cert/${hash}`, this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed(await this.api.fetch(url, {
             method: 'DELETE'
-        }) as Static<typeof TAKItem_Certificate>;
+        }));
     }
 
     /**
@@ -317,15 +318,15 @@ export default class CertificateCommands extends Commands {
         if (ids.length === 0) {
             throw new Error('At least one ID must be provided');
         } else if (ids.length > 1) {
-            // TODO the api docs suggest this is possible but I haven't tested it yet
+            // The api docs suggest this is possible but it is untested
             throw new Error('Only one ID can be currently revoked at a time');
         }
 
         const url = new URL(`/Marti/api/certadmin/cert/revoke/${ids[0]}`, this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed(await this.api.fetch(url, {
             method: 'DELETE'
-        }) as Static<typeof TAKItem_Certificate>;
+        }));
     }
 
     /**
@@ -339,14 +340,14 @@ export default class CertificateCommands extends Commands {
         if (ids.length === 0) {
             throw new Error('At least one ID must be provided');
         } else if (ids.length > 1) {
-            // TODO the api docs suggest this is possible but I haven't tested it yet
+            // The api docs suggest this is possible but it is untested
             throw new Error('Only one ID can be currently deleted at a time');
         }
 
         const url = new URL(`/Marti/api/certadmin/cert/delete/${ids[0]}`, this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed(await this.api.fetch(url, {
             method: 'DELETE'
-        }) as Static<typeof TAKItem_Certificate>;
+        }));
     }
 }

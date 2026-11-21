@@ -6,16 +6,20 @@ import path from 'node:path';
 import { parseArgs } from 'node:util';
 import { Static } from '@sinclair/typebox';
 import { CoTParser } from '@tak-ps/node-cot'
-import TAK from './index.js';
+import TAK, { type CoT } from './index.js';
 import { getPemFromP12 } from '@tak-ps/node-p12'
 import TAKAPI, { CommandList } from './lib/api.js';
 import { APIAuthPassword, APIAuthCertificate } from './lib/auth.js';
 import Commands, {
     CommandConfig,
-    CommandOutputFormat,
     type ParsedArgs,
 } from './lib/commands.js';
+import { typed } from './lib/utils/typed.js';
 import { select, confirm, number, input, password, Separator } from '@inquirer/prompts';
+
+function lookup<T>(record: Record<string, T>, key: string): T | undefined {
+    return record[key];
+}
 
 const parsed = parseArgs({
     args: process.argv.slice(2),
@@ -41,7 +45,7 @@ const configPath = path.resolve(os.homedir(), './.tak.json');
 let config: Static<typeof CommandConfig>;
 
 try {
-    config = JSON.parse(String(await fs.readFile(configPath)));
+    config = typed<Static<typeof CommandConfig>>(JSON.parse(String(await fs.readFile(configPath))));
 } catch (err) {
     if (err instanceof Error && err.message.includes('no such file or directory')) {
         const answer = await confirm({
@@ -57,7 +61,7 @@ try {
         config = {
             version: 1,
             profiles: {}
-        } as Static<typeof CommandConfig>;
+        };
 
         await fs.writeFile(
             configPath,
@@ -68,16 +72,16 @@ try {
     }
 }
 
-if (!profile && config.profiles && Object.keys(config.profiles).length) {
+if (!profile && Object.keys(config.profiles ?? {}).length > 0) {
     profile = await select({
         message: 'Choose a profile',
         choices: [
             { name: 'New Profile', value: '' },
             new Separator(),
-        ].concat(Object.keys(config.profiles).map((profile) => {
+        ].concat(Object.keys(config.profiles).map((name) => {
                 return {
-                    name: profile,
-                    value: profile
+                    name,
+                    value: name
                 };
             }),
         )
@@ -100,17 +104,17 @@ if (!profile) {
 
     do {
         marti = await number({ message: 'Marti API Port', default:  marti });
-    } while (!marti || isNaN(marti))
+    } while (marti === undefined || marti === 0 || Number.isNaN(marti))
 
     do {
         webtak = await number({ message: 'WebTAK API Port', default: webtak });
-    } while (!webtak || isNaN(webtak))
+    } while (webtak === undefined || webtak === 0 || Number.isNaN(webtak))
 
     do {
         stream = await number({ message: 'Streaming Port', default: stream });
-    } while (!stream || isNaN(stream))
+    } while (stream === undefined || stream === 0 || Number.isNaN(stream))
 
-    if (!config.profiles) config.profiles = {};
+    config.profiles ??= {};
     config.profiles[profile] = {
         host,
         ports: { webtak, marti, stream }
@@ -121,7 +125,7 @@ if (!profile) {
     throw new Error('No profile selected');
 }
 
-if (profile && !config.profiles[profile]) {
+if (!lookup(config.profiles, profile)) {
     throw new Error(`Profile "${profile}" is not defined in config file`);
 } else if (!authPath && !config.profiles[profile].auth) {
     const user = await input({ message: 'TAK Username' });
@@ -148,10 +152,10 @@ if (!command) {
         choices: [{
             name: 'stream',
             value: 'stream'
-        }].concat(Object.keys(CommandList).map((profile) => {
+        }].concat(Object.keys(CommandList).map((name) => {
             return {
-                name: profile,
-                value: profile
+                name,
+                value: name
             };
         }))
     });
@@ -166,9 +170,9 @@ await fs.writeFile(
 let auth = config.profiles[profile].auth;
 
 if (authPath) {
-    const password = process.env.TAK_P12_PASSWORD || await input({ message: 'P12 Container Password' });
+    const p12Password = process.env.TAK_P12_PASSWORD || await input({ message: 'P12 Container Password' });
 
-    const certs = getPemFromP12(authPath, password)
+    const certs = getPemFromP12(authPath, p12Password)
 
     const cert = certs.pemCertificate
         .split('-----BEGIN CERTIFICATE-----')
@@ -193,7 +197,7 @@ if (command === 'stream') {
         auth
     );
 
-    tak.on('cot', (cot) => {
+    tak.on('cot', (cot: CoT) => {
         console.log(JSON.stringify(CoTParser.to_geojson(cot)));
     });
 } else {
@@ -207,14 +211,14 @@ if (command === 'stream') {
     );
 
     const invokeTest = tak[CommandList[command]];
-    if (!invokeTest || !(invokeTest instanceof Commands)) {
+    if (!(invokeTest instanceof Commands)) {
+        // oxlint-disable-next-line unicorn/prefer-type-error
         throw new Error(`${command} not found`);
     }
 
     const invoke = invokeTest as Commands;
 
     let subcommand: string | undefined = args._[3];
-    const subcommands = <T extends object>(obj: T) => Object.keys(obj) as Array<keyof T>;
 
     if (subcommand === 'help') {
         console.log((
@@ -222,8 +226,8 @@ if (command === 'stream') {
                 'Command:',
                 `    tak ${command} <subcommand>`,
                 'SubCommands:',
-            ].concat(subcommands(invoke.schema).map((subcommand) => {
-                return `    ${String(subcommand)} - ${invoke.schema[subcommand].description}`
+            ].concat(Object.keys(invoke.schema).map((name) => {
+                return `    ${name} - ${invoke.schema[name].description}`
             }))).join('\n')
         )
         
@@ -231,23 +235,26 @@ if (command === 'stream') {
     } else if (!subcommand) {
         subcommand = await select({
             message: 'Choose an action',
-            choices: subcommands(invoke.schema).map((subcommand) => {
+            choices: Object.keys(invoke.schema).map((name) => {
                 return {
-                    name: subcommand,
-                    value: subcommand
+                    name,
+                    value: name
                 }
             })
         });
     }
 
 
-    if (!invoke.schema[subcommand]) {
+    const schema = lookup(invoke.schema, subcommand);
+
+    if (!schema) {
         throw new Error(`Unsupported Subcommand: ${subcommand}`);
-    } else if (
-        format &&
-        !invoke.schema[subcommand].formats.includes(format as CommandOutputFormat)
-    ) {
-        throw new Error(`tak ${command} ${subcommand} does not support --format ${format}. Supported formats are: ${invoke.schema[subcommand].formats.join(",")}`);
+    }
+
+    const formats: string[] = schema.formats;
+
+    if (format && !formats.includes(format)) {
+        throw new Error(`tak ${command} ${subcommand} does not support --format ${format}. Supported formats are: ${formats.join(",")}`);
     }
 
     try {

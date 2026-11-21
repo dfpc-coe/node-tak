@@ -1,6 +1,7 @@
 import { Static, Type } from '@sinclair/typebox';
 import { TAKList } from './types.js';
 import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
+import { typed } from '../utils/typed.js';
 
 export const Group = Type.Object({
     name: Type.String(),
@@ -35,14 +36,14 @@ export default class GroupCommands extends Commands {
 
             if (args.format === 'json') {
                 return list;
-            } else {
-                return list.data.map((channel) => {
-                    return `${channel.name} - ${channel.description}`;
-                }).join('\n');
             }
-        } else {
-            throw new Error('Unsupported Subcommand');
+
+            return list.data.map((channel) => {
+                return `${channel.name} - ${channel.description}`;
+            }).join('\n');
         }
+
+        throw new Error('Unsupported Subcommand');
     }
 
     async list(
@@ -57,9 +58,9 @@ export default class GroupCommands extends Commands {
             }
         }
 
-        return await this.api.fetch(url, {
+        return typed<Static<typeof TAKList_Group>>(await this.api.fetch(url, {
             method: 'GET'
-        });
+        }));
     }
 
     async update(

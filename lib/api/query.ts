@@ -4,6 +4,7 @@ import { Type, Static } from '@sinclair/typebox';
 import CoT, { CoTParser } from '@tak-ps/node-cot';
 import type { Feature } from '@tak-ps/node-cot';
 import Commands from '../commands.js';
+import { typed, type RawResponse } from '../utils/typed.js';
 
 export const HistoryOptions = Type.Object({
     start: Type.Optional(Type.String()),
@@ -38,6 +39,8 @@ export const SituationalAwarenessWindow = Type.Object({
     end: Type.String({ description: 'ISO 8601 end of the window (inclusive)' }),
 })
 
+type CoTEvent = ConstructorParameters<typeof CoT>[0]['event'];
+
 export default class QueryCommands extends Commands {
     schema = {}
 
@@ -49,7 +52,7 @@ export default class QueryCommands extends Commands {
         const cotstr = await this.single(uid);
 
         try {
-            return CoTParser.to_geojson(CoTParser.from_xml(cotstr))
+            return await CoTParser.to_geojson(CoTParser.from_xml(cotstr))
         } catch (err) {
             throw new Err(502, err instanceof Error ? err : new Error(String(err)), 'TAK Server returned an unparsable CoT for this UID');
         }
@@ -58,9 +61,9 @@ export default class QueryCommands extends Commands {
     async single(uid: string): Promise<string> {
         const url = new URL(`/Marti/api/cot/xml/${encodeURIComponent(uid)}`, this.api.url);
 
-        const res = await this.api.fetch(url, {
+        const res: RawResponse = typed(await this.api.fetch(url, {
             method: 'GET'
-        }, true);
+        }, true));
 
         const body = await res.text();
 
@@ -82,12 +85,14 @@ export default class QueryCommands extends Commands {
     private async parseEvents(xml: string): Promise<Array<Static<typeof Feature.Feature>>> {
         const feats: Static<typeof Feature.Feature>[] = [];
 
-        if (!xml || !xml.trim().length) return feats;
+        if (!xml || xml.trim().length === 0) return feats;
 
-        const res: any = xml2js(xml, { compact: true });
+        const res: {
+            events?: { event?: CoTEvent | CoTEvent[] };
+        } = typed(xml2js(xml, { compact: true }));
 
-        if (!Object.keys(res).length || !res.events || !Object.keys(res.events).length) return feats;
-        if (!res.events.event || (Array.isArray(res.events.event) && !res.events.event.length)) return feats;
+        if (Object.keys(res).length === 0 || !res.events || Object.keys(res.events).length === 0) return feats;
+        if (!res.events.event || (Array.isArray(res.events.event) && res.events.event.length === 0)) return feats;
 
         for (const event of Array.isArray(res.events.event) ? res.events.event : [res.events.event] ) {
             feats.push(await CoTParser.to_geojson(new CoT({ event })));
@@ -143,9 +148,9 @@ export default class QueryCommands extends Commands {
             url.searchParams.append('isFiltered', String(opts.filtered));
         }
 
-        const res = await this.api.fetch(url, {
+        const res: RawResponse = typed(await this.api.fetch(url, {
             method: 'GET'
-        }, true);
+        }, true));
 
         // No matching events is a bare 404; anything else failing is a real error
         if (res.status === 404) return '';
@@ -153,7 +158,7 @@ export default class QueryCommands extends Commands {
             throw new Err(res.status, null, `TAK Server Situational Awareness query failed: ${res.status}`);
         }
 
-        return await res.text();
+        return res.text();
     }
 
     async history(uid: string, opts?: Static<typeof HistoryOptions>): Promise<string> {
@@ -168,9 +173,9 @@ export default class QueryCommands extends Commands {
             }
         }
 
-        const res = await this.api.fetch(url, {
+        const res: RawResponse = typed(await this.api.fetch(url, {
             method: 'GET'
-        }, true);
+        }, true));
 
         const body = await res.text();
 

@@ -3,6 +3,7 @@ import { Static, Type } from '@sinclair/typebox';
 import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
 import pem from 'pem';
 import { xml2js } from '@tak-ps/xml-js';
+import { typed } from '../utils/typed.js';
 
 export const CertificateResponse = Type.Object({
     ca: Type.Array(Type.String()),
@@ -23,16 +24,16 @@ export default class CredentialCommands extends Commands {
     async cli(args: ParsedArgs): Promise<object | string> {
         if (args._[3] === 'config') {
             return this.config();
-        } else {
-            throw new Error('Unsupported Subcommand');
         }
+
+        throw new Error('Unsupported Subcommand');
     }
 
     async config(): Promise<string> {
         const url = new URL(`/Marti/api/tls/config`, this.api.url);
-        return await this.api.fetch(url, {
+        return typed(await this.api.fetch(url, {
             method: 'GET'
-        });
+        }));
     }
 
     async generate(opts: {
@@ -55,10 +56,18 @@ export default class CredentialCommands extends Commands {
             throw new Error('Must use Password or Token Auth');
         }
 
-        const config: any = xml2js(await this.config(), { compact: true });
+        const config: {
+            'ns2:certificateConfig': {
+                nameEntries?: {
+                    nameEntry?: Array<{
+                        _attributes?: { name?: string; value?: string };
+                    }>;
+                };
+            };
+        } = typed(xml2js(await this.config(), { compact: true }));
 
-        let organization = null;
-        let organizationUnit = null;
+        let organization: string | undefined;
+        let organizationUnit: string | undefined;
         const nameEntries = config['ns2:certificateConfig'].nameEntries;
         if (nameEntries && nameEntries.nameEntry) {
             for (const ne of nameEntries.nameEntry) {
@@ -82,18 +91,22 @@ export default class CredentialCommands extends Commands {
         url.searchParams.append('clientUid', username + ' (ETL)');
         url.searchParams.append('version', '3');
 
-        const res = await this.api.fetch(url, {
+        const res: {
+            signedCert: string;
+            ca0?: string;
+            ca1?: string;
+        } = typed(await this.api.fetch(url, {
             method: 'POST',
             nocookies: true,
             headers,
             body: keys.csr
-        });
+        }));
 
         let cert = '-----BEGIN CERTIFICATE-----\n' + res.signedCert;
         if (!res.signedCert.endsWith('\n')) cert = cert + '\n';
         cert = cert + '-----END CERTIFICATE-----';
 
-        const chain = [];
+        const chain: string[] = [];
 
         if (res.ca0) chain.push(res.ca0);
         if (res.ca1) chain.push(res.ca1);

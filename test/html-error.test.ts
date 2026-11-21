@@ -15,6 +15,13 @@ const TOMCAT = `<!doctype html><html lang="en"><head><title>HTTP Status 500 &nda
 \torg.springframework.security.authentication.ProviderManager.authenticate(ProviderManager.java:181)
 </pre><p><b>Note</b> The full stack trace of the root cause is available in the server logs.</p><hr class="line" /><h3>Apache Tomcat/9.0.86</h3></body></html>`;
 
+function time(n: number): number {
+    const big = '<html>' + '<head\t'.repeat(n) + '<'.repeat(n);
+    const start = performance.now();
+    assert.ok(parseHTMLError(big));
+    return performance.now() - start;
+}
+
 test('html-error: isHTML', () => {
     assert.equal(isHTML(TOMCAT), true);
     assert.equal(isHTML('  <html><body>x</body></html>'), true);
@@ -38,13 +45,8 @@ test('html-error: malformed HTML strips hidden blocks & unterminated tags', () =
     assert.equal(parseHTMLError('<html><body>Broken <tag')?.text, 'Broken');
 
     // Pathological input scales linearly (CodeQL polynomial regex finding)
-    const time = (n: number) => {
-        const big = '<html>' + '<head\t'.repeat(n) + '<'.repeat(n);
-        const start = performance.now();
-        assert.ok(parseHTMLError(big));
-        return performance.now() - start;
-    };
-    time(1000); // warm up
+    // warm up
+    time(1000);
     const small = time(10000);
     const large = time(40000);
     assert.ok(large < Math.max(small * 10, 50), `4x input took ${large}ms vs ${small}ms`);

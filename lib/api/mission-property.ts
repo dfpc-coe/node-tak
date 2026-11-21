@@ -3,6 +3,7 @@ import { TAKItem, TAKList } from './types.js';
 import type { MissionOptions } from './mission.js';
 import Commands from '../commands.js';
 import { GUIDMatch } from './mission.js';
+import { typed } from '../utils/typed.js';
 
 export const MissionProperty = Type.Object({
     key: Type.String(),
@@ -41,9 +42,9 @@ export default class MissionPropertyCommands extends Commands {
             return {
                 MissionAuthorization: `Bearer ${opts.token}`
             }
-        } else {
-            return {};
         }
+
+        return {};
     }
 
     /**
@@ -71,10 +72,10 @@ export default class MissionPropertyCommands extends Commands {
 
         if (query.prefix !== undefined) url.searchParams.append('prefix', query.prefix);
 
-        return await this.api.fetch(url, {
+        return typed(await this.api.fetch(url, {
             method: 'GET',
             headers: this.#headers(opts)
-        });
+        }));
     }
 
     /**
@@ -88,10 +89,10 @@ export default class MissionPropertyCommands extends Commands {
         const guid = await this.#guid(mission, opts);
         const url = new URL(`/Marti/api/missions/guid/${encodeURIComponent(guid)}/properties/${encodeURIComponent(key)}`, this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed(await this.api.fetch(url, {
             method: 'GET',
             headers: this.#headers(opts)
-        });
+        }));
     }
 
     /**
@@ -106,14 +107,14 @@ export default class MissionPropertyCommands extends Commands {
         const url = new URL(`/Marti/api/missions/guid/${encodeURIComponent(guid)}/properties`, this.api.url);
         url.searchParams.append('creatorUid', body.creatorUid);
 
-        return await this.api.fetch(url, {
+        return typed(await this.api.fetch(url, {
             method: 'PUT',
             headers: this.#headers(opts),
             body: {
                 key: body.key,
                 value: body.value
             }
-        });
+        }));
     }
 
     /**

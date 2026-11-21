@@ -1,4 +1,5 @@
 import Commands from '../commands.js';
+import { typed } from '../utils/typed.js';
 
 export default class ProfileCommands extends Commands {
     schema = {}
@@ -16,8 +17,8 @@ export default class ProfileCommands extends Commands {
         url.searchParams.append('syncSecago', String(opts.syncSecago));
         url.searchParams.append('clientUid', opts.clientUid);
 
-        return await this.api.fetch(url, {
+        return typed<Buffer>(await this.api.fetch(url, {
             method: 'GET'
-        });
+        }));
     }
 }

@@ -1,6 +1,7 @@
 import { TAKList } from './types.js';
 import { Type, Static } from '@sinclair/typebox';
 import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
+import { typed } from '../utils/typed.js';
 
 export const TAKList_Iconsets = TAKList(Type.String());
 
@@ -20,14 +21,14 @@ export default class InjectorCommands extends Commands {
 
             if (args.format === 'json') {
                 return list;
-            } else {
-                return list.data.map((iconset) => {
-                    return iconset;
-                }).join('\n');
             }
-        } else {
-            throw new Error('Unsupported Subcommand');
+
+            return list.data.map((iconset) => {
+                return iconset;
+            }).join('\n');
         }
+
+        throw new Error('Unsupported Subcommand');
     }
 
     /**
@@ -38,8 +39,8 @@ export default class InjectorCommands extends Commands {
     async list(): Promise<Static<typeof TAKList_Iconsets>> {
         const url = new URL('/Marti/api/iconset/all/uid', this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed<Static<typeof TAKList_Iconsets>>(await this.api.fetch(url, {
             method: 'GET'
-        });
+        }));
     }
 }

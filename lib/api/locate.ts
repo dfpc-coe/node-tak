@@ -1,5 +1,6 @@
 import Commands from '../commands.js';
 import { Type, Static } from '@sinclair/typebox';
+import { typed } from '../utils/typed.js';
 
 export const LocateGenerateInput = Type.Object({
     latitude: Type.Number(),
@@ -25,9 +26,9 @@ export default class LocateCommands extends Commands {
             }
         }
 
-        return await this.api.fetch(url, {
+        // oxlint-disable-next-line typescript/no-confusing-void-expression
+        return typed<void>(await this.api.fetch(url, {
             method: 'POST'
-        });
+        }));
     }
-
 }

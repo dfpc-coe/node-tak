@@ -37,7 +37,9 @@ export default class Commands {
 
     schema: Record<string, {
         description: string,
+        // oxlint-disable-next-line typescript/no-explicit-any
         params: TObject<any>,
+        // oxlint-disable-next-line typescript/no-explicit-any
         query: TObject<any>,
         formats: Array<CommandOutputFormat>
     }> = {};
@@ -47,7 +49,7 @@ export default class Commands {
     }
 
     async cli(args: ParsedArgs): Promise<object | string> {
-        if (!args) throw new Error('Args object must be provided');
+        if (args === undefined || args === null) throw new Error('Args object must be provided');
         throw new Error('Command not yet supported');
     }
 }

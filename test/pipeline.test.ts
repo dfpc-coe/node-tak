@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { EventEmitter } from 'node:events';
+import type { TLSSocket } from 'node:tls';
 import TAK, { CoT } from '../index.js';
 import { CoTParser } from '@tak-ps/node-cot';
 
@@ -8,8 +9,10 @@ function createTAK(opts: { writeQueueSize?: number; socketBatchSize?: number } =
     return new TAK(new URL('ssl://localhost:8089'), { cert: 'test', key: 'test' }, opts);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function createFakeSocket(opts: { write?: (...args: unknown[]) => boolean } = {}): any {
+type FakeSocket = TLSSocket & { writableNeedDrain: boolean };
+
+function createFakeSocket(opts: { write?: (...args: unknown[]) => boolean } = {}): FakeSocket {
+    // oxlint-disable-next-line unicorn/prefer-event-target
     return Object.assign(new EventEmitter(), {
         write: opts.write ?? (() => true),
         destroyed: false,
@@ -18,7 +21,7 @@ function createFakeSocket(opts: { write?: (...args: unknown[]) => boolean } = {}
         writableLength: 0,
         destroy() { this.destroyed = true; },
         setNoDelay: () => {},
-    });
+    }) as unknown as FakeSocket;
 }
 
 test('write - resolves when all CoTs are queued and sent', async () => {
@@ -105,7 +108,7 @@ test('pull - error in socket.write triggers destroy + error event', async () => 
 
     let errorFired = false;
     let errorMsg = '';
-    tak.on('error', (err) => { errorFired = true; errorMsg = err.message; });
+    tak.on('error', (err: Error) => { errorFired = true; errorMsg = err.message; });
 
     // write() enqueues, pull() throws internally, catches → destroy + emit error
     // write() sees destroyed=true on next check and returns
@@ -151,7 +154,7 @@ test('flush - rejects when destroyed mid-flush', async () => {
         assert.fail('should have rejected');
     } catch (err) {
         assert.ok(err instanceof Error, 'error is an Error');
-        assert.ok((err as Error).message.includes('destroyed'), 'error mentions destroyed');
+        assert.ok(err.message.includes('destroyed'), 'error mentions destroyed');
     }
 });
 
@@ -189,9 +192,11 @@ test('write - yields when queue is full and resumes after destroy', async () => 
 
     // No client, so pull() is a no-op → queue fills up and write() yields
     let writeResolved = false;
-    const p = tak.write([CoT.ping(), CoT.ping(), CoT.ping(), CoT.ping(), CoT.ping()])
-        .then(() => { writeResolved = true; });
-    await new Promise(r => setImmediate(r));
+    const p = (async () => {
+        await tak.write([CoT.ping(), CoT.ping(), CoT.ping(), CoT.ping(), CoT.ping()]);
+        writeResolved = true;
+    })();
+    await new Promise<void>((r) => { setImmediate(r); });
 
     assert.equal(tak.queue.length, 4, 'queue at capacity');
     assert.equal(writeResolved, false, 'write blocked waiting for space');
@@ -285,11 +290,11 @@ test('write - stripFlow replaces existing flow tags in outbound XML', async () =
     assert.ok(writeCalls[0].includes('NodeCoT-'), 'node-cot flow tag added to outbound XML');
 
     const outbound = CoTParser.from_xml(writeCalls[0]);
-    const outboundFlow = outbound.raw.event.detail?.['_flow-tags_'];
+    const outboundFlow = outbound.raw.event.detail?.['_flow-tags_'] as Record<string, string | undefined> | undefined;
 
     assert.ok(outboundFlow, 'outbound CoT contains flow tags');
-    assert.equal(Object.keys(outboundFlow || {}).length, 1, 'outbound CoT flow object is reset to one initial tag');
-    assert.ok(!outboundFlow?.['TAK-Server-test'], 'outbound CoT flow object clears prior TAK Server tags');
+    assert.equal(Object.keys(outboundFlow).length, 1, 'outbound CoT flow object is reset to one initial tag');
+    assert.ok(!outboundFlow['TAK-Server-test'], 'outbound CoT flow object clears prior TAK Server tags');
 
     const feat = await CoTParser.to_geojson(cot);
     assert.equal(feat.properties.flow?.['TAK-Server-test'], '2026-03-08T04:48:00Z', 'original CoT remains unchanged');

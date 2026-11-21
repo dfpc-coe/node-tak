@@ -1,5 +1,6 @@
 import { Type, Static } from '@sinclair/typebox';
 import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
+import { typed } from '../utils/typed.js';
 
 export const Package = Type.Object({
     EXPIRATION: Type.String(),
@@ -41,14 +42,14 @@ export default class PackageCommands extends Commands {
 
             if (args.format === 'json') {
                 return list;
-            } else {
-                return list.results.map((data) => {
-                    return data.Name;
-                }).join('\n');
             }
-        } else {
-            throw new Error('Unsupported Subcommand');
+
+            return list.results.map((data) => {
+                return data.Name;
+            }).join('\n');
         }
+
+        throw new Error('Unsupported Subcommand');
     }
 
     async list(query: Static<typeof ListInput>): Promise<{
@@ -64,22 +65,14 @@ export default class PackageCommands extends Commands {
             }
         }
 
-        const res = await this.api.fetch(url, {
+        const res: unknown = await this.api.fetch(url, {
             method: 'GET'
         });
 
-        if (typeof res === 'string') {
-            // The TAK Server API doesn't return application/json
-            return JSON.parse(res) as {
-                resultCount: number;
-                results: Array<Static<typeof Package>>
-            };
-        } else {
-            return res as {
-                resultCount: number;
-                results: Array<Static<typeof Package>>
-            };
-        }
-
+        // The TAK Server API doesn't return application/json
+        return typed<{
+            resultCount: number;
+            results: Array<Static<typeof Package>>
+        }>(typeof res === 'string' ? JSON.parse(res) : res);
     }
 }

@@ -4,6 +4,7 @@ import Err from '@openaddresses/batch-error';
 import Commands, { CommandOutputFormat, type ParsedArgs } from '../commands.js';
 import { TAKList } from './types.js';
 import { Type, Static } from '@sinclair/typebox';
+import { typed, type RawResponse } from '../utils/typed.js';
 
 export const Content = Type.Object({
   UID: Type.String(),
@@ -46,32 +47,30 @@ export default class FileCommands extends Commands {
         if (args._[3] === 'list') {
             const list = await this.list();
 
-            if (args.format === 'json') {
-                return list;
-            } else {
-                return list.data.map((data) => {
-                    return data.filename;
-                }).join('\n');
-            }
-        } else {
-            throw new Error('Unsupported Subcommand');
+            if (args.format === 'json') return list;
+
+            return list.data.map((data) => {
+                return data.filename;
+            }).join('\n');
         }
+
+        throw new Error('Unsupported Subcommand');
     }
 
     async list(): Promise<Static<typeof TAKList_Content>> {
         const url = new URL(`/Marti/api/sync/search`, this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed(await this.api.fetch(url, {
             method: 'GET'
-        });
+        }));
     }
 
     async meta(hash: string): Promise<string> {
         const url = new URL(`/Marti/sync/${encodeURIComponent(hash)}/metadata`, this.api.url);
 
-        const res = await this.api.fetch(url, {
+        const res: RawResponse = typed(await this.api.fetch(url, {
             method: 'GET'
-        }, true);
+        }, true));
 
         const body = await res.text();
 
@@ -82,9 +81,9 @@ export default class FileCommands extends Commands {
         const url = new URL(`/Marti/sync/content`, this.api.url);
         url.searchParams.append('hash', hash);
 
-        const res = await this.api.fetch(url, {
+        const res: RawResponse = typed(await this.api.fetch(url, {
             method: 'GET'
-        }, true);
+        }, true));
 
         // The raw fetch path skips status validation - without this check a
         // TAK Server error page would be streamed as if it were file content
@@ -93,30 +92,32 @@ export default class FileCommands extends Commands {
             throw new Err(res.status, null, body || `Status Code: ${res.status}`);
         }
 
-        return res.body;
+        return typed(res.body);
     }
 
-    async adminDelete(hash: string) {
+    // oxlint-disable-next-line typescript/no-explicit-any
+    async adminDelete(hash: string): Promise<any> {
         const url = new URL(`/Marti/api/files/${hash}`, this.api.url);
 
-        return await this.api.fetch(url, {
+        return this.api.fetch(url, {
             method: 'DELETE',
         });
     }
 
-    async delete(hash: string) {
+    // oxlint-disable-next-line typescript/no-explicit-any
+    async delete(hash: string): Promise<any> {
         const url = new URL(`/Marti/sync/delete`, this.api.url);
         url.searchParams.append('hash', hash)
 
-        return await this.api.fetch(url, {
+        return this.api.fetch(url, {
             method: 'DELETE',
         });
     }
 
-    // TODO Return a Content Object
-
     /**
      * Update a Package that should appear in the Public Data Packages List
+     *
+     * Returns the raw response body rather than a Content Object
      */
     async uploadPackage(opts: {
         name: string;
@@ -157,12 +158,10 @@ export default class FileCommands extends Commands {
         const file = await toBlob(body, contentType);
         form.append('assetfile', file, opts.name);
 
-        const res = await this.api.fetch(url, {
+        return typed(await this.api.fetch(url, {
             method: 'POST',
             body: form
-        }) as string;
-
-        return res;
+        }));
     }
 
     /**
@@ -191,25 +190,26 @@ export default class FileCommands extends Commands {
         if (opts.latitude) url.searchParams.append('latitude', opts.latitude);
 
         if (body instanceof Buffer) {
-            body = Readable.from(body as Buffer);
+            body = Readable.from(body);
         }
 
-        const res = await this.api.fetch(url, {
+        const res: unknown = await this.api.fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': opts.contentType || mime.getType(opts.name) || 'application/octet-stream',
                 'Content-Length': opts.contentLength
             },
-            body: body as Readable
+            body
         });
 
-        return typeof res === 'string' ? JSON.parse(res) : res;
+        return typed(typeof res === 'string' ? JSON.parse(res) : res);
     }
 
-    async count() {
+    // oxlint-disable-next-line typescript/no-explicit-any
+    async count(): Promise<any> {
         const url = new URL('/Marti/api/files/metadata/count', this.api.url);
 
-        return await this.api.fetch(url, {
+        return this.api.fetch(url, {
             method: 'GET'
         });
     }
@@ -241,9 +241,9 @@ export default class FileCommands extends Commands {
     async config(): Promise<Static<typeof Config>> {
         const url = new URL('/files/api/config', this.api.url);
 
-        return await this.api.fetch(url, {
+        return typed(await this.api.fetch(url, {
             method: 'GET'
-        });
+        }));
     }
 }
 
@@ -254,8 +254,9 @@ async function toBlob(body: Readable | Buffer, type?: string): Promise<Blob> {
     }
 
     const chunks: Buffer[] = [];
+    const stream = typed<AsyncIterable<Buffer | string | Uint8Array>>(body);
 
-    for await (const chunk of body) {
+    for await (const chunk of stream) {
         if (chunk instanceof Buffer) {
             chunks.push(chunk);
         } else if (typeof chunk === 'string') {

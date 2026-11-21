@@ -8,10 +8,11 @@ import tls from 'node:tls';
 import TAKAPI from './lib/api.js';
 import { TAKAuth } from './lib/auth.js';
 import { Queue } from './lib/utils/queue.js';
+import { typed } from './lib/utils/typed.js';
 export * from './lib/auth.js';
 export * from './lib/utils/html-error.js';
 
-/* eslint-disable no-control-regex */
+// oxlint-disable-next-line eslint/no-control-regex
 export const REGEX_CONTROL = /[\u000B-\u001F\u007F-\u009F]/g;
 
 // Match <event .../> or <event> but not <events>
@@ -98,14 +99,19 @@ export type WriteOptions = {
 const DEFAULT_WRITE_QUEUE_SIZE = 10_000;
 const DEFAULT_SOCKET_BATCH_SIZE = 64;
 
+function isSet<T extends number | string>(value: T | undefined): value is T {
+    return value !== undefined && value !== 0 && value !== '' && !Number.isNaN(value);
+}
+
 function cloneCoT(cot: CoT): CoT {
-    const cloned = new CoT(JSON.parse(JSON.stringify(cot.raw)));
-    cloned.metadata = JSON.parse(JSON.stringify(cot.metadata));
+    const cloned = new CoT(typed<CoT['raw']>(JSON.parse(JSON.stringify(cot.raw))));
+    cloned.metadata = typed<CoT['metadata']>(JSON.parse(JSON.stringify(cot.metadata)));
     cloned.path = cot.path;
 
     return cloned;
 }
 
+// oxlint-disable-next-line unicorn/prefer-event-target
 export default class TAK extends EventEmitter {
     id: number | string;
     type: string;
@@ -139,20 +145,19 @@ export default class TAK extends EventEmitter {
     constructor(url: URL, auth: Static<typeof TAKAuth>, opts: TAKOptions = {}) {
         super();
 
-        if (!opts) opts = {};
+        opts ??= {};
 
-        this.id = opts.id || crypto.randomUUID();
+        this.id = isSet(opts.id) ? opts.id : crypto.randomUUID();
         this.type = opts.type || 'unknown';
 
         this.url = url;
         this.auth = auth;
 
         this.writing = false;
-        this.writeQueueSize = opts.writeQueueSize || DEFAULT_WRITE_QUEUE_SIZE;
-        this.socketBatchSize =
-            opts.socketBatchSize || DEFAULT_SOCKET_BATCH_SIZE;
+        this.writeQueueSize = isSet(opts.writeQueueSize) ? opts.writeQueueSize : DEFAULT_WRITE_QUEUE_SIZE;
+        this.socketBatchSize = isSet(opts.socketBatchSize) ? opts.socketBatchSize : DEFAULT_SOCKET_BATCH_SIZE;
 
-        this.cotOptions = opts.cot || {};
+        this.cotOptions = opts.cot ?? {};
 
         this.open = false;
         this.destroyed = false;
@@ -169,10 +174,10 @@ export default class TAK extends EventEmitter {
         if (url.protocol === 'ssl:') {
             if (!tak.auth.cert) throw new Error('auth.cert required');
             if (!tak.auth.key) throw new Error('auth.key required');
-            return await tak.connect_ssl();
-        } else {
-            throw new Error('Unknown TAK Server Protocol');
+            return tak.connect_ssl();
         }
+
+        throw new Error('Unknown TAK Server Protocol');
     }
 
     connect_ssl(): Promise<TAK> {
@@ -189,7 +194,8 @@ export default class TAK extends EventEmitter {
             // killing the newly-created socket with no retry triggered.
             const client = tls.connect({
                 host: this.url.hostname,
-                port: parseInt(this.url.port),
+                // oxlint-disable-next-line unicorn/prefer-number-coercion
+                port: parseInt(this.url.port, 10),
                 rejectUnauthorized: this.auth.rejectUnauthorized ?? false,
                 cert: this.auth.cert,
                 key: this.auth.key,
@@ -204,62 +210,66 @@ export default class TAK extends EventEmitter {
             client.on('connect', () => {
                 if (client !== this.client) return;
                 console.error(
-                    `ok - ${this.id} @ connect:${this.client ? this.client.authorized : 'NO CLIENT'} - ${this.client ? this.client.authorizationError : 'NO CLIENT'}`,
+                    `ok - ${this.id} @ connect:${client.authorized} - ${client.authorizationError}`,
                 );
             });
 
             client.on('secureConnect', () => {
                 if (client !== this.client) return;
                 console.error(
-                    `ok - ${this.id} @ secure:${this.client ? this.client.authorized : 'NO CLIENT'} - ${this.client ? this.client.authorizationError : 'NO CLIENT'}`,
+                    `ok - ${this.id} @ secure:${client.authorized} - ${client.authorizationError}`,
                 );
                 this.emit('secureConnect');
-                this.ping();
+                void this.ping();
             });
 
             let buff = '';
-            client
-                .on('data', async (data: Buffer) => {
-                    if (client !== this.client) return;
-                    // Eventually Parse ProtoBuf
-                    buff = buff + data.toString();
+            const onData = async (data: Buffer): Promise<void> => {
+                if (client !== this.client) return;
+                // Eventually Parse ProtoBuf
+                buff = buff + data.toString();
 
-                    let result = TAK.findCoT(buff);
-                    while (result && result.event) {
-                        try {
-                            const cot = CoTParser.from_xml(
-                                result.event,
-                                this.cotOptions,
-                            );
+                let result = TAK.findCoT(buff);
+                while (result && result.event) {
+                    try {
+                        const cot = CoTParser.from_xml(
+                            result.event,
+                            this.cotOptions,
+                        );
 
-                            if (
-                                cot.raw.event._attributes.type === 't-x-c-t-r'
-                            ) {
-                                this.open = true;
-                                this.emit('ping');
-                            } else if (
-                                cot.raw.event._attributes.type ===
-                                    't-x-takp-v' &&
-                                cot.raw.event.detail &&
-                                cot.raw.event.detail.TakControl &&
-                                cot.raw.event.detail.TakControl
-                                    .TakServerVersionInfo &&
-                                cot.raw.event.detail.TakControl
-                                    .TakServerVersionInfo._attributes
-                            ) {
-                                this.version =
-                                    cot.raw.event.detail.TakControl.TakServerVersionInfo._attributes.serverVersion;
-                            } else {
-                                this.emit('cot', cot);
-                            }
-                        } catch (e) {
-                            console.error('Error parsing', e, data.toString());
+                        if (
+                            cot.raw.event._attributes.type === 't-x-c-t-r'
+                        ) {
+                            this.open = true;
+                            this.emit('ping');
+                        } else if (
+                            cot.raw.event._attributes.type ===
+                                't-x-takp-v' &&
+                            cot.raw.event.detail &&
+                            cot.raw.event.detail.TakControl &&
+                            cot.raw.event.detail.TakControl
+                                .TakServerVersionInfo &&
+                            cot.raw.event.detail.TakControl
+                                .TakServerVersionInfo._attributes
+                        ) {
+                            this.version =
+                                cot.raw.event.detail.TakControl.TakServerVersionInfo._attributes.serverVersion;
+                        } else {
+                            this.emit('cot', cot);
                         }
-
-                        buff = result.remainder;
-
-                        result = TAK.findCoT(buff);
+                    } catch (e) {
+                        console.error('Error parsing', e, data.toString());
                     }
+
+                    buff = result.remainder;
+
+                    result = TAK.findCoT(buff);
+                }
+            };
+
+            client
+                .on('data', (data: Buffer) => {
+                    void onData(data);
                 })
                 .on('timeout', () => {
                     if (client !== this.client) return;
@@ -299,20 +309,17 @@ export default class TAK extends EventEmitter {
                 });
 
             this.pingInterval = setInterval(() => {
-                this.ping();
+                void this.ping();
             }, 5000);
 
-            return resolve(this);
+            resolve(this);
         });
     }
 
     async reconnect(): Promise<void> {
-        if (this.destroyed) {
-            await this.connect_ssl();
-        } else {
-            this.destroy();
-            await this.connect_ssl();
-        }
+        if (!this.destroyed) this.destroy();
+
+        await this.connect_ssl();
     }
 
     destroy(): void {
@@ -334,7 +341,7 @@ export default class TAK extends EventEmitter {
     }
 
     async ping(): Promise<void> {
-        this.write([CoT.ping()]);
+        void this.write([CoT.ping()]);
     }
 
     /**
@@ -359,14 +366,14 @@ export default class TAK extends EventEmitter {
 
         try {
             while (this.queue.length > 0) {
-                if (this.destroyed || !this.client) break;
+                if (this.destroyed || this.client === undefined) break;
                 if (this.client.writableNeedDrain) break;
 
                 const batchCount = Math.min(
                     this.socketBatchSize,
                     this.queue.length,
                 );
-                const parts: string[] = new Array(batchCount);
+                const parts = Array.from<string | undefined>({ length: batchCount });
                 for (let i = 0; i < batchCount; i++) {
                     const xml = this.queue.pop();
                     if (!xml) break;
@@ -388,10 +395,10 @@ export default class TAK extends EventEmitter {
             if (
                 this.queue.length > 0 &&
                 !this.destroyed &&
-                this.client &&
+                this.client !== undefined &&
                 !this.client.writableNeedDrain
             ) {
-                setImmediate(() => this.process());
+                setImmediate(() => { this.process(); });
             }
 
             if (this.queue.length === 0) {
@@ -432,7 +439,7 @@ export default class TAK extends EventEmitter {
             // Queue full — yield to let process() drain via I/O callbacks,
             // then retry on the next event loop turn.
             if (i < cots.length) {
-                await new Promise<void>((resolve) => setImmediate(resolve));
+                await new Promise<void>((resolve) => { setImmediate(resolve); });
             }
         }
     }
@@ -481,9 +488,10 @@ export default class TAK extends EventEmitter {
 
     // https://github.com/vidterra/multitak/blob/main/app/lib/helper.js#L4
     static findCoT(str: string): null | PartialCoT {
-        str = str.replace(REGEX_CONTROL, '');
+        str = str.replaceAll(REGEX_CONTROL, '');
 
-        const match = str.match(REGEX_EVENT); // find first CoT
+        // find first CoT
+        const match = str.match(REGEX_EVENT);
         if (!match) return null;
 
         return {

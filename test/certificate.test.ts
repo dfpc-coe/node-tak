@@ -8,6 +8,9 @@ import { APIAuthCertificate } from '../lib/auth.js';
 
 type RequestArgs = Parameters<Client['request']>[0];
 
+// oxlint-disable-next-line typescript/unbound-method
+const originalRequest = Client.prototype.request;
+
 function mockResponse(statusCode: number, contentType: string, body: string | Buffer): Dispatcher.ResponseData {
     return {
         statusCode,
@@ -48,7 +51,7 @@ const TOMCAT_500 = '<!doctype html><html lang="en"><head><title>HTTP Status 500 
 
 async function collect(stream: Readable): Promise<Buffer> {
     const chunks: Buffer[] = [];
-    for await (const chunk of stream) chunks.push(Buffer.from(chunk));
+    for await (const chunk of stream) chunks.push(Buffer.from(chunk as Buffer));
     return Buffer.concat(chunks);
 }
 
@@ -56,17 +59,16 @@ async function collect(stream: Readable): Promise<Buffer> {
  * Install a path-keyed mock; returns the list of paths requested in order
  */
 function mockRoutes(routes: Record<string, () => Dispatcher.ResponseData>): { paths: string[]; restore: () => void } {
-    const originalRequest = Client.prototype.request;
     const paths: string[] = [];
 
     Client.prototype.request = async function(opts: RequestArgs): Promise<Dispatcher.ResponseData> {
         // undici rejects a missing method with UND_ERR_INVALID_ARG - APIAuthCertificate must default it
         assert.equal(typeof opts.method, 'string', `method must be set for ${opts.path}`);
 
-        const path = String(opts.path);
+        const path = opts.path;
         paths.push(path);
         const route = routes[path];
-        if (!route) throw new Error(`Unexpected request: ${opts.method ?? 'GET'} ${path}`);
+        if (route === undefined) throw new Error(`Unexpected request: ${opts.method ?? 'GET'} ${path}`);
         return route();
     };
 
@@ -264,8 +266,6 @@ test('Certificate.probe classifies a BadCredentialsException without a revocatio
 });
 
 test('Certificate.probe classifies a TLS handshake failure as tls', async () => {
-    const originalRequest = Client.prototype.request;
-
     Client.prototype.request = async function(): Promise<Dispatcher.ResponseData> {
         const err = new Error('fetch failed') as Error & { cause?: Error };
         err.cause = Object.assign(new Error('write EPROTO SSL routines:ssl3_read_bytes:sslv3 alert bad certificate'), { code: 'EPROTO' });

@@ -1,6 +1,7 @@
 import Err from '@openaddresses/batch-error';
-import xmljs from '@tak-ps/xml-js';
+import { xml2js } from '@tak-ps/xml-js';
 import type { Element } from '@tak-ps/xml-js';
+import { typed } from './typed.js';
 
 /**
  * TAK Server (Tomcat) returns HTML "Exception Report" pages on failure.
@@ -21,7 +22,7 @@ export interface HTMLErrorDetails {
 const HIDDEN = new Set(['style', 'script', 'head']);
 
 function collapse(input: string): string {
-    return input.replace(/\s+/g, ' ').trim();
+    return input.replaceAll(/\s+/g, ' ').trim();
 }
 
 /** Linear-time tag stripper for malformed HTML - drops the contents of HIDDEN elements */
@@ -70,13 +71,15 @@ function* walk(el: Element, skipHidden = true): Generator<Element> {
 
     if (el.type === 'element') yield el;
 
-    for (const child of el.elements || []) yield* walk(child, skipHidden);
+    for (const child of el.elements ?? []) yield* walk(child, skipHidden);
 }
 
 function find(root: Element, name: string): Element | undefined {
     for (const el of walk(root, false)) {
         if (el.name?.toLowerCase() === name) return el;
     }
+
+    return undefined;
 }
 
 export function isHTML(body: unknown): body is string {
@@ -100,7 +103,7 @@ export function parseHTMLError(body: unknown): HTMLErrorDetails | null {
 
     let root: Element;
     try {
-        root = xmljs.xml2js(body, { compact: false }) as Element;
+        root = typed<Element>(xml2js(body, { compact: false }));
     } catch {
         // Not well-formed XHTML - fall back to visible text
         details.text = stripTags(body);
@@ -108,7 +111,7 @@ export function parseHTMLError(body: unknown): HTMLErrorDetails | null {
         return details;
     }
 
-    const title = find(root, 'title') || find(root, 'h1');
+    const title = find(root, 'title') ?? find(root, 'h1');
     if (title && collapse(textOf(title))) details.title = collapse(textOf(title));
 
     const pres: string[] = [];
@@ -135,7 +138,7 @@ export function parseHTMLError(body: unknown): HTMLErrorDetails | null {
         }
     }
 
-    if (pres.length) details.exception = pres.join('\n\n');
+    if (pres.length > 0) details.exception = pres.join('\n\n');
 
     details.text = text || collapse(textOf(root, { skipPre: true }));
 
@@ -162,7 +165,7 @@ export function summarizeHTMLError(details: HTMLErrorDetails, status?: number): 
 
     if (details.text) return details.text.length > 200 ? details.text.slice(0, 197) + '...' : details.text;
 
-    return status ? `Status Code: ${status}` : 'Unknown TAK Server Error';
+    return (status !== undefined && status !== 0 && !Number.isNaN(status)) ? `Status Code: ${status}` : 'Unknown TAK Server Error';
 }
 
 /** Plain-text breakdown for an "Advanced" details pane */
@@ -176,11 +179,11 @@ export function formatHTMLError(details: HTMLErrorDetails): string {
     }
 
     if (details.exception) {
-        if (lines.length) lines.push('');
+        if (lines.length > 0) lines.push('');
         lines.push(details.exception);
     }
 
-    if (!lines.length && details.text) lines.push(details.text);
+    if (lines.length === 0 && details.text) lines.push(details.text);
 
     return lines.join('\n');
 }
@@ -194,7 +197,7 @@ export class TAKServerError extends Err {
     parsed: HTMLErrorDetails;
 
     constructor(status: number, html: string, parsed?: HTMLErrorDetails) {
-        const details = parsed || parseHTMLError(html) || {
+        const details = parsed ?? parseHTMLError(html) ?? {
             fields: {},
             text: stripTags(html)
         };
